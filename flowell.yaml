@@ -1,0 +1,1834 @@
+openapi: 3.0.1
+info:
+  title: Flowell e-commerce API
+  version: 1.0.0
+  description: A basic API to connect Flowell with the DB and Server.
+paths:
+  /auth/login:
+    summary: Allow user to login into account
+    description: >-
+      This is the path to login a user into an account. It requires an email and a password.It searchs the user into the DB and the compare the passwords (hashed passwords)
+    post:
+      summary: login/authenticate the user into the page
+      description: Allow the user to login and authenticate. 
+      operationId: loginUser
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                  example: 'angela@gmail.com'
+                password:
+                  type: string
+                  example: 'Mypassword123!'
+              required:
+                - email
+                - password
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                Successfully login the user:
+                  value: |-
+                    {
+                      "status": "success",
+                      "message": "User logged-in successfully",
+                      "code": 200,
+                      "user": 
+                        {
+                          "id": 1,
+                          "first_name": "angela"
+                          "last_name": "parga",
+                          "email": 'angela@gmail.com'
+                        }
+                    }
+          description: The user was logged-in and authenticated successfully
+        '403':
+          content:
+            application/json:
+              examples:
+                User unauthorized:
+                  value: |-
+                    {
+                      "status": "Unauthorized",
+                      "message": "Incorrect username or password. Try again",
+                      "code": 403
+                    }
+          description: The user is unauthorized to login, email or password incorrect
+        '404':
+          content:
+            application/json:
+              examples:
+                User not found:
+                  value: |-
+                    {
+                      "status": "Not Found",
+                      "message": "The user does not exist, please sign up",
+                      "code": 404
+                    }
+          description: The user was not found on DB
+        '500':
+          content:
+            application/json:
+              examples:
+                Server Error:
+                  value: |-
+                    {
+                      "status": "Server error",
+                      "message": "Error on server while authenticating the user",
+                      "code": 500
+                    }
+          description: Error on server while authenticating the user
+        default:
+          description: Error on server while authenticating the user
+      tags:
+        - Authentication
+  /auth/signup:
+    post:
+      summary: Register a new user
+      description: Register a new user usign first name, last name, email, password.
+      operationId: registerUser
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                first_name:
+                  type: string
+                  example: 'angela'
+                last_name:
+                  type: string
+                  example: 'parga'
+                email:
+                  type: string
+                  example: 'angela@gmail.com'
+                password:
+                  type: string
+                  example: 'Mypassword123!'
+              required:
+                - first_name
+                - last_name
+                - email
+                - password
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                Successfully registered the user:
+                  value: |-
+                    {
+                      "status": "success",
+                      "message": "User registered successfully",
+                      "code": 200,
+                      "user": 
+                        {
+                          "id": 1,
+                          "first_name": "angela"
+                          "last_name": "parga",
+                          "email": 'angela@gmail.com'
+                        }
+                    }
+          description: The user was registered successfully
+        '400':
+          content:
+            application/json:
+              examples:
+                Bad request:
+                  value: |-
+                    {
+                      "status": "Bad Request"
+                      "message": "The user could not be created"
+                      "code": 400
+                    }
+          description: Bad request, the user could not be created
+        '409':
+          content:
+            application/json:
+              examples:
+                Conflict, user already exists:
+                  value: |-
+                    {
+                      "status": "Conflict Error"
+                      "message": "Email already in use, please log in"
+                      "code": 409
+                    }
+          description: The user already exists on the database
+        '500':
+          content:
+            application/json:
+              examples:
+                Server Error:
+                  value: |-
+                    {
+                      "status": "Server Error",
+                      "message": "Error on server while registering the new user",
+                      "code": 500
+                    }
+          description: The user could not be registered
+        default:
+          description: The server had an error registering the user
+      tags:
+        - Authentication
+  /account/profile:
+    get:
+      summary: Get user's profile information
+      description: Retrieve the profile information of the authenticated user. The user must be authenticated to access this route. 
+      operationId: getUserProfile
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                Successfully retrieve the user profile:
+                  value: |-
+                    {
+                      "status": "success",
+                      "message": "User profile retrieved successfully",
+                      "code": 200,
+                      "user": 
+                        {
+                          "id": 1,
+                          "created": "2024-03-29T06:19:47.000Z",
+                          "first_name": "angela"
+                          "last_name": "parga",
+                          "email": 'angela@gmail.com',
+                          "addresses": [
+                              {
+                                "addressID": 5,
+                                "address": "4301 N MICHIGAN. AVENUE",
+                                "city": "MIAMI",
+                                "state": "FLORIDA",
+                                "zip_code": 33140
+                              }
+                          ],
+                          "phones": [
+                              {
+                                "phoneID":1,
+                                "phone":"323-123-12345"
+                              }
+                          ],
+                          "credit_cards":null
+                        }
+                    }
+          description: User profile retrieved successfully
+        '404':
+          content:
+            application/json:
+              examples:
+                User not found:
+                  value: |-
+                    {
+                      "status": "Not Found",
+                      "message": "User Not Found",
+                      "code": 404
+                    }
+          description: The user was not found on DB
+        '500':
+          content:
+            application/json:
+              examples:
+                Server Error:
+                  value: |-
+                    {
+                      "status": "Server Error",
+                      "message": "Error on server while searching the user",
+                      "code": 500
+                    }
+          description: The server had an error retrieving the user information
+        default:
+          description: The server had an error retrieving the user information
+      tags:
+        - Profile
+  /account/profile/{resourceType}:  
+    post:
+      summary: Add new user information
+      description: Add new user information depending on the type of resource (address information, contact information, payment information). The type of resource is required to store the information on the proper table. To access this route the user must be authenticated and an user_id is required and accessed through (req.user.id). An user can have multiple addresses, phone numbers and credit cards associated with its ID . An user can not have more than one first name, last name or email associated. An user can only add one type of resource at the time.
+      operationId: AddUserInfo
+      parameters:
+      - in: path
+        name: resourceType
+        description: Type of resource to which the information will be added.
+        required: true
+        schema:
+          type: string
+          example: address_inf
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                resource:
+                  type: string
+                  description: Type of resource to which the information belongs. (address_inf for address information, contact_inf for phone numbers, payment_inf for credit card information).
+                  example: address_inf//contact_inf//payment_inf
+                phone:
+                  type: string
+                  example: '123-456-7890'
+                address:
+                  type: string
+                  example: '123 ST FIFTH AVENUE'
+                city:
+                  type: string
+                  example: 'NEW YORK'
+                state:
+                  type: string
+                  example: 'NEW YORK'
+                zip_code:
+                  type: number
+                  example: 25896
+                credit_card:
+                  type: number
+                  example: 123456789000
+                holder:
+                  type: string
+                  example: 'VISA'
+                expiration_date:
+                  type: string
+                  example: '2030/05/01'
+              required:
+                - resource
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                Successfully added the new user information:
+                  value: |-
+                    {
+                      "status": "success",
+                      "message": "New user information was added successfully",
+                      "code": 200,
+                      "user_info": 
+                        {
+                          "id": 2,
+                          "user_id": 1
+                          "address": "123 ST FIFTH AVENUE"
+                          "city": 'NEW YORK',
+                          "state": 'NEW YORK',
+                          "zip_code": 25896,
+                          "created": '2024-03-03 08:10:41'
+                          "modified": '2024-03-03 08:10:41'
+                        }
+                    }
+          description: New user information added successfully
+        '400':
+          content:
+            application/json:
+              examples:
+                Bad request:
+                  value: |-
+                    {
+                      "status": "Bad Request"
+                      "message": "unable to add new user information"
+                      "code": 400
+                    }
+          description: Bad request, the new user information could not be added
+        '500':
+          content:
+            application/json:
+              examples:
+                Server Error:
+                  value: |-
+                    {
+                      "status": "Server Error",
+                      "message": "Error on server while adding new user information",
+                      "code": 500
+                    }
+          description: Error on server while adding new user information
+        default:
+          description: Error on server while adding new user information
+      tags:
+        - Profile
+  /account/profile/{resourceType}/{resourceTypeId}:  
+    patch:
+      summary: Update user's personal information
+      description: Update the user personal information depending on the specified type of resource and its ID. The type of resource is required to find the information on the proper table and the ID to identify the exact resource to be updated. To access this route the user must be authenticated. The user can updated wherever personal information has stored except the email. To update the password there is another route = '/mine'.  An user can update one type of personal information at the time.
+      operationId: updateUserInfo
+      parameters:
+      - in: path
+        name: resourceType
+        description: Type of resource to be updated.
+        required: true
+        schema:
+          type: string
+          example: address_inf
+      - in: path
+        name: resourceTypeId
+        description: Id of the resource to be updated.
+        required: true
+        schema:
+          type: number
+          example: 1
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                resource:
+                  type: string
+                  description: Type of resource to which the information belongs. (personal_inf for users's first or last name, address_inf for address information, contact_inf for phone numbers, payment_inf for credit card information).
+                  example: personal_inf//address_inf//contact_inf//payment_inf
+                first_name:
+                  type: string
+                  example: 'angela'
+                last_name:
+                  type: string
+                  example: 'parga'
+                phone:
+                  type: string
+                  example: '123-456-7890'
+                address:
+                  type: string
+                  example: "555 ST EIGHT AVENUE"
+                city:
+                  type: string
+                  example: 'NEW YORK'
+                state:
+                  type: string
+                  example: 'NEW YORK'
+                zip_code:
+                  type: number
+                  example: 25896
+                credit_card:
+                  type: number
+                  example: 123456789000
+                holder:
+                  type: string
+                  example: 'VISA'
+                expiration_date:
+                  type: string
+                  example: '2030/05/01'
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                Successfully updated the user information:
+                  value: |-
+                    {
+                      "status": "success",
+                      "message": "The user information was updated successfully",
+                      "code": 200,
+                      "user_info": 
+                        {
+                          "id": 1,
+                          "user_id": 1
+                          "phone": '890-123-4567'
+                          "created": '2024-03-03 08:10:41'
+                          "modified": '2024-03-04 10:10:10'
+                        }
+                    }
+          description: User information updated successfully
+        '400':
+          content:
+            application/json:
+              examples:
+                Bad request:
+                  value: |-
+                    {
+                      "status": "Bad Request"
+                      "message": "unable to update the user or user not found"
+                      "code": 400
+                    }
+          description: Bad request, the user information could not be updated
+        '500':
+          content:
+            application/json:
+              examples:
+                Server Error:
+                  value: |-
+                    {
+                      "status": Server Error",
+                      "message": "Error on server while updating the user",
+                      "code": 500
+                    }
+          description: Error on server while updating the user
+        default:
+          description: Error on server while updating the user
+      tags:
+        - Profile
+    delete:
+      summary: Delete user's personal information
+      description: Delete the user personal information depending on the specified type of resource and its ID. The type of resource is required to find the information on the proper table and the ID to identify the exact resource to be deleted. To access this route the user must be authenticated. The user can delete wherever personal information has stored except the first name, last name, email and password.
+      operationId: deleteUserInfo
+      parameters:
+      - in: path
+        name: resourceType
+        description: Type of resource to be deleted.
+        required: true
+        schema:
+          type: string
+          example: address_inf
+      - in: path
+        name: resourceTypeId
+        description: Id of the resource to be deleted.
+        required: true
+        schema:
+          type: number
+          example: 1
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                Successfully deleted the user information:
+                  value: |-
+                    {
+                      "status": "success",
+                      "message": "the user information was succesfully deleted",
+                      "code": 204,
+                      "response": 
+                        {
+                          "status": 204,
+                          "message": "the user information was succesfully deleted"
+                        }
+                    }
+          description: User information deleted successfully
+        '400':
+          content:
+            application/json:
+              examples:
+                Bad request:
+                  value: |-
+                    {
+                      "status": "Bad Request"
+                      "message": "unable to delete the user information, or user information not found"
+                      "code": 400
+                    }
+          description: Bad request, the user information could not be deleted
+        '500':
+          content:
+            application/json:
+              examples:
+                Server Error:
+                  value: |-
+                    {
+                      "status": Server Error",
+                      "message": "Error on server while deleting the user info",
+                      "code": 500
+                    }
+          description: Error on server while deleting the user info
+        default:
+          description: Error on server while deleting the user info
+      tags:
+        - Profile
+  /account/profile/mine:  
+    patch:
+      summary: Update user's password information
+      description: Update the user password information. To access this route the user must be authenticated and an user_id is required and accessed through (req.user.id). 
+      operationId: updateUserPassword
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                password:
+                  type: string
+                  example: 'MynewPassword567!'
+              required:
+                - password
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                Successfully updated the user password:
+                  value: |-
+                    {
+                      "status": "success",
+                      "message": "The user password was updated successfully",
+                      "code": 200,
+                      "user_info": 
+                        {
+                          "id": 1,
+                          "first_name": "angela"
+                          "last_name": "parga",
+                          "email": 'angela@gmail.com',
+                          "password": 'MynewPassword567!_hashed',
+                          "created": "2024-03-29T06:23:41.000Z",
+                          "modified": "2024-04-01T22:07:32.240Z"
+                        }
+                    }
+          description: User password was updated successfully
+        '400':
+          content:
+            application/json:
+              examples:
+                Bad request:
+                  value: |-
+                    {
+                      "status": "Bad Request"
+                      "message": "unable to update the user password or user not found"
+                      "code": 400
+                    }
+          description: Bad request, the user password could not be updated
+        '500':
+          content:
+            application/json:
+              examples:
+                Server Error:
+                  value: |-
+                    {
+                      "status": Server Error",
+                      "message": "Error on server while updating the user password",
+                      "code": 500
+                    }
+          description: Error on server while updating the user password
+        default:
+          description: Error on server while updating the user password
+      tags:
+        - Profile
+        
+  /account/orders:
+    get:
+      summary: Get user's orders
+      description: Retrieve a list of orders placed by the user. To access this route the user must be authenticated and an user_id is required and accessed through (req.user.id).
+      operationId: getUserOrders
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                Successfully retrieved the user orders:
+                  value: |-
+                    {
+                      "status": "success",
+                      "message": "Orders retrieved succesfully"
+                      "code": 200,
+                      "orders": [
+                        {
+                          "id": 15,
+                          "created": '2024-03-23 08:10:41',
+                          "modified": '2024-03-25 08:10:41',
+                          "delivery_date": '2024-04-02',
+                          "status": "COMPLETED",
+                          "total": 110.00,
+                          "items": [
+                              {
+                                "order_id": 15,
+                                "product_id": 2,
+                                "name": "Chablis Roses, white roses 60 cm length, 120 stems",
+                                "qty": 3
+                              },
+                              {
+                                "order_id": 15,
+                                "product_id": 4,
+                                "name": "Red Freedom Roses, red roses 60 cm length, 120 stems",
+                                "qty": 1
+                              }
+                          ],
+                          "shipping_info": {
+                            "address": "123 ST FIFTH AVENUE"
+                            "city": 'NEW YORK',
+                            "state": 'NEW YORK',
+                            "zip_code": 25896,
+                            "phone": '123-456-7890'
+                          }
+                        }
+                      ]
+                    }
+          description: Orders retrieved successfully
+        '404':
+          content:
+            application/json:
+              examples:
+                Not orders were found:
+                  value: |
+                    {
+                      "status": "Not Found"
+                      "message": "orders(s) not found"
+                      "code": 404
+                    }
+          description: The user orders were not found
+        '500':
+          content:
+            application/json:
+              examples:
+                Server Error:
+                  value: |-
+                    {
+                      "status": "Server Error",
+                      "message": "Error on server while searching the order",
+                      "code": 500
+                    }
+          description: Error on server while searching the order
+        default:
+          description: Error on server while searching the order
+      tags:
+        - Orders
+  /account/orders/{id}:
+    get:
+      summary: Get order by ID
+      description: Retrieve an order by its ID. To access this route the user must be authenticated
+      operationId: getOrderById
+      parameters:
+        - in: path
+          name: id
+          required: true
+          description: ID of the order to retrieve
+          schema:
+            type: integer
+            example: 15
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                Successfully retrieved the order:
+                  value: |
+                    {
+                      "status": "success",
+                      "message": "Order retrieved succesfully"
+                      "code": 200,
+                      "order": 
+                        {
+                          "id": 15,
+                          "created": '2024-03-23 08:10:41',
+                          "modified": '2024-03-23 08:10:41',
+                          "delivery_date": '2024-04-02',
+                          "status": "COMPLETED",
+                          "total": 110.00,
+                          "items": [
+                              {
+                                "order_id": 15,
+                                "product_id": 2,
+                                "name": "Chablis Roses, white roses 60 cm length, 120 stems",
+                                "qty": 3
+                              },
+                              {
+                                "order_id": 15,
+                                "product_id": 4,
+                                "name": "Red Freedom Roses, red roses 60 cm length, 120 stems",
+                                "qty": 1
+                              }
+                          ],
+                          "shipping_info": {
+                            "address": "123 ST FIFTH AVENUE"
+                            "city": 'NEW YORK',
+                            "state": 'NEW YORK',
+                            "zip_code": 25896,
+                            "phone": '123-456-7890'
+                          }
+                        }
+                    }
+          description: Order retrieved successfully
+        '404':
+          content:
+            application/json:
+              examples:
+                Not order with the provided id was found:
+                  value: |
+                    {
+                      "status": "Not Found"
+                      "message": "orders not found"
+                      "code": 404
+                    }
+          description: The user doesn't have an order with the provided ID
+        '500':
+          content:
+            application/json:
+              examples:
+                Server Error:
+                  value: |-
+                    {
+                      "status": "Server Error",
+                      "message": "Error on server while searching the order",
+                      "code": 500
+                    }
+          description: Error on server while searching the order
+        default:
+          description: Error on server while searching the order
+      tags:
+        - Orders
+    delete:
+      summary: Delete an order by ID
+      description: Delete an order by its ID. To access this route the user must be authenticated
+      operationId: deleteOrder
+      parameters:
+        - in: path
+          name: id
+          required: true
+          description: ID of the order to delete
+          schema:
+            type: integer
+            example: 15
+      responses:
+        '204':
+          content:
+            application/json:
+              examples:
+                Successfully deleted the order:
+                  value: |-
+                    {
+                      "status": "success",
+                      "message": "Order deleted succesfully"
+                      "code": 204,
+                      "response": 
+                        {
+                          "status": 204,
+                          "message": "Order succesfully deleted"
+                        }
+                    }
+          description: Order deleted successfully
+        '400':
+          content:
+            application/json:
+              examples:
+                Bad Request:
+                  value: |-
+                    {
+                      "status": "Bad Request"
+                      "message": "'order not found or unable to delete'"
+                      "code": 400
+                    }
+                    
+          description: order not found or unable to delete
+        '500':
+          content:
+            application/json:
+              examples:
+                Server Error:
+                  value: |-
+                    {
+                      "status": "Server Error",
+                      "message": "Error on server while deleting the order",
+                      "code": 500
+                    }
+          description: Error on server while deleting the order
+        default:
+          description: Error on server while deleting the order
+      tags:
+        - Orders
+  /account/orders/{id}/items_qty:
+    patch:
+      summary: Update an order's item quantities.
+      description: Update the order's item quantities. It requires the order ID to update the specific order. The body must have an array of objects "items". Each object contain the product ID and a quantity to update.
+      operationId: updateOrderItemsInfo
+      parameters:
+        - in: path
+          name: id
+          required: true
+          description: ID of the order to update
+          schema:
+            type: integer
+            example: 15
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                items:
+                  type: array
+                  items:
+                    type: object 
+                    properties:
+                      product_id:
+                        type: number
+                        example: 5
+                      qty:
+                        type: number
+                        example: 2
+              required:
+                - items
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                Successfully updated the user information:
+                  value: |
+                    {
+                      "status": "success",
+                      "message": "ordered items updated successfully",
+                      "code": 200,
+                      "order": 
+                        {
+                          "items": [
+                              {
+                                "order_id": 15,
+                                "product_id": 2,
+                                "name": "Chablis Roses, white roses 60 cm length, 120 stems",
+                                "qty": 5
+                              },
+                              {
+                                "order_id": 15,
+                                "product_id": 4,
+                                "name": "Red Freedom Roses, red roses 60 cm length, 120 stems",
+                                "qty": 5
+                              }
+                          ]
+                          "order":{
+                            "id": 1,
+                            "created": '2024-03-23 08:10:41',
+                            "modified": '2024-03-25 10:15:49',
+                            "delivery_date": '2024-04-05',
+                            "status": "PENDING",
+                            "total": 280.00
+                          }
+                          
+                        }
+                    }
+          description: Ordered items updated successfully
+        '400':
+          content:
+            application/json:
+              examples:
+                Bad request:
+                  value: |-
+                    {
+                      "status": "Bad Request"
+                      "message": "order not found or unable to update"
+                      "code": 400
+                    }
+          description: Bad request, order not found or unable to update
+        '500':
+          content:
+            application/json:
+              examples:
+                Server Error:
+                  value: |-
+                    {
+                      "status": "Server Error",
+                      "message": "Error on server while updating the order",
+                      "code": 500
+                    }
+          description: Error on server while updating the order
+        default:
+          description: Error on server while updating the order
+      tags:
+        - Orders
+  /account/orders/{id}/shipping_info:
+    patch:
+      summary: Update an order's shipping information.
+      description: Update the order's shipping information. It requires the order ID to update the specific order. The body can have one of the following (delivery date, shipping address id specifying the id of the selected address information, contact info id specifying the id of the selected phone number)
+      operationId: updateOrderShippingInfo
+      parameters:
+        - in: path
+          name: id
+          required: true
+          description: ID of the order to update
+          schema:
+            type: integer
+            example: 15
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                delivery_date:
+                  type: string
+                  example: '2024-05-20'
+                shipping_address_id:
+                  type: number
+                  example: 8
+                contact_info_id:
+                  type: number
+                  example: 5
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                Successfully updated the user information:
+                  value: |
+                    {
+                      "status": "success",
+                      "message": "order shipping information updated successfully",
+                      "code": 200,
+                      "order_updated": 
+                        {
+                          {
+                            "id": 1,
+                            "created": '2024-03-23 08:10:41',
+                            "modified": '2024-03-25 10:15:49',
+                            "delivery_date": '2024-05-20',
+                            "status": "PENDING",
+                            "total": 280.00,
+                            "shipping_address_id": 8,
+                            "contact_info_id": 5
+                          }
+                          
+                        }
+                    }
+          description: Ordered items updated successfully
+        '400':
+          content:
+            application/json:
+              examples:
+                Bad request:
+                  value: |-
+                    {
+                      "status": "Bad Request"
+                      "message": "order not found or unable to update"
+                      "code": 400
+                    }
+          description: Bad request, order not found or unable to update
+        '500':
+          content:
+            application/json:
+              examples:
+                Server Error:
+                  value: |-
+                    {
+                      "status": "Server Error",
+                      "message": "Error on server while updating the order",
+                      "code": 500
+                    }
+          description: Error on server while updating the order
+        default:
+          description: Error on server while updating the order
+      tags:
+        - Orders
+  /products:
+    get:
+      summary: Get all products and product's categories
+      description: Retrieve a list of all available products (limit to 30) and all available categories.
+      operationId: getAllProducts
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                Successfully retrieved all products (limit 30):
+                  value: |-
+                    {
+                      "status": "success",
+                      "message": "Products and categories retrieved succesfully"
+                      "code": 200,
+                      "response": [
+                        {
+                          "category_name": "roses",
+                          "name": "Red Freedom Roses, red roses 60 cm length, 120 stems",
+                          "id": 4,
+                          "category_id": 1,
+                          "description": "Beautiful and big size red roses, perfect for weddings and valentines day!. They have a long lasting life, a big red bloom\n   and a 60 cm length stem",
+                          "color": "red",
+                          "stem_length_cm": 60,
+                          "bloom_size_cm": 6,
+                          "blooms_per_stem": 1,
+                          "life_in_days": 12,
+                          "qty_per_case": 120,
+                          "measure_per_case": "stems",
+                          "price_per_case": 160,
+                          "stock": 89,
+                          "available": true
+                        },
+                        {
+                          "category_name": "roses",
+                          "name": "Red Freedom Roses, red roses 60 cm length, 50 stems",
+                          "id": 3,
+                          "category_id": 1,
+                          "description": "Beautiful and big size red roses, perfect for weddings and valentines day!. They have a long lasting life, a big red bloom\n   and a 60 cm length stem",
+                          "color": "red",
+                          "stem_length_cm": 60,
+                          "bloom_size_cm": 6,
+                          "blooms_per_stem": 1,
+                          "life_in_days": 12,
+                          "qty_per_case": 50,
+                          "measure_per_case": "stems",
+                          "price_per_case": 80,
+                          "stock": 70,
+                          "available": true
+                        }
+                      ],
+                      [
+                        {
+                          "id": 1,
+                          "name": "roses"
+                        },
+                        {
+                          "id": 2,
+                          "name": "spray roses"
+                        }
+                      ]
+                    }
+          description: Products and categories retrieved succesfully
+        '404':
+          content:
+            application/json:
+              examples:
+                Not Found:
+                  value: |-
+                    {
+                      "status": "Not Found",
+                      "message": "The products/categories do not exist or they are null",
+                      "code": 404
+                    }
+          description: Error on server while finding all products
+        '500':
+          content:
+            application/json:
+              examples:
+                Server Error:
+                  value: |-
+                    {
+                      "status": "Server Error",
+                      "message": "Error on server while finding all products",
+                      "code": 500
+                    }
+          description: Error on server while finding all products
+        default:
+          description:  Error on server while finding all products
+      tags:
+        - Products
+  /products/{id}:
+    get:
+      summary: Get product by ID
+      description: Retrieve a product by its ID.
+      operationId: getProductById
+      parameters:
+        - in: path
+          name: id
+          required: true
+          description: ID of the product to retrieve
+          schema:
+            type: integer
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                Successfully retrieved the product:
+                  value: |-
+                    {
+                      "category_name": "roses",
+                      "id": 1,
+                      "category_id": 1,
+                      "name": "Chablis Roses, white roses 60 cm length, 50 stems",
+                      "description": "Beautiful and big size white roses, perfect for weddings. They have a long lasting life, a big white bloom\n   and a 60 cm length stem",
+                      "color": "white",
+                      "stem_length_cm": 60,
+                      "bloom_size_cm": 6,
+                      "blooms_per_stem": 1,
+                      "life_in_days": 12,
+                      "qty_per_case": 50,
+                      "measure_per_case": "stems",
+                      "price_per_case": 80,
+                      "stock": 123,
+                      "available": true
+                    }
+          description: Product retrieved succesfully
+        '404':
+          content:
+            application/json:
+              examples:
+                Not Found:
+                  value: |-
+                    {
+                      "status": "Not Found"
+                      "message": "The product was not found or does not exist"
+                      "code": 404
+                    }
+          description: The product was not found or does not exist
+        '500':
+          content:
+            application/json:
+              examples:
+                Server Error:
+                  value: |-
+                    {
+                      "status": "Server Error",
+                      "message": "Error on server while finding product information by ID"
+                      "code": 500
+                    }
+          description: Error on server while finding product information by ID
+        default:
+          description: Error on server while finding product information by ID
+      tags:
+        - Products
+    post:
+      summary: Add product to a cart
+      description: Add a product to the cart. To access this route the user must be authenticated and an user_id is required and accessed through (req.user.id), this ID is used to find the cart's user where the item is going to be added. The body must have an object with the product_id and quantity to add. 
+      operationId: addProductToCart
+      parameters:
+        - in: path
+          name: id
+          required: true
+          description: Category ID
+          schema:
+            type: number
+            example: 1
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                product_id:
+                  type: number
+                  example: 7
+                qty:
+                  type: number
+                  example: 10
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                Successfully added the product:
+                  value: |-
+                    {
+                      "status": "success",
+                      "message": "Product added to cart succesfully",
+                      "code": 200,
+                      "product_added": {
+                        "item": {
+                          "cart_id": 10,
+                          "id": 14,
+                          "product_id": 7,
+                          "qty": 10,
+                          "created": "2024-03-25 10:15:49",
+                          "modified": "2024-03-25 10:15:49"
+                        },
+                        "cart": {
+                           "id": 10,
+                           "user_id": 1,
+                           "created": "2024-03-25 10:15:49",
+                           "modified": "2024-03-25 10:15:49"
+                           "total": 500
+                        }
+                      }
+                    }
+          description: Product added to cart succesfully
+        '400':
+          content:
+            application/json:
+              examples:
+                Bad Request:
+                  value: |-
+                    {
+                      "status": "Bad Request"
+                      "message": "The product could not be added to cart"
+                      "code": 400
+                    }
+          description: The product could not be added to cart
+        '500':
+          content:
+            application/json:
+              examples:
+                Server Error:
+                  value: |-
+                    {
+                      "status": "Server Error",
+                      "message": "Error on server while adding the item to the cart"
+                      "code": 500
+                    }
+          description: Error on server while adding the item to the cart
+        default:
+          description: Error on server while adding the item to the cart
+      tags:
+        - Products 
+  /products/search:
+    get:
+      summary: Search for a product
+      description: Search for products using a search term. First, the search is done by name of the product. If the product is not found by name, the search is done by category name.
+      operationId: searchProduct
+      parameters:
+        - in: query
+          name: term
+          required: true
+          description: Keyword to search for a product. 
+          schema:
+            type: string
+            example: "roses"
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                Successfully retrieved the product(s):
+                  value: |-
+                    {
+                      "category_name": "roses",
+                      "id": 1,
+                      "category_id": 1,
+                      "name": "Chablis Roses, white roses 60 cm length, 50 stems",
+                      "description": "Beautiful and big size white roses, perfect for weddings. They have a long lasting life, a big white bloom\n   and a 60 cm length stem",
+                      "color": "white",
+                      "stem_length_cm": 60,
+                      "bloom_size_cm": 6,
+                      "blooms_per_stem": 1,
+                      "life_in_days": 12,
+                      "qty_per_case": 50,
+                      "measure_per_case": "stems",
+                      "price_per_case": 80,
+                      "stock": 123,
+                      "available": true
+                    }
+          description: Product(s) retrieved succesfully
+        '404':
+          content:
+            application/json:
+              examples:
+                Not Found:
+                  value: |-
+                    {
+                      "status": "Not Found"
+                      "message": "The product was not found or does not exist"
+                      "code": 404
+                    }
+          description: The product was not found or does not exist
+        '500':
+          content:
+            application/json:
+              examples:
+                Server Error:
+                  value: |-
+                    {
+                      "status": "Server Error",
+                      "message": "Error on server while finding the product"
+                      "code": 500
+                    }
+          description: Error on server while finding the product 
+        default:
+          description: Error on server while finding the product 
+      tags:
+        - Products
+  /products/categories/{categoryId}:
+    get:
+      summary: Get products by category
+      description: Retrieve a list of products by category.
+      operationId: getProductsByCategory
+      parameters:
+        - in: path
+          name: categoryId
+          required: true
+          description: Category ID
+          schema:
+            type: number
+            example: 1
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                Successfully retrieved the products:
+                  value: |-
+                    {
+                      "status": "success",
+                      "message": "Product(s) by category retrieved succesfully",
+                      "code": 200,
+                      "products_by_category": [
+                        {
+                          "category_name": "roses",
+                          "id": 1,
+                          "category_id": 1,
+                          "name": "Chablis Roses, white roses 60 cm length, 50 stems",
+                          "description": "Beautiful and big size white roses, perfect for weddings. They have a long lasting life, a big white bloom\n   and a 60 cm length stem",
+                          "color": "white",
+                          "stem_length_cm": 60,
+                          "bloom_size_cm": 6,
+                          "blooms_per_stem": 1,
+                          "life_in_days": 12,
+                          "qty_per_case": 50,
+                          "measure_per_case": "stems",
+                          "price_per_case": 80,
+                          "stock": 123,
+                          "available": true
+                        },
+                      ]
+                    }
+          description: Products retrieved succesfully
+        '404':
+          content:
+            application/json:
+              examples:
+                Not Found:
+                  value: |-
+                    {
+                      "status": "Not Found"
+                      "message": "This category is empty or does not exist"
+                      "code": 404
+                    }
+          description: This category is empty or does not exist
+        '500':
+          content:
+            application/json:
+              examples:
+                Server Error:
+                  value: |-
+                    {
+                      "status": "Server Error",
+                      "message": "Error on server while finding all products by category"
+                      "code": 500
+                    }
+          description: Error on server while finding all products by category
+        default:
+          description: Error on server while finding all products by category
+      tags:
+        - Products
+    post:
+      summary: Find products using filters
+      description: Retrieve a product or list of products in a category using filter parameters. The body must have at least one parameter to use as a filter condition, like "color" = "white"
+      operationId: getProductsByFilters
+      parameters:
+        - in: path
+          name: categoryId
+          required: true
+          description: Category ID
+          schema:
+            type: number
+            example: 1
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                color:
+                  type: string
+                  example: 'white'
+                stem_length_cm:
+                  type: number
+                  example: 60
+                qty_per_case:
+                  type: number
+                  example: 100
+                bloom_size_cm: 
+                  type: number
+                  example: 6
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                Successfully retrieved the product(s):
+                  value: |-
+                    {
+                      "status": "success",
+                      "message": "Product(s) by category and filter retrieved succesfully",
+                      "code": 200,
+                      "product_found": [
+                        {
+                          "category_name": "roses",
+                          "id": 1,
+                          "category_id": 1,
+                          "name": "Chablis Roses, white roses 60 cm length, 50 stems",
+                          "description": "Beautiful and big size white roses, perfect for weddings. They have a long lasting life, a big white bloom\n   and a 60 cm length stem",
+                          "color": "white",
+                          "stem_length_cm": 60,
+                          "bloom_size_cm": 6,
+                          "blooms_per_stem": 1,
+                          "life_in_days": 12,
+                          "qty_per_case": 100,
+                          "measure_per_case": "stems",
+                          "price_per_case": 80,
+                          "stock": 123,
+                          "available": true
+                        },
+                      ]
+                    }
+          description: Product(s) retrieved succesfully
+        '404':
+          content:
+            application/json:
+              examples:
+                Not Found:
+                  value: |-
+                    {
+                      "status": "Not Found"
+                      "message": "The product that you are filtering does not exist"
+                      "code": 404
+                    }
+          description: The product that you are filtering does not exist
+        '500':
+          content:
+            application/json:
+              examples:
+                Server Error:
+                  value: |-
+                    {
+                      "status": "Server Error",
+                      "message": "Error on server while filtering products"
+                      "code": 500
+                    }
+          description: Error on server while filtering products
+        default:
+          description: Error on server while filtering products
+      tags:
+        - Products    
+  /cart:
+    get:
+      summary: Get cart's user information
+      description: Retrieve the user's cart information including items. The user must be authenticated to access this route.
+      operationId: getCartInfo
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                Successfully retrieved the user's cart:
+                  value: |
+                    {
+                      "status": "success",
+                      "message": "Cart information retrieved successfully",
+                      "code": 200,
+                      "cart": 
+                        {
+                          "id": 15,
+                          "total": 375.00
+                          "items": [
+                              {
+                                "product_id": 7,
+                                "name": "Chablis Roses, white roses 60 cm length, 50 stems",
+                                "qty": 5,
+                                "price_per_case": 75
+                              },
+                              {
+                                "product_id": 6,
+                                "name": "Chablis Roses, white roses 60 cm length, 100 stems",
+                                "qty": 1,
+                                "price_per_case": 120
+                              }
+                          ]
+                        }
+                    }
+          description: Cart information retrieved successfully
+        '500':
+          content:
+            application/json:
+              examples:
+                Server Error:
+                  value: |-
+                    {
+                      "status": "Server Error",
+                      "message": "Error on server while retrieving the cart information"
+                      "code": 500
+                    }
+          description: Error on server while retrieving the cart information
+        default:
+          description: Error on server while retrieving the cart information
+      tags:
+        - Cart
+  /cart/{id}:
+    patch:
+      summary: Update cart's item quantities
+      description: Update the cart's item quantities. The user must be authenticated to access this route. The body must have an object with the product ID with the item to update and the new quantity
+      operationId: updateCartInfo
+      parameters:
+        - in: path
+          name: id
+          required: true
+          description: Cart ID
+          schema:
+            type: number
+            example: 1
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                product_id:
+                  type: integer
+                  example: 7
+                qty:
+                  type: integer
+                  example: 5
+              required:
+                - product_id
+                - qty
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                Successfully updated the user's cart:
+                  value: |
+                    {
+                      "status": "success",
+                      "message": "cart's items updated successfully",
+                      "code": 200,
+                      "cart_updated": 
+                        {
+                          "items": [
+                              {
+                                "id": 50,
+                                "cart_id": 15
+                                "product_id": 7,
+                                "qty": 5
+                                "created": '2024-03-23 08:10:41',
+                                "modified": '2024-03-25 10:15:49',
+                              }
+                          ],
+                          "cart":{
+                            "id": 15,
+                            "user_id": 1,
+                            "created": '2024-03-23 08:10:41',
+                            "modified": '2024-03-25 10:15:49',
+                            "total": 300
+                          }
+                          
+                        }
+                    }
+          description: Cart updated successfully
+        '400':
+          content:
+            application/json:
+              examples:
+                Bad Request:
+                  value: |-
+                    {
+                      "status": "Bad Request"
+                      "message": "Cart's item not found or unable to update"
+                      "code": 400
+                    }
+          description: Cart item not found or unable to update
+        '500':
+          content:
+            application/json:
+              examples:
+                Server Error:
+                  value: |-
+                    {
+                      "status": "Server Error",
+                      "message": "Error on server while updating the cart's item"
+                      "code": 500
+                    }
+          description: Error on server while updating the cart's item
+        default:
+          description: Error on server while updating the cart's item
+      tags:
+        - Cart
+    delete:
+      summary: Delete all cart's items
+      description: Delete all cart's items. The user must be authenticated to access this route.
+      operationId: emptyCart
+      parameters:
+        - in: path
+          name: id
+          required: true
+          description: Cart ID
+          schema:
+            type: number
+            example: 1
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                Successfully emptied the user's cart:
+                  value: |
+                    {
+                      "status": "success",
+                      "message": "Cart emptied successfully",
+                      "code": 204,
+                      "cart_updated": 
+                        {
+                          status: 204,
+                          message: 'Cart emptied successfully'
+                        }
+                    }
+          description: Cart emptied successfully
+        '400':
+          content:
+            application/json:
+              examples:
+                Bad Request:
+                  value: |-
+                    {
+                      "status": "Bad Request"
+                      "message": "Cart not found or unable to empty completely"
+                      "code": 400
+                    }
+          description: Cart not found or unable to empty completely
+        '500':
+          content:
+            application/json:
+              examples:
+                Server Error:
+                  value: |-
+                    {
+                      "status": "Server Error",
+                      "message": "Error on server while emptying the cart"
+                      "code": 500
+                    }
+          description: Error on server while emptying the cart
+        default:
+          description: Error on server while emptying the cart
+      tags:
+        - Cart
+  /cart/{id}/items/{productId}:
+    delete:
+      summary: Delete an item of a cart
+      description: Delete an item of a cart. The user must be authenticated to access this route.
+      operationId: deleteCartItem
+      parameters:
+        - in: path
+          name: id
+          required: true
+          description: Cart ID
+          schema:
+            type: number
+            example: 15
+        - in: path
+          name: productId
+          required: true
+          description: Product ID
+          schema:
+            type: number
+            example: 7
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                Successfully deleted the cart's item:
+                  value: |
+                    {
+                      "status": "success",
+                      "message": "Cart's item deleted successfully",
+                      "code": 204,
+                      "cart_updated": 
+                        {
+                          "item": 
+                            {
+                              "message":'Item succesfully deleted', 
+                              "status": 204
+                            },
+                          "cart":
+                            {
+                              "id": 15,
+                              "user_id": 1,
+                              "created": '2024-03-23 08:10:41',
+                              "modified": '2024-03-25 10:15:49',
+                              "total": 120.00
+                            }
+                        }
+                    }
+          description: Item succesfully deleted
+        '400':
+          content:
+            application/json:
+              examples:
+                Bad Request:
+                  value: |-
+                    {
+                      "status": "Bad Request"
+                      "message": "Cart item not found or unable to delete"
+                      "code": 400
+                    }
+          description: Cart item not found or unable to delete
+        '500':
+          content:
+            application/json:
+              examples:
+                Server Error:
+                  value: |-
+                    {
+                      "status": "Server Error",
+                      "message": "Error on server while deleting the item"
+                      "code": 500
+                    }
+          description: Error on server while deleting the item
+        default:
+          description: Error on server while deleting the item
+      tags:
+        - Cart
+  /cart/{id}/checkout:
+    post:
+      summary: Cart Checkout and creation of the order
+      description: Process the checkout of the user's shopping cart and the creation of a new order. The user must be authenticated to access this route, and an user_id is required and is accessed through (req.user.id). The body contains an object with the shipping information (the delivery date, shipping address id representing the id of the address stored, and a contact information id representing the id of the phone number stored)
+      operationId: checkoutCart
+      parameters:
+        - in: path
+          name: id
+          required: true
+          description: Cart ID
+          schema:
+            type: number
+            example: 15
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                delivery_date:
+                  type: string
+                  example: "2024/05/12"
+                shipping_address_id:
+                  type: number
+                  example: 5
+                contact_info_id:
+                  type: number
+                  example: 7
+              required:
+                - delivery_date
+                - shipping_address_id
+                - contact_info_id
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                Successfully created the order:
+                  value: |
+                    {
+                      "status": "success",
+                      "message": "Order created successfully",
+                      "code": 200,
+                      "order": 
+                        {
+                          "message": 
+                            {
+                              "message":'Order succesfully created', 
+                              "status": 200
+                            },
+                          "cart":
+                            {
+                              "message":'Cart succesfully emptied', 
+                              "status":204
+                            },
+                          "order":
+                            {
+                              "id": 15,
+                              "created": '2024-03-23 08:10:41',
+                              "modified": '2024-03-23 08:10:41',
+                              "delivery_date": '2024-05-12',
+                              "status": "PENDING",
+                              "total": 110.00,
+                            }
+                        }
+                    }
+          description: Order succesfully created
+        '500':
+          content:
+            application/json:
+              examples:
+                Server Error:
+                  value: |-
+                    {
+                      "status": "Server Error",
+                      "message": "Error on server while placing the order"
+                      "code": 500
+                    }
+          description: Error on server while placing the order
+        default:
+          description: Error on server while placing the order
+      tags:
+        - Cart
+
+  

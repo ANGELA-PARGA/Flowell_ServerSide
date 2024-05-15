@@ -1,0 +1,92 @@
+const express = require('express');
+const router = express.Router();
+const { checkAuthenticated, idParamsValidator, 
+        orderShippingInfoValidators, orderedItemsInfoValidators, 
+        handleValidationErrors } = require('../Utilities/expressValidators')
+
+const OrderService = require('../ServicesLogic/OrderService')
+
+router.get('/', checkAuthenticated, async (req, res, next) => {
+    try {
+        console.log('calling api route to fetch all orders by user id')
+        console.log(req.session)
+        console.log(req.session.passport)
+        console.log(req.user)
+        const user_id = req.user.id;
+        console.log(user_id)
+        const response = await OrderService.findOrder({user_id});
+        res.status(200).json({
+            status: 'success',
+            message: 'Orders retrieved successfully',
+            code: 200,
+            orders: response 
+        });
+    } catch(err) {
+        next(err);
+    }
+});
+
+router.get('/:id', checkAuthenticated, idParamsValidator, handleValidationErrors, 
+    async (req, res, next) => {
+        try {
+            console.log(req.session.passport)
+            console.log(req.user)
+            const id = parseInt(req.params.id, 10);
+            const response = await OrderService.findOrder({id});
+            res.status(200).json({
+                status: 'success',
+                message: 'Order retrieved successfully',
+                code: 200,
+                orders: response 
+            });
+        } catch(err) {
+            next(err);
+        }
+});
+
+router.patch('/:id/items_qty', checkAuthenticated, idParamsValidator, orderedItemsInfoValidators,
+            handleValidationErrors, async (req, res, next) => {
+    try {
+        const {items} = req.body
+        const id = parseInt(req.params.id, 10);
+        const response = await OrderService.updateOrderItemsInfo({id, items});
+        res.status(200).json({
+            status: 'success',
+            message: 'Ordered items updated successfully',
+            code: 200,
+            order_updated: response 
+        });
+    } catch(err) {
+        next(err);
+    }        
+});
+
+router.patch('/:id/shipping_info', checkAuthenticated, idParamsValidator, orderShippingInfoValidators, 
+            handleValidationErrors, async (req, res, next) => {
+    try {
+        const data = req.body
+        const id = parseInt(req.params.id, 10);
+        const response = await OrderService.updateOrderShippingInfo({id, ...data});
+        res.status(200).json({
+            status: 'success',
+            message: 'Orders shipping information updated successfully',
+            code: 200,
+            order_updated: response 
+        });
+    } catch(err) {
+        next(err);
+    }        
+});
+
+router.delete('/:id', checkAuthenticated, idParamsValidator, 
+                handleValidationErrors, async (req, res, next) => {
+    try {
+        const id = parseInt(req.params.id, 10);
+        const response = await OrderService.deleteOrder(id);
+        res.status(200).send(response);
+    } catch(err) {
+        next(err);
+    }        
+});
+
+module.exports = router;
