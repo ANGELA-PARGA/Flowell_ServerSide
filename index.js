@@ -5,6 +5,7 @@ const express = require('express');
 const session = require('express-session');
 const app = express();
 const PORT = process.env.PORT || 8000;
+console.log(process.env.MONGODB)
 
 /*setting morgan */
 const morgan = require('morgan');
@@ -27,7 +28,7 @@ app.use(cors(corsOptions));
 const MongoDBStore = require('connect-mongodb-session')(session);
 
 const store = new MongoDBStore({
-    uri: 'mongodb://localhost:27017/flowell', 
+    uri: process.env.MONGODB, 
     collection: 'sessions' 
 });
 
