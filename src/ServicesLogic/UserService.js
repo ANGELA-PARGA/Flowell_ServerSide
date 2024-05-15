@@ -59,7 +59,8 @@ module.exports = class UserService{
     // this method expects the data object { resource_id, user_id, resource }
     static async deleteUserInfo(data){
         try {          
-            const infoToDelete = await UserModel.deleteUserInfo(data)  
+            const infoToDelete = await UserModel.deleteUserInfo(data) 
+            console.log('receiving infoTodelete:', infoToDelete) 
             if(!infoToDelete) {
                 throw createError(400, 'unable to delete the user information, or user information not found');
             }      

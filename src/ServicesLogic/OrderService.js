@@ -56,7 +56,7 @@ module.exports = class OrderService {
             }
 
             if(!ordersFound?.length){
-                ordersFound = {}                
+                ordersFound = []               
             }
             return ordersFound;
         } catch (error) {

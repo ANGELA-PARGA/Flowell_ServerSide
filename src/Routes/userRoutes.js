@@ -85,11 +85,11 @@ router.delete('/:resourceType/:resourceId', checkAuthenticated, resourceValidato
         const resource_id = parseInt(req.params.resourceId, 10);
         const user_id = req.user.id;
         const response = await UserService.deleteUserInfo({param1:resource_id, param2:user_id, resource:resource});
-        res.status(204).json({
+        res.status(200).json({
             status: 'success',
             message: 'the user information was succesfully deleted',
-            code: 204,
-            response: response 
+            code: 200,
+            response: response.message 
         });
     } catch(err) {
         next(err);
