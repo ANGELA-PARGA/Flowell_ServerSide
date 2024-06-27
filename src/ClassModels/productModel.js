@@ -2,8 +2,9 @@ const createError = require('http-errors');
 const {selectAllProductInfoQuery, selectAllProducts, 
     selectProductBySearchParameters, selectProductByParameters,
     selectAllCategories, selectAllProductsByCategory} = require('../DBQueries/productQueries')
-const { calculateTotal, updateQuery } = require('../DBQueries/generalQueries')
+const { calculateTotal, updateQuery, calculateTotalItems } = require('../DBQueries/generalQueries')
 const CartItemsModel = require('./cartItemsModel')
+
 
 module.exports = class ProductModel { 
     /**
@@ -65,7 +66,7 @@ module.exports = class ProductModel {
     }
 
     /**
-     * Add a product to the cart using the object {product_id, qty}: 
+     * Add a product to the cart using the object {cart_id, product_id, qty}: 
      * @param {number} product_id
      * @param {number} qty
      * @param {number} cart_id
@@ -78,8 +79,9 @@ module.exports = class ProductModel {
             const CartItemInstance = new CartItemsModel(data)
             const itemToAdd = await CartItemInstance.createCartItem()
 
-            const newTotal = await calculateTotal(cart_id,'cart_id','cart_items');           
-            const updatedCart = await updateQuery({id:cart_id, total:newTotal.total }, 'id','carts')
+            const newTotal = await calculateTotal(cart_id,'cart_id','cart_items');
+            const newItemNumber = await calculateTotalItems(cart_id,'cart_id','cart_items');         
+            const updatedCart = await updateQuery({id:cart_id, total:newTotal.total, total_items:newItemNumber}, 'id','carts')
 
             return {item:itemToAdd, cart:updatedCart};
         } catch (error) {

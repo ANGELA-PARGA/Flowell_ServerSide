@@ -8,12 +8,8 @@ const OrderService = require('../ServicesLogic/OrderService')
 
 router.get('/', checkAuthenticated, async (req, res, next) => {
     try {
-        console.log('calling api route to fetch all orders by user id')
-        console.log(req.session)
-        console.log(req.session.passport)
-        console.log(req.user)
         const user_id = req.user.id;
-        console.log(user_id)
+        console.log('calling api route to fetch all orders by user id:', user_id)
         const response = await OrderService.findOrder({user_id});
         res.status(200).json({
             status: 'success',
@@ -29,9 +25,8 @@ router.get('/', checkAuthenticated, async (req, res, next) => {
 router.get('/:id', checkAuthenticated, idParamsValidator, handleValidationErrors, 
     async (req, res, next) => {
         try {
-            console.log(req.session.passport)
-            console.log(req.user)
             const id = parseInt(req.params.id, 10);
+            console.log('calling api route to fetch an order info by order id:', id)
             const response = await OrderService.findOrder({id});
             res.status(200).json({
                 status: 'success',
@@ -49,6 +44,7 @@ router.patch('/:id/items_qty', checkAuthenticated, idParamsValidator, orderedIte
     try {
         const {items} = req.body
         const id = parseInt(req.params.id, 10);
+        console.log('calling api route to update the qty of an order:', items, id)
         const response = await OrderService.updateOrderItemsInfo({id, items});
         res.status(200).json({
             status: 'success',
@@ -66,6 +62,7 @@ router.patch('/:id/shipping_info', checkAuthenticated, idParamsValidator, orderS
     try {
         const data = req.body
         const id = parseInt(req.params.id, 10);
+        console.log('calling api route to update the shipping info of an order:', data, id)
         const response = await OrderService.updateOrderShippingInfo({id, ...data});
         res.status(200).json({
             status: 'success',
@@ -82,6 +79,7 @@ router.delete('/:id', checkAuthenticated, idParamsValidator,
                 handleValidationErrors, async (req, res, next) => {
     try {
         const id = parseInt(req.params.id, 10);
+        console.log('calling api route to delete an order:', id)
         const response = await OrderService.deleteOrder(id);
         res.status(200).send(response);
     } catch(err) {

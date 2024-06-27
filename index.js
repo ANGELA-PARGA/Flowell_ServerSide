@@ -99,11 +99,16 @@ const CartService = require('./src/ServicesLogic/CartService')
 
 app.post('/api/auth/login', loginValidators, handleValidationErrors, passport.authenticate('local'), async (req, res, next) => {
     try {
-        const loadCart = await CartService.getCartInfo(req.user.id)
+        console.log('calling route for login user')
+        let loadCart = await CartService.getCartInfo(req.user.id)
+        let cartId;
+
         if(!Object.keys(loadCart)?.length){
+            console.log('there is NOT CART...creating one')
             const CartServiceInstance = new CartService();
-            CartServiceInstance.createNewCart({user_id: req.user.id})
+            loadCart = await CartServiceInstance.createNewCart({user_id: req.user.id})
         }
+        cartId = loadCart.id;
         const { id, first_name, last_name, email } = req.user;
         const user = req.user
         
@@ -120,7 +125,8 @@ app.post('/api/auth/login', loginValidators, handleValidationErrors, passport.au
                     id,
                     first_name,
                     last_name,
-                    email,                    
+                    email, 
+                    cart_id:cartId                   
                 },
                 sessionID: req.sessionID
             });
@@ -134,14 +140,19 @@ app.post('/api/auth/login', loginValidators, handleValidationErrors, passport.au
 app.post('/api/auth/signup', signupValidators, handleValidationErrors, async (req, res, next) => {
     try {
         const data = req.body;
+        console.log('calling route for signup user', data)
         const AuthServiceInstance = new Authentication();
         const newUser = await AuthServiceInstance.register(data);
-        const cart = await CartService.getCartInfo(newUser.id);
+        let loadCart = await CartService.getCartInfo(newUser.id);
+        let cartId;
 
-        if (!Object.keys(cart)?.length) {
+        if (!Object.keys(loadCart)?.length) {
+            console.log('there is NOT CART...creating one')
             const CartServiceInstance = new CartService();
-            CartServiceInstance.createNewCart({ user_id: newUser.id });
+            loadCart = await CartServiceInstance.createNewCart({ user_id: newUser.id });
         }
+
+        cartId = loadCart.id
 
         req.login(newUser, (err) => {
             if (err) {
@@ -156,7 +167,8 @@ app.post('/api/auth/signup', signupValidators, handleValidationErrors, async (re
                     id,
                     first_name,
                     last_name,
-                    email
+                    email,
+                    cart_id: cartId
                 },
                 sessionID: req.sessionID
             });
@@ -167,18 +179,13 @@ app.post('/api/auth/signup', signupValidators, handleValidationErrors, async (re
 });
 
 app.post('/api/auth/logout',  async (req, res, next) => {
-    console.log('calling logout in server', req.session)
-    console.log('with:', req.headers)
-    try {      
-        console.log('enter try block with req object:', req.headers)  
+    try { 
+        console.log('calling logout in server')       
         req.logout((err) => {
             if (err) {
-                console.log('log out server error:', err)
                 return next(err);
         }})
-        console.log('THE USER deleted and the session', req.user, req.session, req.sessionID)
         res.clearCookie('connect.sid');
-        console.log('the session after deleted cookie', req.session)
         res.status(200).json({ message: 'Logged out successfully' });
                 
     } catch(err) {

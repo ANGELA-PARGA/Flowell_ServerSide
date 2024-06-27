@@ -14,6 +14,7 @@ const selectAllCartInfoQuery = async (parameter) => {
     const sqlStatement = pgp.as.format(`SELECT 
                                         carts.id AS "id",
                                         carts.total AS "total",
+                                        carts.total_items AS "total_items",
                                         json_agg(
                                             json_build_object(
                                                 'product_id', cart_items.product_id,

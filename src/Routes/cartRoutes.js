@@ -9,6 +9,7 @@ router.get('/', checkAuthenticated, async (req, res, next) => {
     try {
         const user_id = req.user.id;
         const response = await CartService.getCartInfo(user_id);
+        console.log('calling api route for get cart with:', user_id)
         res.status(200).json({
             status: 'success',
             message: 'Cart information retrieved successfully',
@@ -20,11 +21,13 @@ router.get('/', checkAuthenticated, async (req, res, next) => {
     }
 });
 
-router.patch('/:id', checkAuthenticated, idParamsValidator, updateCartValidators, handleValidationErrors, async (req, res, next) => {
+router.patch('/', checkAuthenticated, updateCartValidators, handleValidationErrors, async (req, res, next) => {
     try {
         const data = req.body
-        const id = parseInt(req.params.id, 10);
-        const response = await CartService.updateCartItems({cart_id:id, ...data});
+        const cart_info = await CartService.getCartInfo(req.user.id)
+        const cart_id = cart_info.id 
+        console.log('calling api route for update cart items with:', cart_id, data)
+        const response = await CartService.updateCartItems({cart_id:cart_id, ...data});
         res.status(200).json({
             status: 'success',
             message: 'Carts items updated successfully',
@@ -37,12 +40,14 @@ router.patch('/:id', checkAuthenticated, idParamsValidator, updateCartValidators
 });
 
 
-router.post('/:id/checkout', checkAuthenticated, idParamsValidator, createCheckoutValidators, handleValidationErrors, async (req, res, next) => {
+router.post('/checkout', checkAuthenticated, createCheckoutValidators, handleValidationErrors, async (req, res, next) => {
     try {
-        const id = parseInt(req.params.id, 10);
+        const cart_info = await CartService.getCartInfo(req.user.id)
+        const cart_id = cart_info.id 
         const user_id = req.user.id;
         const shipping_info = req.body
-        const response = await CartService.checkoutCart({user_id, cart_id:id, ...shipping_info} );
+        console.log('calling api route for checkout with:', user_id, cart_id, shipping_info)
+        const response = await CartService.checkoutCart({user_id, cart_id:cart_id, ...shipping_info} );
         res.status(200).json({
             status: 'success',
             message: 'Order created successfully',
@@ -55,14 +60,16 @@ router.post('/:id/checkout', checkAuthenticated, idParamsValidator, createChecko
 });
 
 
-router.delete('/:id', checkAuthenticated, idParamsValidator, handleValidationErrors, async (req, res, next) => {
+router.delete('/', checkAuthenticated, handleValidationErrors, async (req, res, next) => {
     try {
-        const cart_id = parseInt(req.params.id, 10);        
+        const cart_info = await CartService.getCartInfo(req.user.id)
+        const cart_id = cart_info.id   
+        console.log('calling api route for emptying a cart with:', cart_id)   
         const response = await CartService.emptyCart(cart_id);
         res.status(200).json({
             status: 'success',
             message: 'Cart emptied successfully',
-            code: 204,
+            code: 200,
             cart_deleted: response 
         });       
     } catch(err) {
@@ -70,10 +77,12 @@ router.delete('/:id', checkAuthenticated, idParamsValidator, handleValidationErr
     }
 });
 
-router.delete('/:id/items/:productId', checkAuthenticated, idParamsValidator, handleValidationErrors, async (req, res, next) => {
+router.delete('/:id', checkAuthenticated, idParamsValidator, handleValidationErrors, async (req, res, next) => {
     try {
-        const cart_id = parseInt(req.params.id, 10);        
-        const product_id = parseInt(req.params.productId, 10);
+        const cart_info = await CartService.getCartInfo(req.user.id)
+        const cart_id = cart_info.id             
+        const product_id = parseInt(req.params.id, 10);
+        console.log('calling api route for deleting a carts item #:', cart_id, product_id)
         const response = await CartService.deleteItemFromCart({ param1: cart_id, param2: product_id });
         res.status(200).json({
             status: 'success',

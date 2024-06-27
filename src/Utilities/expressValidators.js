@@ -90,13 +90,10 @@ const handleValidationErrors = (req, res, next) => {
 
 const checkAuthenticated = (req, res, next) => {
     console.log('calling check authenticated')
-    console.log('header and cookies received from frontend:', req.headers)
-    console.log('is there a session', req.session)
-    console.log('is there a user', req.user)
     const auth = req.isAuthenticated()
     console.log(auth)
     if (req.isAuthenticated()) { 
-        console.log('User is authenticated', req.user)
+        console.log('User is authenticated')
         return next() 
     }
     if(!req.isAuthenticated()){

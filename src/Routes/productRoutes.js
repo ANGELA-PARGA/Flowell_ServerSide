@@ -8,10 +8,9 @@ const CartsService = require('../ServicesLogic/CartService')
 
 router.get('/', async (req, res, next) => {
     try {
-        console.log('calling api route for get products')
+        console.log('calling api route for getting products:')
         const bestProducts = await ProductService.loadAllProducts(); 
-        const allCategories = await ProductService.loadAllCategories(); 
-
+        const allCategories = await ProductService.loadAllCategories();
         res.status(200).json({
             status: 'success',
             message: 'Products and categories retrieved succesfully',
@@ -26,8 +25,8 @@ router.get('/', async (req, res, next) => {
 router.get('/search', searchTermValidators, handleValidationErrors,
             async (req, res, next) => {
     try {
-        console.log('calling api route for search products:', req.query.term)
         const data = req.query.term;
+        console.log('calling api route for search products:', data)
         const response = await ProductService.findProductsBySearch(data)
         res.status(200).json({
             status: 'success',
@@ -44,8 +43,8 @@ router.get('/search', searchTermValidators, handleValidationErrors,
 
 router.get('/categories/:categoryId', categoryParamsValidator, handleValidationErrors, async (req, res, next) => {
     try {
-        console.log('calling api route for products by category')
         const categoryId = parseInt(req.params.categoryId, 10);
+        console.log('calling api route for products by category with:', categoryId)
         const response = await ProductService.loadAllProductsByCategory(categoryId)
         res.status(200).json({
             status: 'success',
@@ -62,9 +61,9 @@ router.get('/categories/:categoryId', categoryParamsValidator, handleValidationE
 router.post('/categories/:categoryId', categoryParamsValidator, 
             productFilterValidators, handleValidationErrors,  async (req, res, next) => {
     try {
-        console.log('calling api route for products filtering', req.body)
         const data = req.body;
         const categoryId = parseInt(req.params.categoryId, 10);
+        console.log('calling api route for products filtering with:', data, categoryId)
         const response = await ProductService.findProductsByFilter({category_id: categoryId,...data})
         res.status(200).json({
             status: 'success',
@@ -80,8 +79,8 @@ router.post('/categories/:categoryId', categoryParamsValidator,
 router.get('/:id', idParamsValidator, handleValidationErrors, 
             async (req, res, next) => {
     try {
-        console.log('calling api route for product by id')
         const id = parseInt(req.params.id, 10);
+        console.log('calling api route for product by id:', id)
         const response = await ProductService.loadSpecificProduct(id)
         res.status(200).json({
             status: 'success',
@@ -94,12 +93,12 @@ router.get('/:id', idParamsValidator, handleValidationErrors,
     }
 });
 
-router.post('/:id', cartItemValidators, handleValidationErrors, async (req, res, next) => {
+router.post('/', checkAuthenticated, cartItemValidators, handleValidationErrors, async (req, res, next) => {
     try {
-        console.log('calling api route for adding product to cart', req.body)
         const cart_info = await CartsService.getCartInfo(req.user.id)
         const cart_id = cart_info.id
         const data = req.body
+        console.log('calling api route for adding product to cart', data, cart_id)
         const response = await ProductService.addProductToCart({cart_id, ...data})
         res.status(200).json({
             status: 'success',

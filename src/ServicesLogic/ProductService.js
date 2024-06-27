@@ -61,9 +61,6 @@ module.exports = class ProductService {
     static async findProductsBySearch(searchTerm){
         try { 
             const searchResults = await ProductModel.findProductsBySearch(searchTerm);
-            /*if(!searchResults?.length){
-                throw createError(404, 'the product that you are searching does not exist');                
-            }*/
             return searchResults
         } catch (error) {
             throw createError(500, `error on server while finding products by search term`, error.stack, error); 
@@ -78,10 +75,7 @@ module.exports = class ProductService {
      */
     static async findProductsByFilter(options){
         try { 
-            const filteredResults = await ProductModel.findProductsByFilter(options);
-            /*if(!filteredResults?.length){
-                throw createError(404, 'the product that you are filtering does not exist');                
-            }*/            
+            const filteredResults = await ProductModel.findProductsByFilter(options);           
             return filteredResults
         } catch (error) {
             throw createError(500, `error on server while filtering products`, error.stack, error); 

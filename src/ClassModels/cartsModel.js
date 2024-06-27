@@ -1,6 +1,6 @@
 const createError = require('http-errors');
 const moment = require('moment');
-const {insertQuery, updateQuery, calculateTotal} = require('../DBQueries/generalQueries')
+const {insertQuery, updateQuery, calculateTotal, calculateTotalItems} = require('../DBQueries/generalQueries')
 const {selectAllCartInfoQuery} = require('../DBQueries/cartQueries')
 const CartItemsModel = require('./cartItemsModel')
 
@@ -10,6 +10,7 @@ module.exports = class CartsModel {
         this.modified = moment.utc().toISOString();
         this.user_id = data.user_id;
         this.total = 0;
+        this.total_items = 0;
     }
     
     /**
@@ -42,8 +43,9 @@ module.exports = class CartsModel {
         try {    
             const { cart_id } = data;
             const updatedCartItem = await CartItemsModel.updateCartItem(data)
-            const newTotal = await calculateTotal(cart_id,'cart_id','cart_items');            
-            const updatedCart = await updateQuery({id:cart_id, total:newTotal.total }, 'id','carts')
+            const newTotal = await calculateTotal(cart_id,'cart_id','cart_items');
+            const newItemNumber = await calculateTotalItems(cart_id,'cart_id','cart_items');             
+            const updatedCart = await updateQuery({id:cart_id, total:newTotal.total, total_items:newItemNumber}, 'id','carts')
             
             return {item: updatedCartItem, cart: updatedCart};
         } catch(error) {
@@ -78,13 +80,14 @@ module.exports = class CartsModel {
             const cart_id = data.param1;
             const deletedCartItem = await CartItemsModel.deleteCartItem(data)
             const newTotal = await calculateTotal(cart_id,'cart_id','cart_items');
+            const newItemNumber = await calculateTotalItems(cart_id,'cart_id','cart_items'); 
             
             let updatedCart;
             if(!newTotal.total){
-                updatedCart = await updateQuery({id:cart_id, total:0 }, 'id','carts')
+                updatedCart = await updateQuery({id:cart_id, total:0, total_items:0 }, 'id','carts')
                 
             } else {
-                updatedCart = await updateQuery({id:cart_id, total:newTotal.total }, 'id','carts')
+                updatedCart = await updateQuery({id:cart_id, total:newTotal.total, total_items:newItemNumber}, 'id','carts')
             }
             return {item:deletedCartItem, cart:updatedCart};
         } catch(error) {

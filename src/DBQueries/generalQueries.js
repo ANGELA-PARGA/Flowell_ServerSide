@@ -121,7 +121,7 @@ const deleteDoubleConditionQuery = async (data, tableName, cond1, cond2) => {
  * @returns {0} unsuccessfull query
  */
 const calculateTotal = async (parameter, columnName, tableName) => {
-    console.log('calling calculate total with:', parameter)
+    console.log('calling calculate total price with:', parameter)
     const sqlStatement = pgp.as.format(`SELECT SUM(${tableName}.qty * products.price_per_case) AS "total"
                                             FROM ${tableName}
                                             INNER JOIN products ON ${tableName}.product_id = products.id
@@ -134,11 +134,33 @@ const calculateTotal = async (parameter, columnName, tableName) => {
 }
 
 
+/**
+ * Calculate the total number of items on a cart
+ * It returns an object {total_items:value} if the query was succesfull (there was quantities to sum up), otherwise it returns 0
+ * @param {number} parameter
+ * @param {string} columnName
+ * @param {string} tableName
+ * @returns {object} successfull query {total:number}
+ * @returns {0} unsuccessfull query
+ */
+const calculateTotalItems = async (parameter, columnName, tableName) => {
+    console.log('calling calculate total items with:', parameter)
+    const sqlStatement = pgp.as.format(`SELECT SUM(${tableName}.qty) AS "total_items"
+                                        FROM ${tableName}
+                                        WHERE ${tableName}.${columnName} = $1`, [parameter]);
+
+    const queryResult = await db.query(sqlStatement);
+    console.log('calculate total items result', queryResult.rows)
+    if (queryResult.rows?.length) return queryResult.rows[0].total_items;
+    return 0; 
+}
+
 module.exports = {
     insertQuery,
     updateQuery,
     standardSelectQuery,
     standardDeleteQuery,
     deleteDoubleConditionQuery,
-    calculateTotal
+    calculateTotal,
+    calculateTotalItems
 }

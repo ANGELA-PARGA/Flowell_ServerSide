@@ -5,8 +5,7 @@ module.exports = class UserService{
 
     // this method expects the user_id
     static async getUserInfo(id){
-        try {    
-            console.log('getting all user info', id)     
+        try {       
             const userFound = await UserModel.findAllUserInfoById(id)          
             /*if(!Object.keys(userFound)?.length) {
                 throw createError(404, 'User Not Found');
@@ -60,7 +59,6 @@ module.exports = class UserService{
     static async deleteUserInfo(data){
         try {          
             const infoToDelete = await UserModel.deleteUserInfo(data) 
-            console.log('receiving infoTodelete:', infoToDelete) 
             if(!infoToDelete) {
                 throw createError(400, 'unable to delete the user information, or user information not found');
             }      
