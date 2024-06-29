@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { updateUserValidators, resourceValidator ,checkAuthenticated,
+const { updateUserValidators, updatePasswordValidators, resourceValidator ,checkAuthenticated,
         handleValidationErrors} = require('../Utilities/expressValidators')
 
 const UserService = require('../ServicesLogic/UserService')
@@ -21,7 +21,7 @@ router.get('/', checkAuthenticated, async (req, res, next) => {
     }
 });
 
-router.post('/:resourceType', checkAuthenticated, resourceValidator, updateUserValidators, 
+router.post('/:resourceType', checkAuthenticated, resourceValidator, updateUserValidators,
             handleValidationErrors, async (req, res, next) => {
     try {
         const resource = req.params.resourceType
@@ -59,7 +59,7 @@ router.patch('/:resourceType/:resourceId', checkAuthenticated, resourceValidator
     }        
 });
 
-router.patch('/mine', checkAuthenticated, updateUserValidators, handleValidationErrors, 
+router.patch('/mine', checkAuthenticated, updatePasswordValidators, handleValidationErrors, 
             async (req, res, next) => {
     try {
         const data = req.body

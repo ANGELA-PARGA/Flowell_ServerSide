@@ -75,13 +75,13 @@ passport.use(new LocalStrategy({
 ));
 
 passport.serializeUser((user, done) => {
-    console.log('calling serialize user', user)
+    console.log('calling serialize user')
     done(null, user);
 });
 
 passport.deserializeUser(async (user, done) => {
     try {
-        console.log('calling deserialize user', user)
+        console.log('calling deserialize user')
         return done(null, user);        
     } catch (error) {
         return done(error);        
