@@ -22,6 +22,7 @@ const selectAllCartInfoQuery = async (parameter) => {
                                                 'qty', cart_items.qty,
                                                 'price_per_case', products.price_per_case
                                             )
+                                            ORDER BY cart_items.product_id
                                         ) AS "items"
                                         FROM 
                                             carts

@@ -2,20 +2,31 @@ const express = require('express');
 const router = express.Router();
 const { idParamsValidator, checkAuthenticated, handleValidationErrors,
 searchTermValidators, categoryParamsValidator, productFilterValidators, cartItemValidators } = require('../Utilities/expressValidators')
+const {selectTotalProducts} = require('../DBQueries/productQueries')
+
 
 const ProductService = require('../ServicesLogic/ProductService')
 const CartsService = require('../ServicesLogic/CartService')
 
 router.get('/', async (req, res, next) => {
     try {
-        console.log('calling api route for getting products:')
-        const bestProducts = await ProductService.loadAllProducts(); 
-        const allCategories = await ProductService.loadAllCategories();
+        const limit = 6;
+        const page = parseInt(req.query.page) || 1;
+        const offset = (page - 1) * limit;
+        console.log('calling api route for getting products limit, page, offset:', limit, page, offset)
+
+        const bestProducts = await ProductService.loadAllProducts(limit, offset);
+        const totalProducts = await selectTotalProducts(); 
         res.status(200).json({
             status: 'success',
             message: 'Products and categories retrieved succesfully',
             code: 200,
-            products_and_categories: [bestProducts, allCategories] 
+            products_and_categories: [bestProducts],
+            pagination: {
+                limit,
+                page,
+                totalPages: Math.ceil(totalProducts / limit)
+            }
         });
     } catch(err) {
         next(err);
@@ -39,6 +50,21 @@ router.get('/search', searchTermValidators, handleValidationErrors,
     }        
 });
 
+router.get('/categories', async (req, res, next) => {
+    try {
+        console.log('calling api route for getting all categories')
+        
+        const allCategories = await ProductService.loadAllCategories();
+        res.status(200).json({
+            status: 'success',
+            message: 'categories retrieved succesfully',
+            code: 200,
+            products_and_categories: allCategories,
+        });
+    } catch(err) {
+        next(err);
+    }
+});
 
 
 router.get('/categories/:categoryId', categoryParamsValidator, handleValidationErrors, async (req, res, next) => {

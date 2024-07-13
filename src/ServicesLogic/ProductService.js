@@ -23,9 +23,9 @@ module.exports = class ProductService {
     }
 
     //Returns a list of 30 products:     
-    static async loadAllProducts(){
+    static async loadAllProducts(limit, offset){
         try {
-            const productsList = await ProductModel.returnProductsList();
+            const productsList = await ProductModel.returnProductsList(limit, offset);
             return productsList;
         } catch (error) {
             throw createError(500, 'error on server while finding all products', error.stack, error);        

@@ -27,9 +27,9 @@ module.exports = class ProductModel {
      * @returns {Array}
      * @throws {Error}
      */
-    static async returnProductsList(){
+    static async returnProductsList(limit, offset){
         try {
-            const productsList = await selectAllProducts()
+            const productsList = await selectAllProducts(limit, offset)
             return productsList;
         } catch (error) {
             throw createError(500, 'error on server while retrieving all products', error.stack, error);        

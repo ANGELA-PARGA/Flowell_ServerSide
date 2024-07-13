@@ -28,16 +28,29 @@ const selectAllProductInfoQuery = async (parameter) => {
  * @returns {Array} successfull query 
  * @returns {[]} unsuccessfull query
  */
-const selectAllProducts = async () => {
-    console.log('calling select all products')
-    const sqlStatement = `SELECT products_categories.name AS "category_name", products.*
-                        FROM products 
-                        LEFT JOIN products_categories ON products.category_id = products_categories.id LIMIT 30`;
+const selectAllProducts = async (limit, offset) => {
+    console.log('calling select all products with:', limit, offset)
+    const sqlStatement = pgp.as.format(
+                        `SELECT products_categories.name AS "category_name", products.*
+                        FROM products
+                        LEFT JOIN products_categories ON products.category_id = products_categories.id 
+                        ORDER BY products.id
+                        LIMIT $1 OFFSET $2`, [limit, offset]);
     const queryResult = await db.query(sqlStatement);
     console.log('select all products results:', queryResult.rows)
     if(queryResult.rows?.length) return queryResult.rows;
     return []; 
 }
+
+const selectTotalProducts = async () => {
+    console.log('calling select total products:')
+    const sqlStatement = pgp.as.format(`SELECT COUNT(*) FROM products`);
+    const queryResult = await db.query(sqlStatement);
+    console.log('select all products count:', queryResult.rows)
+    if(queryResult.rows?.length) return queryResult.rows[0].count;
+    return 0; 
+}
+
 
 /**
  * Select all cartegories stored on the DB 
@@ -136,5 +149,6 @@ module.exports = {
     selectAllCategories,
     selectAllProductsByCategory,
     selectProductByParameters,
-    selectProductBySearchParameters
+    selectProductBySearchParameters,
+    selectTotalProducts
 }
