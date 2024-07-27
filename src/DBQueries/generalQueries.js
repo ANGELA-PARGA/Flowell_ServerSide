@@ -59,7 +59,7 @@ const updateQuery = async (data, columnName, tableName) => {
  * @returns {[]} query unsuccesfull
  */
 const standardSelectQuery = async (parameter, tableName, columnName) => {
-    console.log('calling the standart select query with:', parameter, tableName, columnName)
+    console.log('calling the standard select query with:', parameter, tableName, columnName)
     const sqlStatement = pgp.as.format(`SELECT ${tableName}.* FROM ${tableName}
                                         WHERE ${tableName}.${columnName} = $1`,[parameter]);
 

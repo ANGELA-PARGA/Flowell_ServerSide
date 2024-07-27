@@ -94,10 +94,10 @@ app.get('/api', (req, res) =>{
     res.send('This is the main page of Flowell')
 });
 
-const { signupValidators, loginValidators, handleValidationErrors, errorHandler } = require('./src/Utilities/expressValidators')
+const { signupValidators, loginValidators, handleValidationErrors, checkUserRole, checkAdminRole, errorHandler} = require('./src/Utilities/expressValidators')
 const CartService = require('./src/ServicesLogic/CartService')
 
-app.post('/api/auth/login', loginValidators, handleValidationErrors, passport.authenticate('local'), async (req, res, next) => {
+app.post('/api/auth/login', loginValidators, handleValidationErrors, passport.authenticate('local'), checkUserRole, async (req, res, next) => {
     try {
         console.log('calling route for login user')
         let loadCart = await CartService.getCartInfo(req.user.id)
@@ -109,28 +109,23 @@ app.post('/api/auth/login', loginValidators, handleValidationErrors, passport.au
             loadCart = await CartServiceInstance.createNewCart({user_id: req.user.id})
         }
         cartId = loadCart.id;
-        const { id, first_name, last_name, email } = req.user;
-        const user = req.user
+        const { id, first_name, last_name, email, role } = req.user;
         
-        req.login(user, (err) => {
-            if (err) {
-                return next(err);
-            }
-    
-            res.status(200).json({
-                status: 'success',
-                message: 'User successfully authenticated',
-                code: 200,
-                user: {
-                    id,
-                    first_name,
-                    last_name,
-                    email, 
-                    cart_id:cartId                   
-                },
-                sessionID: req.sessionID
-            });
+        res.status(200).json({
+            status: 'success',
+            message: 'User successfully authenticated',
+            code: 200,
+            user: {
+                id,
+                first_name,
+                last_name,
+                email,
+                role, 
+                cart_id:cartId                   
+            },
+            sessionID: req.sessionID
         });
+
     } catch (err) {
         next(err);        
     }
@@ -142,7 +137,7 @@ app.post('/api/auth/signup', signupValidators, handleValidationErrors, async (re
         const data = req.body;
         console.log('calling route for signup user', data)
         const AuthServiceInstance = new Authentication();
-        const newUser = await AuthServiceInstance.register(data);
+        const newUser = await AuthServiceInstance.register({...data, role:'client'});
         let loadCart = await CartService.getCartInfo(newUser.id);
         let cartId;
 
@@ -158,7 +153,7 @@ app.post('/api/auth/signup', signupValidators, handleValidationErrors, async (re
             if (err) {
                 return next(err);
             }
-            const { id, first_name, last_name, email } = req.user;
+            const { id, first_name, last_name, email, role } = req.user;
             res.status(200).json({
                 status: 'success',
                 message: 'User registered successfully',
@@ -168,6 +163,7 @@ app.post('/api/auth/signup', signupValidators, handleValidationErrors, async (re
                     first_name,
                     last_name,
                     email,
+                    role,
                     cart_id: cartId
                 },
                 sessionID: req.sessionID
@@ -177,6 +173,62 @@ app.post('/api/auth/signup', signupValidators, handleValidationErrors, async (re
         next(err);
     }
 });
+
+app.post('/api/admin/auth/login', loginValidators, handleValidationErrors, passport.authenticate('local'), checkAdminRole, async (req, res, next) => {
+    try {
+        console.log('calling route for login admin')
+        const { id, first_name, last_name, email, role } = req.user;
+        
+        res.status(200).json({
+            status: 'success',
+            message: 'Admin user successfully authenticated',
+            code: 200,
+            user: {
+                id,
+                first_name,
+                last_name,
+                email,
+                role                    
+            },
+            sessionID: req.sessionID
+        });
+
+    } catch (err) {
+        next(err);        
+    }
+});
+
+app.post('/api/admin/auth/signup', signupValidators, handleValidationErrors, async (req, res, next) => {
+    try {
+        const data = req.body;
+        console.log('calling route for signup ADMIN', data)
+        const AuthServiceInstance = new Authentication();
+        const newUser = await AuthServiceInstance.register({...data, role:'admin'});
+
+        req.login(newUser, (err) => {
+            if (err) {
+                return next(err);
+            }
+            const { id, first_name, last_name, email, role } = req.user;
+            res.status(200).json({
+                status: 'success',
+                message: 'Admin User registered successfully',
+                code: 200,
+                user: {
+                    id,
+                    first_name,
+                    last_name,
+                    email,
+                    role
+                },
+                sessionID: req.sessionID
+            });
+        });
+    } catch(err) {
+        next(err);
+    }
+});
+
 
 app.post('/api/auth/logout',  async (req, res, next) => {
     try { 
@@ -193,7 +245,7 @@ app.post('/api/auth/logout',  async (req, res, next) => {
     }
 });
 
-/*setting additional routes */
+/*setting user role routes */
 const userRoutes = require('./src/Routes/userRoutes');
 app.use('/api/profile', userRoutes);
 
@@ -205,6 +257,8 @@ app.use('/api/orders', orderRoutes);
 
 const cartRoutes = require('./src/Routes/cartRoutes');
 app.use('/api/cart', cartRoutes);
+
+/*setting admin role routes */
 
 app.use(errorHandler);
 

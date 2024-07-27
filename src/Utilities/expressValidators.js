@@ -165,6 +165,32 @@ const checkAuthenticated = (req, res, next) => {
     }
 }
 
+const checkUserRole = (req, res, next) => {
+    console.log('calling check user Role', req.user)
+    if (req.user.role === 'client') { 
+        console.log('User is authorized')
+        return next() 
+    }
+    console.log('User is authenticated but not authorized');
+    req.logout(err => {
+        if (err) return next(err);
+        res.status(403).json({ error: 'Unauthorized' });
+    });   
+}
+
+const checkAdminRole = (req, res, next) => {
+    console.log('calling check Admin Role', req.user)
+    if (req.user.role === 'admin') { 
+        console.log('admin is authorized')
+        return next() 
+    }
+    console.log('User is authenticated but not authorized');
+    req.logout(err => {
+        if (err) return next(err);
+        res.status(403).json({ error: 'Unauthorized' });
+    });   
+}
+
 const errorHandler = (err, req, res, next) => {
 
     console.log('error received in error handler', err)
@@ -185,6 +211,8 @@ const errorHandler = (err, req, res, next) => {
 
 module.exports = {
     checkAuthenticated,
+    checkUserRole,
+    checkAdminRole,
     handleValidationErrors,
     idParamsValidator,
     resourceValidator,

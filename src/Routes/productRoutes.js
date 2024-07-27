@@ -11,7 +11,7 @@ const CartsService = require('../ServicesLogic/CartService')
 router.get('/', async (req, res, next) => {
     try {
         const limit = 6;
-        const page = parseInt(req.query.page) || 1;
+        const page = parseInt(req.query.page);
         const offset = (page - 1) * limit;
         console.log('calling api route for getting products limit, page, offset:', limit, page, offset)
 
