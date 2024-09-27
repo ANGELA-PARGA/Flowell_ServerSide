@@ -104,7 +104,7 @@ module.exports = class CartsModel {
     static async emptyCart(cart_id){
         try {
             const cartEmptied = await CartItemsModel.deleteAllCartItems(cart_id)
-            const updatedCart = await updateQuery({id:cart_id, total:0 }, 'id','carts')
+            const updatedCart = await updateQuery({ id:cart_id, total:0, total_items:0 }, 'id','carts')
             if(!cartEmptied || !Object.keys(updatedCart)?.length){
                 return false
             }

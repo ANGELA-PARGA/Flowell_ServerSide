@@ -37,7 +37,8 @@ store.on('error', function(error) {
 });
 
 /*app.set('trust proxy', 1)*/
-/*setting the session-express middleware*/
+/*setting the session-express middleware
+On PRODUCTION, set secure to true and httpOnly attribute to true. Also update the domain*/
 app.use(
     session({
         secret: process.env.SECRET,

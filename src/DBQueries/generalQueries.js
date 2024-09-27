@@ -80,7 +80,7 @@ const standardSelectQuery = async (parameter, tableName, columnName) => {
  * @returns {number} rowCount
  */
 const standardDeleteQuery = async (parameter, tableName, columnName) => {
-    console.log('calling the standart delete query with:', parameter)   
+    console.log('calling the standart delete query with:', parameter, tableName, columnName)   
     const sqlStatement = pgp.as.format(`DELETE FROM ${tableName} WHERE ${columnName} = $1`, [parameter] );
     const queryResult = await db.query(sqlStatement);
     console.log('standard delete query result', queryResult.rowCount)

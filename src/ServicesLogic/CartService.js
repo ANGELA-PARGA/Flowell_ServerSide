@@ -58,6 +58,7 @@ module.exports = class CartService{
     // this method require a cart_id
     static async emptyCart(cart_id){
         try {
+            console.log('calling empty cart in checkout', cart_id)
             const emptiedCart = await CartsModel.emptyCart(cart_id);
             if(!emptiedCart) {
                 throw createError(400, 'cart not found or unable to empty completely');

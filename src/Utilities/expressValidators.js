@@ -117,7 +117,7 @@ const updateCartValidators = [
 ]
 
 const createCheckoutValidators = [
-    body('delivery_date').trim().notEmpty().toDate({ format: 'YYYY-MM-DD' }).withMessage('Delivery date is required'),
+    body('delivery_date').trim().notEmpty().toDate({ format: 'MM-DD-YYYY' }).withMessage('Delivery date is required'),
     body('shipping_address_id').trim().notEmpty().isNumeric().withMessage('user address is required'),
     body('contact_info_id').trim().notEmpty().isNumeric().withMessage('The phone id is required and must be a number')
 ]
@@ -141,6 +141,8 @@ const searchTermValidators = [
 const deleteBodyValidator = [
     body('product_id').trim().notEmpty().isNumeric().withMessage('The product ID is required, must be a number, can not be zero')
 ]
+
+/*middlewares for routes */
 
 const handleValidationErrors = (req, res, next) => {
     const errors = validationResult(req);
