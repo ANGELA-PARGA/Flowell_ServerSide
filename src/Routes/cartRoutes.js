@@ -2,8 +2,10 @@ const express = require('express');
 const router = express.Router();
 const { checkAuthenticated, handleValidationErrors, idParamsValidator, deleteBodyValidator,
     updateCartValidators, createCheckoutValidators } = require('../Utilities/expressValidators')
-
+require('dotenv').config({ path: 'variables.env' });
 const CartService = require('../ServicesLogic/CartService')
+const CartItemsModel = require('../ClassModels/cartItemsModel');
+
 
 router.get('/', checkAuthenticated, async (req, res, next) => {
     try {
@@ -42,18 +44,52 @@ router.patch('/', checkAuthenticated, updateCartValidators, handleValidationErro
 
 router.post('/checkout', checkAuthenticated, createCheckoutValidators, handleValidationErrors, async (req, res, next) => {
     try {
-        const cart_info = await CartService.getCartInfo(req.user.id)
-        const cart_id = cart_info.id 
+        const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
+
         const user_id = req.user.id;
+        const cart_info = await CartService.getCartInfo(user_id );
+        const cart_id = cart_info.id 
+        const cartItemsToOrder = await CartItemsModel.findAllCartItemsToOrder(cart_id);
+        const totalPrice = cart_info.total
         const shipping_info = req.body
-        console.log('calling api route for checkout with:', user_id, cart_id, shipping_info)
-        const response = await CartService.checkoutCart({user_id, cart_id:cart_id, ...shipping_info} );
-        res.status(200).json({
-            status: 'success',
-            message: 'Order created successfully',
-            code: 200,
-            order: response 
-        });    
+
+        const itemsToOrder = cartItemsToOrder.map((item) =>{
+            return {
+                product_id: item.product_id,
+                qty: item.qty
+            }
+        })
+
+        console.log('calling api route for checkout with:', user_id, cart_id, shipping_info, itemsToOrder)
+
+        const newOrder = await CartService.checkoutCart({cart_id , user_id, ...shipping_info, itemsToOrder, totalPrice} );
+
+        // Stripe integration            
+        const lineItems = cartItemsToOrder.map((item) =>{
+            return {
+                price_data: {
+                    product_data: {
+                        name: item.name
+                    },
+                    currency: 'usd',
+                    unit_amount: item.price * 100
+                },
+                quantity: item.qty
+            }
+        })
+
+        const session = await stripe.checkout.sessions.create({
+            client_reference_id: newOrder.id,
+            customer_email: req.user.email,                            
+            line_items: lineItems,
+            mode: 'payment',
+            currency: "usd",
+            success_url: 'http://localhost:3000/account/orders?session_id={CHECKOUT_SESSION_ID}',
+            cancel_url: 'http://localhost:3000/account/cart',
+        });
+
+        res.status(200).json({ url: session.url });
+
     } catch(err) {
         next(err);
     }        
@@ -96,3 +132,23 @@ router.delete('/:id', checkAuthenticated, idParamsValidator, handleValidationErr
 });
 
 module.exports = router;
+
+/*router.post('/checkout', checkAuthenticated, createCheckoutValidators, handleValidationErrors, async (req, res, next) => {
+    try {
+        const cart_info = await CartService.getCartInfo(req.user.id)
+        const cart_id = cart_info.id 
+        const user_id = req.user.id;
+        const shipping_info = req.body
+        console.log('calling api route for checkout with:', user_id, cart_id, shipping_info)
+
+        const response = await CartService.checkoutCart({user_id, cart_id:cart_id, ...shipping_info} );
+        res.status(200).json({
+            status: 'success',
+            message: 'Order created successfully',
+            code: 200,
+            order: response 
+        });    
+    } catch(err) {
+        next(err);
+    }        
+}); */

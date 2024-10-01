@@ -34,8 +34,12 @@ const updateCartItemsQuery = async (data) => {
  */
 const selectCartItemsQuery = async (parameter) => {
     console.log('calling the select cart Items query with:', parameter)
-    const sqlStatement = pgp.as.format(`SELECT cart_items.product_id, cart_items.qty 
+    const sqlStatement = pgp.as.format(`SELECT cart_items.product_id, cart_items.qty,
+                                        products.price_per_case AS price, 
+                                        products.name 
                                         FROM cart_items
+                                        JOIN products 
+                                            ON cart_items.product_id = products.id
                                         WHERE cart_items.cart_id = $1`,[parameter]);
 
     const queryResult = await db.query(sqlStatement);

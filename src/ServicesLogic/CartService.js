@@ -2,6 +2,7 @@ const createError = require('http-errors');
 const CartsModel = require('../ClassModels/cartsModel');
 const CartItemsModel = require('../ClassModels/cartItemsModel');
 const OrderService = require('./OrderService');
+require('dotenv').config({ path: 'variables.env' });
 
 module.exports = class CartService{
 
@@ -69,8 +70,44 @@ module.exports = class CartService{
         }
     }
 
-    // this method require a user_id and an object 'shipping_info' { delivery_date, shipping_address_id, contact_info_id }
     static async checkoutCart(data){
+        try {
+            const { cart_id, user_id, delivery_date, shipping_address_id, contact_info_id, itemsToOrder, totalPrice } = data            
+
+            const OrderServiceInstance = new OrderService();
+
+            const order = await OrderServiceInstance.createNewOrder(
+                {   
+                    user_id, 
+                    total:totalPrice, 
+                    items:itemsToOrder, 
+                    delivery_date, 
+                    shipping_address_id, 
+                    contact_info_id
+                }
+            );
+            
+
+            //empty the cart after the order is created
+            const cartUpdated= await this.emptyCart(cart_id)
+
+            return { order:order, message:`Order succesfully created`, cart:cartUpdated };                          
+
+        } catch(error) {
+            throw createError(500, 'Error on server while placing the order', error.stack, error);            
+        }
+    }
+}
+
+
+
+
+
+
+
+
+
+/* static async checkoutCart(data){
         try {
             const { user_id, cart_id, delivery_date, shipping_address_id, contact_info_id  } = data
             
@@ -78,28 +115,78 @@ module.exports = class CartService{
             const cart = await this.getCartInfo(user_id);            
             // Find all cart items
             const cartItemsToOrder = await CartItemsModel.findAllCartItemsToOrder(cart_id);
-            // Generate total price from cart items
+            // Retrieve total price from cart items
             const totalPrice = cart.total
 
-            // Generate initial order
-            const OrderServiceInstance = new OrderService();
-            const order = await OrderServiceInstance.createNewOrder(
-                {   
-                    user_id, 
-                    total:totalPrice, 
-                    items:cartItemsToOrder, 
-                    delivery_date, 
-                    shipping_address_id, 
-                    contact_info_id
-                });
+            // Stripe integration
+            const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
+            const lineItems = cartItemsToOrder.map((item) =>{
+                return {
+                    price_items: {
+                        product_data: {
+                            name: item.name
+                        },
+                        currency: 'usd',
+                        unit_amount: item.price * 100
+                    },
+                    quantity: item.qty
+                }
+            })
 
-            //empty the cart after the order is created
-            const cartUpdated= await this.emptyCart(cart_id)
+            const session = await stripe.checkout.sessions.create({
+                client_reference_id: user_id,
+                customer: user_id,
+                customer_email: req.user.email,                            
+                line_items: lineItems,
+                amount_total: totalPrice * 100,
+                mode: 'payment',
+                ui_mode: 'embedded',
+                currency: "usd",
+                payment_method_types: [
+                    "card",
+                    "us_bank_account",
+                    "Google Pay",
+                    "customer_balance"
+                ],
+                success_url: 'http://localhost:3000/account/orders?session_id={CHECKOUT_SESSION_ID}',
+                cancel_url: 'http://localhost:3000/account/cart',
+            });
 
-            return {order:order, message:`Order succesfully created`, cart:cartUpdated};           
+            // Generate initial order if the payment was succesfull
+
+            if(session.payment_status === 'paid'){
+                const OrderServiceInstance = new OrderService();
+                const itemsToOrder = cartItemsToOrder.map((item) =>{
+                    return {
+                        product_id: item.product_id,
+                        qty: item.qty
+                    }
+                })
+
+                const order = await OrderServiceInstance.createNewOrder(
+                    {   
+                        user_id, 
+                        total:totalPrice, 
+                        items:itemsToOrder, 
+                        delivery_date, 
+                        shipping_address_id, 
+                        contact_info_id
+                    });
+
+                //empty the cart after the order is created
+                const cartUpdated= await this.emptyCart(cart_id)
+
+                return {order:order, message:`Order succesfully created`, cart:cartUpdated};   
+
+            } else {
+                return {
+                    sessionPaymentStatus: session.payment_status,
+                    sessionStatus: session.payment_status,
+                    message: 'order not placed'
+                }
+            }                         
 
         } catch(error) {
             throw createError(500, 'Error on server while placing the order', error.stack, error);            
         }
-    }
-}
+    } */
