@@ -9,7 +9,7 @@ module.exports = class OrderModel {
         this.created = moment.utc().toISOString();
         this.modified = moment.utc().toISOString();
         this.user_id = data.user_id;
-        this.status = 'PENDING';
+        this.status = 'FULFILLED';
         this.total = data.total;
         this.items = data.items;
         this.delivery_date = data.delivery_date;
@@ -135,4 +135,5 @@ module.exports = class OrderModel {
             throw createError(500, 'error on server while deleting the order by id', error.stack, error);            
         }
     }
+
 }

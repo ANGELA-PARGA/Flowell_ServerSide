@@ -3,7 +3,6 @@ const router = express.Router();
 const { checkAuthenticated, idParamsValidator, 
         orderShippingInfoValidators, orderedItemsInfoValidators, 
         handleValidationErrors } = require('../Utilities/expressValidators')
-
 const OrderService = require('../ServicesLogic/OrderService')
 
 router.get('/', checkAuthenticated, async (req, res, next) => {
@@ -38,6 +37,7 @@ router.get('/:id', checkAuthenticated, idParamsValidator, handleValidationErrors
             next(err);
         }
 });
+
 
 router.patch('/:id/items_qty', checkAuthenticated, idParamsValidator, orderedItemsInfoValidators,
             handleValidationErrors, async (req, res, next) => {
@@ -86,5 +86,7 @@ router.delete('/:id', checkAuthenticated, idParamsValidator,
         next(err);
     }        
 });
+
+
 
 module.exports = router;

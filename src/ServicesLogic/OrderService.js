@@ -2,8 +2,7 @@ const createError = require('http-errors');
 const OrderModel = require('../ClassModels/orderModel');
 
 module.exports = class OrderService {
-
-    // orderData is an object { user_id, total, [items] }
+    
     async createNewOrder(orderData){
         try {
             const orderInstance = new OrderModel(orderData);
@@ -75,4 +74,5 @@ module.exports = class OrderService {
             throw createError(500, 'Error on server while deleting the order', error.stack, error);            
         }
     }
+
 }

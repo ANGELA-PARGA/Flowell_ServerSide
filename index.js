@@ -5,16 +5,14 @@ const express = require('express');
 const session = require('express-session');
 const app = express();
 const PORT = process.env.PORT || 8000;
-console.log(process.env.MONGODB)
+const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
+const endpointSecret = process.env.WEBHOOK_ENDPOINT_SECRET;
+const CartService = require('./src/ServicesLogic/CartService')
+
 
 /*setting morgan */
 const morgan = require('morgan');
 app.use(morgan('dev'));
-
-/*setting the body parser package*/
-const bodyParser =  require('body-parser');
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: true }));
 
 /*setting cors configuration */
 const cors = require('cors');
@@ -23,6 +21,36 @@ const corsOptions = {
     credentials: true,
 };
 app.use(cors(corsOptions));
+
+/*setting the body parser package*/
+const bodyParser =  require('body-parser');
+
+
+app.post('/api/webhook', bodyParser.raw({type: 'application/json'}), async (req, res) => {
+    console.log('calling webhook')
+    
+    const sig = req.headers['stripe-signature'];
+    let event;
+
+    try {
+        event = stripe.webhooks.constructEvent(req.body, sig, endpointSecret);
+    } catch (err) {
+        console.error(`Webhook signature verification failed.`, err.message);
+        return res.status(400).send(`Webhook Error: ${err.message}`);
+    }
+
+    // Handle the checkout.session.completed or async_payment_succeeded event
+    if (event.type === 'checkout.session.completed' || event.type === 'checkout.session.async_payment_succeeded') {
+        const session = event.data.object; 
+        console.log('there is a session', session)       
+        await CartService.checkoutCart(session.id);
+        
+    }
+    res.status(200).end();
+});
+
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }));
 
 /*setting mongoDB to store sessions */
 const MongoDBStore = require('connect-mongodb-session')(session);
@@ -96,11 +124,10 @@ app.get('/api', (req, res) =>{
 });
 
 const { signupValidators, loginValidators, handleValidationErrors, checkUserRole, checkAdminRole, errorHandler} = require('./src/Utilities/expressValidators')
-const CartService = require('./src/ServicesLogic/CartService')
+
 
 app.post('/api/auth/login', loginValidators, handleValidationErrors, passport.authenticate('local'), checkUserRole, async (req, res, next) => {
     try {
-        console.log('calling route for login user')
         let loadCart = await CartService.getCartInfo(req.user.id)
         let cartId;
 
@@ -247,6 +274,7 @@ app.post('/api/auth/logout',  async (req, res, next) => {
 });
 
 /*setting user role routes */
+
 const userRoutes = require('./src/Routes/userRoutes');
 app.use('/api/profile', userRoutes);
 
@@ -258,6 +286,7 @@ app.use('/api/orders', orderRoutes);
 
 const cartRoutes = require('./src/Routes/cartRoutes');
 app.use('/api/cart', cartRoutes);
+
 
 /*setting admin role routes */
 
