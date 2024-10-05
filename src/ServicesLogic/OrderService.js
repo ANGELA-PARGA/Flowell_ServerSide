@@ -16,18 +16,6 @@ module.exports = class OrderService {
         }
     }
 
-    // This method expects an object with an order ID and an array with the modified items [{product_id, qty}]
-    static async updateOrderItemsInfo(dataToUpdate){
-        try {
-            const orderUpdated = await OrderModel.updateItemsInfo(dataToUpdate);
-            if(!Object.keys(orderUpdated)?.length){
-                throw createError(400, 'order not found or unable to update');                
-            } 
-            return orderUpdated;                    
-        } catch (error) {
-            throw createError(500, 'Error on server while updating the order', error.stack, error);            
-        }
-    }
 
     // This method expects an object with an order ID and one of the following: 
     // {delivery_date, shipping_address_id, contact_info_id }

@@ -46,6 +46,11 @@ app.post('/api/webhook', bodyParser.raw({type: 'application/json'}), async (req,
         await CartService.checkoutCart(session.id);
         
     }
+    if (event.type === 'checkout.session.expired' || event.type === 'checkout.session.async_payment_failed') {
+        const session = event.data.object; 
+        console.log('the checkout expired or the payment failed', session)         
+    }
+
     res.status(200).end();
 });
 
@@ -291,6 +296,36 @@ app.use('/api/cart', cartRoutes);
 /*setting admin role routes */
 
 app.use(errorHandler);
+
+require('dotenv').config({ path: 'variables.env' });
+const cloudinary = require('cloudinary')
+
+
+cloudinary.v2.config({
+    cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+    api_key: process.env.CLOUDINARY_API_KEY,
+    api_secret: process.env.CLOUDINARY_API_SECRET,
+    secure: true,
+});
+
+(async () => {
+    try {
+        const results = await cloudinary.uploader.upload('./images/mini_image1.jpeg')
+        console.log(results) 
+        const url = cloudinary.url(results.public_id, {
+            transformation:[
+                {
+                    quality:'auto',
+                    fetch_format: 'auto'
+                }
+            ]
+        }) 
+        console.log(url) 
+        
+    } catch (error) {
+        
+    } 
+})();
 
 app.listen(PORT, () => {
     console.log(`Flowell app listening on port ${PORT}`)

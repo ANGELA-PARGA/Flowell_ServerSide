@@ -39,24 +39,6 @@ router.get('/:id', checkAuthenticated, idParamsValidator, handleValidationErrors
 });
 
 
-router.patch('/:id/items_qty', checkAuthenticated, idParamsValidator, orderedItemsInfoValidators,
-            handleValidationErrors, async (req, res, next) => {
-    try {
-        const {items} = req.body
-        const id = parseInt(req.params.id, 10);
-        console.log('calling api route to update the qty of an order:', items, id)
-        const response = await OrderService.updateOrderItemsInfo({id, items});
-        res.status(200).json({
-            status: 'success',
-            message: 'Ordered items updated successfully',
-            code: 200,
-            order_updated: response 
-        });
-    } catch(err) {
-        next(err);
-    }        
-});
-
 router.patch('/:id/shipping_info', checkAuthenticated, idParamsValidator, orderShippingInfoValidators, 
             handleValidationErrors, async (req, res, next) => {
     try {

@@ -118,7 +118,11 @@ module.exports = class CartService{
     
                 return { order:order, message:`Order succesfully created`, cart:cartUpdated }; 
 
-            }                                               
+            }  
+            if (session.payment_status === 'unpaid' || session.payment_status === 'expired'){
+                const status= session.payment_status    
+                return {message:`Order could not be paid`, status}; 
+            }                                             
 
         } catch(error) {
             throw createError(500, 'Error on server while placing the order', error.stack, error);            

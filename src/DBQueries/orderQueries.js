@@ -18,6 +18,8 @@ const selectAllOrderInfoQuery = async (parameter, columnName) => {
                                             orders.status, 
                                             orders.delivery_date,
                                             orders.total,
+                                            orders.shipping_address_id,
+                                            orders.contact_info_id,
                                             json_agg(
                                                 json_build_object(
                                                     'order_id', ordered_items.order_id,

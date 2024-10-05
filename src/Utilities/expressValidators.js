@@ -102,13 +102,9 @@ const updateUserValidators = (req, res, next) => {
 };
 
 const orderShippingInfoValidators = [
-    body('delivery_date').optional().trim().notEmpty().toDate({ format: 'YYYY-MM-DD' }).withMessage('A delivery date is required'),
+    body('delivery_date').optional().trim().notEmpty().toDate({ format: 'MM-DD-YYYY' }).withMessage('A delivery date is required'),
     body('shipping_address_id').optional().trim().notEmpty().isNumeric().withMessage('The address id is required and must be a number'),
     body('contact_info_id').optional().trim().notEmpty().isNumeric().withMessage('The phone id is required and must be a number') 
-]
-
-const orderedItemsInfoValidators = [
-    body('items').notEmpty().isArray().notEmpty().withMessage('The new product/items with their qty are required')      
 ]
 
 const updateCartValidators = [
@@ -224,7 +220,6 @@ module.exports = {
     signupValidators,
     loginValidators,
     orderShippingInfoValidators,
-    orderedItemsInfoValidators,
     updateCartValidators,
     createCheckoutValidators,
     cartItemValidators,
