@@ -29,12 +29,6 @@ describe('UserService', () => {
                 phones: [{
                     id: 1,
                     phone: '323-333-4811'
-                }],
-                credit_cards: [{
-                    id: 1,
-                    credit_card: 456245891258,
-                    holder: "VISA",
-                    expiration_date:'2028-04-01'
                 }]
             };
             

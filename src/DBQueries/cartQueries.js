@@ -20,7 +20,8 @@ const selectAllCartInfoQuery = async (parameter) => {
                                                 'product_id', cart_items.product_id,
                                                 'name', products.name,
                                                 'qty', cart_items.qty,
-                                                'price_per_case', products.price_per_case
+                                                'price_per_case', products.price_per_case,
+                                                'images', products.images_urls
                                             )
                                             ORDER BY cart_items.product_id
                                         ) AS "items"

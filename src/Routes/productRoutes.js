@@ -17,6 +17,8 @@ router.get('/', async (req, res, next) => {
 
         const bestProducts = await ProductService.loadAllProducts(limit, offset);
         const totalProducts = await selectTotalProducts(); 
+        console.log('total number of products:', totalProducts)
+        
         res.status(200).json({
             status: 'success',
             message: 'Products and categories retrieved succesfully',

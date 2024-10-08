@@ -297,35 +297,15 @@ app.use('/api/cart', cartRoutes);
 
 app.use(errorHandler);
 
+
 require('dotenv').config({ path: 'variables.env' });
 const cloudinary = require('cloudinary')
-
-
 cloudinary.v2.config({
     cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
     api_key: process.env.CLOUDINARY_API_KEY,
     api_secret: process.env.CLOUDINARY_API_SECRET,
     secure: true,
 });
-
-(async () => {
-    try {
-        const results = await cloudinary.uploader.upload('./images/mini_image1.jpeg')
-        console.log(results) 
-        const url = cloudinary.url(results.public_id, {
-            transformation:[
-                {
-                    quality:'auto',
-                    fetch_format: 'auto'
-                }
-            ]
-        }) 
-        console.log(url) 
-        
-    } catch (error) {
-        
-    } 
-})();
 
 app.listen(PORT, () => {
     console.log(`Flowell app listening on port ${PORT}`)

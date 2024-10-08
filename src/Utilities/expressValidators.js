@@ -30,7 +30,7 @@ const updatePersonalInfoValidators = [
     body('first_name').trim().notEmpty().isString().isLength({ min: 2 }).withMessage('First name must be at least 2 characters long'),
     body('last_name').trim().notEmpty().isString().isLength({ min: 2 }).withMessage('Last name must be at least 2 characters long'),
 ]
-const updatePaymentInfoValidators = [
+/*const updatePaymentInfoValidators = [
     body('credit_card').isString().notEmpty().trim()
     .isLength({ min: 13, max: 19 }).withMessage('Credit card number must be between 13 and 19 digits')
     .matches(/^[0-9]+$/).withMessage('Credit card number must contain only digits')
@@ -50,7 +50,7 @@ const updatePaymentInfoValidators = [
         const today = new Date();
         return value > today;
     }).withMessage('Expiration date must be in the future'),
-]
+]*/
 const updateAddressInfoValidators = [
     body('address').trim().notEmpty().isString().withMessage('Address is required'),
     body('city').trim().notEmpty().isString().withMessage('City is required'),
@@ -76,10 +76,6 @@ const updateUserValidators = (req, res, next) => {
 
     let validationRules;
     switch (resourceType) {
-        case 'payment_inf':
-            console.log('validator for payment', resourceType)
-            validationRules = updatePaymentInfoValidators;
-            break;
         case 'personal_inf':
             console.log('validator for personal inf', resourceType)
             validationRules = updatePersonalInfoValidators;

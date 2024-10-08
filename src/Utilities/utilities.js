@@ -50,9 +50,6 @@ function verifyResource(resource){
         if(resource === 'address_inf'){
             return 'users_addresses'
         }
-        if(resource === 'payment_inf'){
-            return 'users_credit_cards'
-        }
         if(resource === 'contact_inf'){
             return 'users_phones'
         }        

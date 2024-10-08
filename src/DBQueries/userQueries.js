@@ -40,24 +40,11 @@ const selectAllUserInfoQuery = async (parameter) => {
                                                 users_phones
                                             WHERE 
                                                 users_phones.user_id = users.id
-                                        ) AS "phones",
-                                        (
-                                            SELECT 
-                                                json_agg(json_build_object(
-                                                    'creditcardID', users_credit_cards.id,
-                                                    'credit_card', users_credit_cards.credit_card,
-                                                    'holder', users_credit_cards.holder,
-                                                    'expiration_date', users_credit_cards.expiration_date
-                                                ))
-                                            FROM 
-                                                users_credit_cards
-                                            WHERE 
-                                                users_credit_cards.user_id = users.id
-                                        ) AS "credit_cards"
-                                    FROM 
-                                        users
-                                    WHERE 
-                                        users.id = $1`, [parameter]);
+                                        ) AS "phones"
+                                        FROM 
+                                            users
+                                        WHERE 
+                                            users.id = $1`, [parameter]);
 
     const queryResult = await db.query(sqlStatement);
     console.log('select all user info result:', queryResult.rows)

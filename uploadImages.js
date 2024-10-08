@@ -1,7 +1,9 @@
+
+const fs = require('fs');
+const path = require('path');
+
 require('dotenv').config({ path: 'variables.env' });
 const cloudinary = require('cloudinary')
-
-
 cloudinary.v2.config({
     cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
     api_key: process.env.CLOUDINARY_API_KEY,
@@ -10,15 +12,20 @@ cloudinary.v2.config({
 });
 
 (async () => {
-    const results = await cloudinary.uploader.upload('./images')
-    console.log(results) 
-    const url = cloudinary.url(results.public_id, {
-        transformation:[
-            {
-                quality:'auto',
-                fetch_format: 'auto'
-            }
-        ]
-    }) 
-    console.log(url)  
+    try {
+        const results = await cloudinary.uploader.upload('./images')
+        console.log(results) 
+        const url = cloudinary.url(results.public_id, {
+            transformation:[
+                {
+                    quality:'auto',
+                    fetch_format: 'auto'
+                }
+            ]
+        }) 
+        console.log(url) 
+        
+    } catch (error) {
+        
+    } 
 })();

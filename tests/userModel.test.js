@@ -70,12 +70,6 @@ jest.mock('../src/DBQueries/userQueries', () => ({
             phones: [{
                 id: 1,
                 phone: '323-333-4811'
-            }],
-            credit_cards: [{
-                id: 1,
-                credit_card: 456245891258,
-                holder: "VISA",
-                expiration_date:'2028-04-01'
             }]
         }
         if (user_id === userStored.id) {
@@ -276,7 +270,6 @@ describe('UserModel', function() {
                 modified: expect.stringContaining(userFound.modified),
                 addresses: expect.arrayContaining(userFound.addresses),
                 phones: expect.arrayContaining(userFound.phones),
-                credit_cards: expect.arrayContaining(userFound.credit_cards)
             }));  
         });
     });
