@@ -99,8 +99,14 @@ const updateUserValidators = (req, res, next) => {
 
 const orderShippingInfoValidators = [
     body('delivery_date').optional().trim().notEmpty().toDate({ format: 'MM-DD-YYYY' }).withMessage('A delivery date is required'),
-    body('shipping_address_id').optional().trim().notEmpty().isNumeric().withMessage('The address id is required and must be a number'),
-    body('contact_info_id').optional().trim().notEmpty().isNumeric().withMessage('The phone id is required and must be a number') 
+    body('address').trim().notEmpty().isString().withMessage('Address is required'),
+    body('city').trim().notEmpty().isString().withMessage('City is required'),
+    body('state').trim().notEmpty().isString().withMessage('State is required'),
+    body('zip_code').trim().notEmpty().isString().withMessage('Zip Code is required and must be a valid zip code'),
+    body('contact_phone')
+    .trim().notEmpty().isString()
+    .matches(/^\(\d{3}\) \d{3}-\d{4}$/).withMessage('Phone number must be in the format (123) 456-7890')
+    .isLength({ min: 14, max: 14 }).withMessage('Phone number must be 10 digits long'),
 ]
 
 const updateCartValidators = [
@@ -110,8 +116,14 @@ const updateCartValidators = [
 
 const createCheckoutValidators = [
     body('delivery_date').trim().notEmpty().toDate({ format: 'MM-DD-YYYY' }).withMessage('Delivery date is required'),
-    body('shipping_address_id').trim().notEmpty().isNumeric().withMessage('user address is required'),
-    body('contact_info_id').trim().notEmpty().isNumeric().withMessage('The phone id is required and must be a number')
+    body('address').trim().notEmpty().isString().withMessage('Address is required'),
+    body('city').trim().notEmpty().isString().withMessage('City is required'),
+    body('state').trim().notEmpty().isString().withMessage('State is required'),
+    body('zip_code').trim().notEmpty().isString().withMessage('Zip Code is required and must be a valid zip code'),
+    body('contact_phone')
+    .trim().notEmpty().isString()
+    .matches(/^\(\d{3}\) \d{3}-\d{4}$/).withMessage('Phone number must be in the format (123) 456-7890')
+    .isLength({ min: 14, max: 14 }).withMessage('Phone number must be 10 digits long'),
 ]
 
 const cartItemValidators = [

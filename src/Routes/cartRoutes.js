@@ -76,8 +76,11 @@ router.post('/checkout', checkAuthenticated, createCheckoutValidators, handleVal
             currency: "usd",
             metadata: {
                 delivery_date: new Date(new Date(shipping_info.delivery_date).setHours(0, 0, 0, 0)).toISOString(),
-                shipping_address_id: shipping_info.shipping_address_id,
-                contact_info_id: shipping_info.contact_info_id
+                address: shipping_info.address,
+                city: shipping_info.city,
+                state: shipping_info.state,
+                zip_code: shipping_info.zip_code,
+                contact_phone: shipping_info.contact_phone
             },
             success_url: `http://localhost:3000/account/orders/success?session_id={CHECKOUT_SESSION_ID}`,
             cancel_url: 'http://localhost:3000/account/cart',

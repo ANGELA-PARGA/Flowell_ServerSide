@@ -3,6 +3,7 @@ const moment = require('moment');
 const { hashPassword, verifyResource } = require('../Utilities/utilities');
 const {selectAllUserInfoQuery} = require('../DBQueries/userQueries')
 const {insertQuery, updateQuery, standardSelectQuery, deleteDoubleConditionQuery} = require('../DBQueries/generalQueries')
+const {selectAllOrderInfoQuery} = require('../DBQueries/orderQueries')
 
 module.exports = class UserModel {
     constructor(data){
@@ -136,7 +137,7 @@ module.exports = class UserModel {
     static async deleteUserInfo(data){
         try {
             const { param1, param2, resource } = data
-            const tableName = verifyResource(resource);
+            const tableName = verifyResource(resource)
 
             const deletedResource = await deleteDoubleConditionQuery({param1, param2}, tableName, 'id', 'user_id');
             if(!deletedResource){

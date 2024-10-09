@@ -9,12 +9,15 @@ module.exports = class OrderModel {
         this.created = moment.utc().toISOString();
         this.modified = moment.utc().toISOString();
         this.user_id = data.user_id;
-        this.status = 'FULFILLED';
+        this.status = 'PAID';
         this.total = data.total;
         this.items = data.items;
         this.delivery_date = data.delivery_date;
-        this.shipping_address_id = data.shipping_address_id
-        this.contact_info_id = data.contact_info_id
+        this.address = data.address;
+        this.city = data.city
+        this.state = data.state
+        this.zip_code = data.zip_code
+        this.contact_phone = data.contact_phone
     }
     
     /**
@@ -23,8 +26,11 @@ module.exports = class OrderModel {
      * @param {number} total
      * @param {Array} items {product_id, qty}
      * @param {Date} delivery_date
-     * @param {number} shipping_address_id
-     * @param {number} contact_info_id
+     * @param {string} address
+     * @param {string} city
+     * @param {string} state
+     * @param {string} zip_code
+     * @param {string} contact_phone
      * @returns {Object}
      * @throws {Error}
      */
@@ -48,13 +54,15 @@ module.exports = class OrderModel {
 
     /**
      * Update an order using data object that have an ID and can have one or multiple of the following properties: 
-     * @param {number} id
-     * @param {number} user_id
-     * @param {Array} items
+     * @param {number} id // required always
+     * @param {Array} items // required only for updateItemsInfo 
      * @param {string} status
      * @param {Date} delivery_date
-     * @param {number} shipping_address_id
-     * @param {number} contact_info_id
+     * @param {string} address
+     * @param {string} city
+     * @param {string} state
+     * @param {string} zip_code
+     * @param {string} contact_phone
      * @returns {Object}
      * @throws {Error}
      */

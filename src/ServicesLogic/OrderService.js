@@ -17,8 +17,6 @@ module.exports = class OrderService {
     }
 
 
-    // This method expects an object with an order ID and one of the following: 
-    // {delivery_date, shipping_address_id, contact_info_id }
     static async updateOrderShippingInfo(dataToUpdate){
         try {        
             const orderUpdated = await OrderModel.updateShippingInfo(dataToUpdate);

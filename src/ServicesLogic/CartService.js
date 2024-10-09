@@ -108,8 +108,11 @@ module.exports = class CartService{
                         total:totalPrice, 
                         items:itemsToOrder, 
                         delivery_date: session.metadata.delivery_date, 
-                        shipping_address_id: session.metadata.shipping_address_id, 
-                        contact_info_id: session.metadata.contact_info_id
+                        address: session.metadata.address,
+                        city: session.metadata.city,
+                        state: session.metadata.state,
+                        zip_code: session.metadata.zip_code, 
+                        contact_phone: session.metadata.contact_phone
                     }
                 );               
     
