@@ -98,7 +98,6 @@ const updateUserValidators = (req, res, next) => {
 };
 
 const orderShippingInfoValidators = [
-    body('delivery_date').optional().trim().notEmpty().toDate({ format: 'MM-DD-YYYY' }).withMessage('A delivery date is required'),
     body('address').trim().notEmpty().isString().withMessage('Address is required'),
     body('city').trim().notEmpty().isString().withMessage('City is required'),
     body('state').trim().notEmpty().isString().withMessage('State is required'),
@@ -107,6 +106,10 @@ const orderShippingInfoValidators = [
     .trim().notEmpty().isString()
     .matches(/^\(\d{3}\) \d{3}-\d{4}$/).withMessage('Phone number must be in the format (123) 456-7890')
     .isLength({ min: 14, max: 14 }).withMessage('Phone number must be 10 digits long'),
+]
+
+const orderDeliveryInfoValidator = [
+    body('delivery_date').trim().notEmpty().toDate({ format: 'MM-DD-YYYY' }).withMessage('A delivery date is required'),
 ]
 
 const updateCartValidators = [
@@ -228,6 +231,7 @@ module.exports = {
     signupValidators,
     loginValidators,
     orderShippingInfoValidators,
+    orderDeliveryInfoValidator,
     updateCartValidators,
     createCheckoutValidators,
     cartItemValidators,

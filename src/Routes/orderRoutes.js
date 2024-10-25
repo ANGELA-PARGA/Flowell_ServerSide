@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const { checkAuthenticated, idParamsValidator, 
-        orderShippingInfoValidators, orderedItemsInfoValidators, 
+        orderShippingInfoValidators, orderDeliveryInfoValidator,
         handleValidationErrors } = require('../Utilities/expressValidators')
 const OrderService = require('../ServicesLogic/OrderService')
 
@@ -54,6 +54,24 @@ router.patch('/:id/shipping_info', checkAuthenticated, idParamsValidator, orderS
         });
     } catch(err) {
         next(err);
+    }        
+});
+
+router.patch('/:id/delivery_date', checkAuthenticated, idParamsValidator, orderDeliveryInfoValidator, 
+        handleValidationErrors, async (req, res, next) => {
+    try {
+    const data = req.body
+    const id = parseInt(req.params.id, 10);
+    console.log('calling api route to update the delivery info of an order:', data, id)
+    const response = await OrderService.updateOrderShippingInfo({id, ...data});
+    res.status(200).json({
+        status: 'success',
+        message: 'Orders delivery date updated successfully',
+        code: 200,
+        order_updated: response 
+    });
+    } catch(err) {
+    next(err);
     }        
 });
 

@@ -27,7 +27,6 @@ const bodyParser =  require('body-parser');
 
 
 app.post('/api/webhook', bodyParser.raw({type: 'application/json'}), async (req, res) => {
-    console.log('calling webhook')
     
     const sig = req.headers['stripe-signature'];
     let event;
@@ -82,6 +81,7 @@ app.use(
             maxAge: 24 * 60 * 60 * 1000,
             secure: false,
             domain: '.localhost',
+            sameSite: 'lax'
         }
     })
 );
@@ -277,6 +277,16 @@ app.post('/api/auth/logout',  async (req, res, next) => {
         next(err);
     }
 });
+
+/*app.post('/auth/refresh-session', (req, res) => {
+    if (req.isAuthenticated()) {
+        // Refresh session expiration
+        req.session.touch();
+        return res.status(200).json({ message: 'Session refreshed' });
+    }
+    res.status(401).json({ message: 'Unauthorized' });
+});*/
+
 
 /*setting user role routes */
 

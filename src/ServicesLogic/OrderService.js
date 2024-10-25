@@ -28,6 +28,18 @@ module.exports = class OrderService {
             throw createError(500, 'Error on server while updating the order', error.stack, error);            
         }
     }
+
+    static async updateOrderShippingInfo(dataToUpdate){
+        try {        
+            const orderUpdated = await OrderModel.updateShippingInfo(dataToUpdate);
+            if(!Object.keys(orderUpdated)?.length){
+                throw createError(400, 'order not found or unable to update');                
+            } 
+            return orderUpdated; 
+        } catch (error) {
+            throw createError(500, 'Error on server while updating the order', error.stack, error);            
+        }
+    }
     //data is an object with possibly one of two properties {id, user_id}
     static async findOrder(data){
         try {
