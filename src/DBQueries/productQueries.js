@@ -1,7 +1,6 @@
 const pgp = require('pg-promise')({ capSQL: true });
 const db = require('../DB/connectionDB');
 
-
 /**
  * Select all information of a product stored on the DB using a parameter (product id) 
  * It returns an object with nested objects if the query was succesfull, otherwise it returns an empty object
@@ -22,34 +21,91 @@ const selectAllProductInfoQuery = async (parameter) => {
     return []; 
 }
 
-/**
- * Select all products(limit 30) stored on the DB 
- * It returns an array with objects if the query was succesfull, otherwise it returns an empty array
- * @returns {Array} successfull query 
- * @returns {[]} unsuccessfull query
- */
-const selectAllProducts = async (limit, offset) => {
-    console.log('calling select all products with:', limit, offset)
-    const sqlStatement = pgp.as.format(
-                        `SELECT products_categories.name AS "category_name", products.*
-                        FROM products
-                        LEFT JOIN products_categories ON products.category_id = products_categories.id 
-                        ORDER BY products.id
-                        LIMIT $1 OFFSET $2`, [limit, offset]);
-    const queryResult = await db.query(sqlStatement);
-    console.log('select all products results:', queryResult.rows)
-    if(queryResult.rows?.length) return queryResult.rows;
-    return []; 
-}
+/*This query uses: limit and offset to determine the pagination, 
+and filters which is an object woth color and category parameters */
+const selectAllProducts = async (limit, offset, filters) => {
+    const { color, category } = filters;
+    console.log('calling select all products:', limit, offset, filters)
 
-const selectTotalProducts = async () => {
-    console.log('calling select total products:')
-    const sqlStatement = pgp.as.format(`SELECT COUNT(*) FROM products`);
+    let whereClauses = [];
+    let queryParams = [limit, offset];
+
+    // Build WHERE clause for color filter
+    if (color) {
+        const colorArray = color.split(',');
+        whereClauses.push(`products.color IN (${colorArray.map((_, i) => `$${queryParams.length + i + 1}`).join(', ')})`);
+        queryParams.push(...colorArray);
+    }
+
+    // Build WHERE clause for category filter
+    if (category) {
+        const categoryArray = category.split(',');
+        whereClauses.push(`products_categories.name IN (${categoryArray.map((_, i) => `$${queryParams.length + i + 1}`).join(', ')})`);
+        queryParams.push(...categoryArray);
+    }
+
+    const whereClause = whereClauses.length > 0 ? `WHERE ${whereClauses.join(' AND ')}` : '';
+
+    const sqlStatement = pgp.as.format(
+        `SELECT products_categories.name AS "category_name", products.*
+        FROM products
+        LEFT JOIN products_categories ON products.category_id = products_categories.id
+        ${whereClause}
+        ORDER BY products.id
+        LIMIT $1 OFFSET $2`, 
+        queryParams
+    );
+
+    console.log('Executing SQL SELECT ALL PRODUCTS:', sqlStatement);
+    console.log('with clauses:', whereClause);
+    console.log('with query params:', queryParams)
     const queryResult = await db.query(sqlStatement);
-    console.log('select all products count:', queryResult.rows)
-    if(queryResult.rows?.length) return queryResult.rows[0].count;
-    return 0; 
-}
+
+    console.log('results on the DB:', queryResult.rows)
+
+    if (queryResult.rows?.length) return queryResult.rows;
+    return [];
+};
+
+const selectTotalProducts = async (filters) => {
+    const { color, category, categoryId } = filters;
+
+    let whereClauses = [];
+    let queryParams = [];
+
+    if (color) {
+        const colorArray = color.split(',');
+        whereClauses.push(`products.color IN (${colorArray.map((_, i) => `$${queryParams.length + i + 1}`).join(', ')})`);
+        queryParams.push(...colorArray);
+    }
+
+    // Build WHERE clause for category filter
+    if (category) {
+        const categoryArray = category.split(',');
+        whereClauses.push(`products_categories.name IN (${categoryArray.map((_, i) => `$${queryParams.length + i + 1}`).join(', ')})`);
+        queryParams.push(...categoryArray);
+    }
+
+    if (categoryId) { 
+        whereClauses.push(`products.category_id = $${queryParams.length + 1}`); queryParams.push(categoryId); 
+    }    
+
+    const whereClause = whereClauses.length > 0 ? `WHERE ${whereClauses.join(' AND ')}` : '';
+
+    const sqlStatement = pgp.as.format(
+            `SELECT COUNT(*) FROM products
+            LEFT JOIN products_categories ON products.category_id = products_categories.id
+            ${whereClause}`,
+            queryParams
+    );
+
+    console.log('Executing SQL SELECT TOTAL PRODUCTS:', sqlStatement);
+    console.log('with clauses:', whereClause);
+    console.log('with query params:', queryParams)
+    const queryResult = await db.query(sqlStatement);
+    return parseInt(queryResult.rows[0].count, 10);
+};
+
 
 
 /**
@@ -69,53 +125,53 @@ const selectAllCategories = async () => {
 }
 
 /**
- * Select all products by category stored on the DB using the category id (id)
+ * Select all products by category stored on the DB using the category id (id), limit and offset for pagination
  * It returns an array with objects if the query was succesfull, otherwise it returns an empty array
  * @param {number} id
+ * @param {number} limit
+ * @param {number} offset
  * @returns {Array} successfull query 
  * @returns {[]} unsuccessfull query
- */
-const selectAllProductsByCategory= async (id) => {
-    console.log('calling select all products by category:', id)
-    const sqlStatement = pgp.as.format(`SELECT products_categories.name AS "category_name", products.*
-                                        FROM products 
-                                        LEFT JOIN products_categories ON products.category_id = products_categories.id
-                                        WHERE products.category_id = $1`, [id]);
+ * */
+
+const selectAllProductsByCategory = async (id, limit, offset, filters) => {
+    console.log('calling select all products by category:', id, limit, offset, filters);
+    const { color } = filters;
+
+    let whereClauses = [`products.category_id = $1`];
+    let queryParams = [id, limit, offset];
+
+    // Add color filtering, if provided
+    if (color) {
+        const colorArray = color.split(',');
+        whereClauses.push(
+            `products.color IN (${colorArray.map((_, i) => `$${queryParams.length + i + 1}`).join(', ')})`
+        );
+        queryParams.push(...colorArray);
+    }
+
+    const whereClause = whereClauses.length > 0 ? `WHERE ${whereClauses.join(' AND ')}` : '';
+
+    // Main query without a subquery, directly applying LIMIT and OFFSET
+    const sqlStatement = pgp.as.format(
+        `SELECT products_categories.name AS "category_name", products.*
+        FROM products
+        LEFT JOIN products_categories ON products.category_id = products_categories.id
+        ${whereClause}
+        ORDER BY products.id
+        LIMIT $2 OFFSET $3`, 
+        queryParams
+    );
+
+    console.log('Executing SQL SELECT ALL CATEGORY PRODUCTS:', sqlStatement);
     const queryResult = await db.query(sqlStatement);
-    console.log('select all products by category results:', queryResult.rows)
-    if(queryResult.rows?.length) return queryResult.rows;
-    return []; 
-}
 
-/**
- * Select all products stored on the DB using an object with filter parameters. 
- * It returns an array with objects if the query was succesfull, otherwise it returns an empty array
- * @param {Object} options
- * @returns {Array} successfull query 
- * @returns {[]} unsuccessfull query
- */
-const selectProductByParameters = async (options) => {
-    console.log('calling select products by parameter', options)
-    let sqlStatement = `SELECT * FROM products `;
-    const parameters = [];
-    const conditions = [];
-    for (const key in options) {
-        if (Object.hasOwnProperty.call(options, key)) {
-                conditions.push(`${key} = $${parameters.length + 1}`);
-                parameters.push(options[key]);
-        }
-        
-    }
+    console.log('select all products by category, results on the DB:', queryResult.rows);
 
-    if (conditions.length > 0) {
-        sqlStatement += 'WHERE  ' + conditions.join(' AND ');
-    }
+    if (queryResult.rows?.length) return queryResult.rows;
+    return [];
+};
 
-    const queryResult = await db.query(sqlStatement, parameters);
-    console.log('select products by parameter result:', queryResult.rows)
-    if(queryResult.rows?.length) return queryResult.rows;
-    return [];  
-}
 
 /**
  * Select all products stored on the DB using a search term (string)
@@ -124,22 +180,59 @@ const selectProductByParameters = async (options) => {
  * @returns {Array} successfull query 
  * @returns {[]} unsuccessfull query
  */
-const selectProductBySearchParameters = async (searchTerm) => {
-    console.log('calling select products by search parameter', searchTerm)
-    const sqlStatement = `SELECT * FROM products
-                            WHERE name ILIKE $1
-                            UNION
-                            SELECT * FROM products
-                            WHERE category_id IN (
-                                SELECT id FROM products_categories
-                                WHERE name ILIKE $2
-                            )
-                            AND name NOT ILIKE $1`;
-    const queryResult = await db.query(sqlStatement, [`%${searchTerm}%`, `%${searchTerm}%`]);
-    console.log('select products by parameter result:', queryResult.rows)
+const selectProductBySearchParameters = async (searchTerm, filters) => {
+    const { color, category } = filters;
+    console.log('calling select products by search parameter:', searchTerm, filters)
+    let whereClauses = [];
+    let queryParams = [];
+
+    // Build WHERE clause for color filter
+    if (color) {
+        const colorArray = color.split(',');
+        whereClauses.push(`products.color IN (${colorArray.map((_, i) => `$${queryParams.length + i + 1}`).join(', ')})`);
+        queryParams.push(...colorArray);
+    }
+
+    // Build WHERE clause for category filter
+    if (category) {
+        const categoryArray = category.split(',');
+        whereClauses.push(`products_categories.name IN (${categoryArray.map((_, i) => `$${queryParams.length + i + 1}`).join(', ')})`);
+        queryParams.push(...categoryArray);
+    }
+
+    const whereClause = whereClauses.length > 0 ? `WHERE ${whereClauses.join(' AND ')}` : '';
+
+    // Using tsquery for flexible search
+    const searchQuery = searchTerm.split(' ').map(term => `${term}:*`).join(' & ');
+    queryParams.push(searchQuery);
+    const searchIndex = queryParams.length; // Position of the search query in params
+
+    const sqlStatement = `
+        SELECT 
+            products.id, 
+            products.name, 
+            products.color, 
+            products.category_id, 
+            products_categories.name AS category_name, 
+            products.images_urls
+        FROM products
+        LEFT JOIN products_categories ON products.category_id = products_categories.id
+        ${whereClause ? `${whereClause} AND` : 'WHERE'}
+        to_tsvector(products.name) @@ to_tsquery($${searchIndex})
+        ORDER BY products.id
+    `;
+
+    console.log('Executing SQL SELECT PRODUCTS BY SEARCH PARAMETERS:', sqlStatement);
+    console.log('with query params:', queryParams);
+    
+    const queryResult = await db.query(sqlStatement, queryParams);
+    console.log('select products by parameter result:', queryResult.rows);
+
     if (queryResult.rows?.length) return queryResult.rows;
-    return [];  
-}
+    return [];
+};
+
+
 
 
 
@@ -148,7 +241,6 @@ module.exports = {
     selectAllProducts,
     selectAllCategories,
     selectAllProductsByCategory,
-    selectProductByParameters,
     selectProductBySearchParameters,
     selectTotalProducts
 }

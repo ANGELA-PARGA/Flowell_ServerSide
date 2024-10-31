@@ -22,10 +22,10 @@ module.exports = class ProductService {
         }
     }
 
-    //Returns a list of 30 products:     
-    static async loadAllProducts(limit, offset){
+    //Returns a list of products:     
+    static async loadAllProducts(limit, offset, filters){
         try {
-            const productsList = await ProductModel.returnProductsList(limit, offset);
+            const productsList = await ProductModel.returnProductsList(limit, offset, filters);
             return productsList;
         } catch (error) {
             throw createError(500, 'error on server while finding all products', error.stack, error);        
@@ -42,10 +42,10 @@ module.exports = class ProductService {
         }
     }
 
-    // Returns a list of products by category, using the category ID:      
-    static async loadAllProductsByCategory(id){
+    // Returns a list of products by category, using the category ID and multiple conditions:      
+    static async loadAllProductsByCategory(id, limit, offset, filters){
         try {
-            const categoryProducts = await ProductModel.returnProductsByCategory(id);
+            const categoryProducts = await ProductModel.returnProductsByCategory(id, limit, offset, filters);
             return categoryProducts;
         } catch (error) {
             throw createError(500, 'error on server while finding all products by category', error.stack, error);        
@@ -58,27 +58,13 @@ module.exports = class ProductService {
      * @returns {Object|null}
      * @throws {Error}
      */
-    static async findProductsBySearch(searchTerm){
+    static async findProductsBySearch(searchTerm, filters){
         try { 
-            const searchResults = await ProductModel.findProductsBySearch(searchTerm);
+            const searchResults = await ProductModel.findProductsBySearch(searchTerm, filters);
             return searchResults
         } catch (error) {
             throw createError(500, `error on server while finding products by search term`, error.stack, error); 
         }
     }
 
-    /**
-     * Find a product using an object with zero or multiple conditions: 
-     * @param {Object} options
-     * @returns {Object|null}
-     * @throws {Error}
-     */
-    static async findProductsByFilter(options){
-        try { 
-            const filteredResults = await ProductModel.findProductsByFilter(options);           
-            return filteredResults
-        } catch (error) {
-            throw createError(500, `error on server while filtering products`, error.stack, error); 
-        }
-    }
 }

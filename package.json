@@ -1,7 +1,7 @@
 {
   "name": "e-commerce-rest-api",
   "version": "1.0.0",
-  "description": "A server, and API for an e-commerce on the flower business",
+  "description": "API for an e-commerce on the flower business",
   "main": "index.js",
   "scripts": {
     "start": "node index.js",
@@ -38,6 +38,6 @@
     "chai": "^5.1.0",
     "chai-jest-snapshot": "^2.0.0",
     "jest": "^29.7.0",
-    "nodemon": "^3.1.0"
+    "nodemon": "^3.1.4"
   }
 }

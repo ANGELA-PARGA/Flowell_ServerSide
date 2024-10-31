@@ -134,13 +134,6 @@ const cartItemValidators = [
     body('qty').trim().notEmpty().isNumeric().withMessage('The quantity is required, must be a number, can not be zero')
 ]
 
-const productFilterValidators = [
-    body('color').optional().trim().notEmpty().isString().withMessage('The color is required, must be a string'),
-    body('stem_length_cm').optional().trim().notEmpty().isNumeric().withMessage('The stem length is required, must be a number, represents cm'),
-    body('bloom_size_cm').optional().trim().notEmpty().isNumeric().withMessage('The bloom size is required, must be a number, represents cm'),
-    body('qty_per_case').optional().trim().notEmpty().isNumeric().withMessage('The quantity per case is required, must be a number, represents stems or bunches per case')
-]
-
 const searchTermValidators = [
     query('term').trim().notEmpty().isString().withMessage('the search term must be a string and can not be empty'),
 ]
@@ -235,7 +228,6 @@ module.exports = {
     updateCartValidators,
     createCheckoutValidators,
     cartItemValidators,
-    productFilterValidators,
     searchTermValidators,
     deleteBodyValidator,
     errorHandler

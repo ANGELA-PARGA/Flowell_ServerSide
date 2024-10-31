@@ -1,6 +1,6 @@
 const createError = require('http-errors');
 const {selectAllProductInfoQuery, selectAllProducts, 
-    selectProductBySearchParameters, selectProductByParameters,
+    selectProductBySearchParameters,
     selectAllCategories, selectAllProductsByCategory} = require('../DBQueries/productQueries')
 const { calculateTotal, updateQuery, calculateTotalItems } = require('../DBQueries/generalQueries')
 const CartItemsModel = require('./cartItemsModel')
@@ -27,9 +27,9 @@ module.exports = class ProductModel {
      * @returns {Array}
      * @throws {Error}
      */
-    static async returnProductsList(limit, offset){
+    static async returnProductsList(limit, offset, filters){
         try {
-            const productsList = await selectAllProducts(limit, offset)
+            const productsList = await selectAllProducts(limit, offset, filters)
             return productsList;
         } catch (error) {
             throw createError(500, 'error on server while retrieving all products', error.stack, error);        
@@ -56,9 +56,9 @@ module.exports = class ProductModel {
      * @returns {Array}
      * @throws {Error}
      */
-    static async returnProductsByCategory(id){
+    static async returnProductsByCategory(id, limit, offset, filters){
         try {
-            const categoryProducts = await selectAllProductsByCategory(id)
+            const categoryProducts = await selectAllProductsByCategory(id, limit, offset ,filters)
             return categoryProducts;
         } catch (error) {
             throw createError(500,'error on server while retrieving all products from a category', error.stack, error);        
@@ -95,27 +95,12 @@ module.exports = class ProductModel {
      * @returns {Array}
      * @throws {Error}
      */
-    static async findProductsBySearch(searchTerm){
+    static async findProductsBySearch(searchTerm, filters){
         try { 
-            const searchResults = await selectProductBySearchParameters(searchTerm);
+            const searchResults = await selectProductBySearchParameters(searchTerm, filters);
             return searchResults
         } catch (error) {
             throw createError(500, `error on server finding products by search term`, error.stack, error);
-        }
-    }
-
-    /**
-     * Find a product using an object with zero or multiple conditions: 
-     * @param {Object} options
-     * @returns {Array}
-     * @throws {Error}
-     */
-    static async findProductsByFilter(options){
-        try { 
-            const filterResults = await selectProductByParameters(options);
-            return filterResults
-        } catch (error) {
-            throw createError(500, `error on server while filtering products`, error.stack, error);
         }
     }
 }
