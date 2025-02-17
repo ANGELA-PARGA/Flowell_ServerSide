@@ -1,8 +1,8 @@
 const createError = require('http-errors');
 const moment = require('moment');
 const OrderedItemsModel = require('./orderedItemsModel')
-const {insertQuery,updateQuery,standardDeleteQuery,calculateTotal} = require('../DBQueries/generalQueries')
-const {selectAllOrderInfoQuery} = require('../DBQueries/orderQueries')
+const {insertQuery,updateQuery,standardDeleteQuery,calculateTotal} = require('../../DBQueries/generalQueries')
+const {selectAllOrderInfoQuery} = require('../../DBQueries/orderQueries')
 
 module.exports = class OrderModel {
     constructor(data) {

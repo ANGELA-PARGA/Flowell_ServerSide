@@ -1,7 +1,7 @@
 const createError = require('http-errors');
 const moment = require('moment');
-const {insertQuery, updateQuery, calculateTotal, calculateTotalItems} = require('../DBQueries/generalQueries')
-const {selectAllCartInfoQuery} = require('../DBQueries/cartQueries')
+const {insertQuery, updateQuery, calculateTotal, calculateTotalItems} = require('../../DBQueries/generalQueries')
+const {selectAllCartInfoQuery} = require('../../DBQueries/cartQueries')
 const CartItemsModel = require('./cartItemsModel')
 
 module.exports = class CartsModel {

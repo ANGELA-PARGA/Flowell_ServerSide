@@ -212,7 +212,9 @@ const selectProductBySearchParameters = async (searchTerm, filters) => {
             products.id, 
             products.name, 
             products.color, 
-            products.category_id, 
+            products.category_id,
+            products.price_per_case,
+            products.qty_per_case, 
             products_categories.name AS category_name, 
             products.images_urls
         FROM products

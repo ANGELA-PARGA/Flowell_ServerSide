@@ -1,5 +1,5 @@
 const createError = require('http-errors');
-const ProductModel = require('../ClassModels/productModel');
+const ProductModel = require('../../ClassModels/ClassClientModels/productModel');
 module.exports = class ProductService { 
 
     // retrieve the information of a specific product using the product ID

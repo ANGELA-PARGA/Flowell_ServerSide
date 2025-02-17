@@ -1,6 +1,6 @@
 const createError = require('http-errors');
-const UserModel = require('../ClassModels/userModel');
-const { comparePasswords } = require('../Utilities/utilities');
+const UserModel = require('../../ClassModels/ClassClientModels/userModel');
+const { comparePasswords } = require('../../Utilities/utilities');
 
 module.exports = class Authentication {
     

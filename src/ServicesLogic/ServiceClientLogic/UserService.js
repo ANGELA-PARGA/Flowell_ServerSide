@@ -1,5 +1,5 @@
 const createError = require('http-errors');
-const UserModel = require('../ClassModels/userModel');
+const UserModel = require('../../ClassModels/ClassClientModels/userModel');
 
 module.exports = class UserService{
 

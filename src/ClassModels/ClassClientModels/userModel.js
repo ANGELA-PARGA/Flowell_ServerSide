@@ -1,9 +1,9 @@
 const createError = require('http-errors');
 const moment = require('moment');
-const { hashPassword, verifyResource } = require('../Utilities/utilities');
-const {selectAllUserInfoQuery} = require('../DBQueries/userQueries')
-const {insertQuery, updateQuery, standardSelectQuery, deleteDoubleConditionQuery} = require('../DBQueries/generalQueries')
-const {selectAllOrderInfoQuery} = require('../DBQueries/orderQueries')
+const { hashPassword, verifyResource } = require('../../Utilities/utilities');
+const {selectAllUserInfoQuery} = require('../../DBQueries/userQueries')
+const {insertQuery, updateQuery, standardSelectQuery, deleteDoubleConditionQuery} = require('../../DBQueries/generalQueries')
+const {selectAllOrderInfoQuery} = require('../../DBQueries/orderQueries')
 
 module.exports = class UserModel {
     constructor(data){

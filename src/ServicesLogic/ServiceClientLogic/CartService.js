@@ -1,6 +1,6 @@
 const createError = require('http-errors');
-const CartsModel = require('../ClassModels/cartsModel');
-const CartItemsModel = require('../ClassModels/cartItemsModel');
+const CartsModel = require('../../ClassModels/ClassClientModels/cartsModel');
+const CartItemsModel = require('../../ClassModels/ClassClientModels/cartItemsModel');
 const OrderService = require('./OrderService');
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 require('dotenv').config({ path: 'variables.env' });
@@ -73,7 +73,7 @@ module.exports = class CartService{
 
     static async checkoutCart(session_id){
         try {
-            console.log('Fulfilling Checkout Session ' + session_id);
+            console.log('ON CHECKOUT SERVICE: 1. Fulfilling Checkout Session ' + session_id);
             
             const session = await stripe.checkout.sessions.retrieve(session_id, {
                 expand: ['line_items'],

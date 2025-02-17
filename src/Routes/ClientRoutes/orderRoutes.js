@@ -1,9 +1,9 @@
 const express = require('express');
 const router = express.Router();
-const { checkAuthenticated, idParamsValidator, 
-        orderShippingInfoValidators, orderDeliveryInfoValidator,
-        handleValidationErrors } = require('../Utilities/expressValidators')
-const OrderService = require('../ServicesLogic/OrderService')
+const { idParamsValidator, orderShippingInfoValidators, orderDeliveryInfoValidator,
+        handleValidationErrors } = require('../../Utilities/expressValidators')
+const { checkAuthenticated } = require('../../middleware/appMiddlewares')
+const OrderService = require('../../ServicesLogic/ServiceClientLogic/OrderService')
 
 router.get('/', checkAuthenticated, async (req, res, next) => {
     try {

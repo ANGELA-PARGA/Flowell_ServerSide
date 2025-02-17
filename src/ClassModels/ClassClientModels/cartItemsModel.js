@@ -1,7 +1,8 @@
 const createError = require('http-errors');
-const {insertQuery, deleteDoubleConditionQuery, standardDeleteQuery} = require('../DBQueries/generalQueries')
-const {updateCartItemsQuery, selectCartItemsQuery} = require('../DBQueries/cartItemsQueries')
+const {insertQuery, deleteDoubleConditionQuery, standardDeleteQuery} = require('../../DBQueries/generalQueries')
+const {updateCartItemsQuery, selectCartItemsQuery} = require('../../DBQueries/cartItemsQueries')
 const moment = require('moment');
+
 module.exports = class CartItemsModel {
     constructor(data) {
         this.cart_id = data.cart_id;

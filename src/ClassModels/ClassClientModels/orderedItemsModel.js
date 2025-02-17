@@ -1,6 +1,6 @@
 const createError = require('http-errors');
-const {insertQuery, standardSelectQuery } = require('../DBQueries/generalQueries')
-const {updateOrderedItemsQuery} = require('../DBQueries/orderedItemsQueries')
+const {insertQuery, standardSelectQuery } = require('../../DBQueries/generalQueries')
+const {updateOrderedItemsQuery} = require('../../DBQueries/orderedItemsQueries')
 const moment = require('moment');
 
 

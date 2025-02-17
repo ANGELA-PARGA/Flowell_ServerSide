@@ -1,12 +1,13 @@
 const express = require('express');
 const router = express.Router();
-const { idParamsValidator, checkAuthenticated, handleValidationErrors,
-searchTermValidators, categoryParamsValidator, cartItemValidators } = require('../Utilities/expressValidators')
-const {selectTotalProducts} = require('../DBQueries/productQueries')
+const { idParamsValidator, handleValidationErrors,
+searchTermValidators, categoryParamsValidator, cartItemValidators } = require('../../Utilities/expressValidators')
+const { checkAuthenticated } = require('../../middleware/appMiddlewares')
+const {selectTotalProducts} = require('../../DBQueries/productQueries')
 
 
-const ProductService = require('../ServicesLogic/ProductService')
-const CartsService = require('../ServicesLogic/CartService')
+const ProductService = require('../../ServicesLogic/ServiceClientLogic/ProductService')
+const CartsService = require('../../ServicesLogic/ServiceClientLogic/CartService')
 
 router.get('/', async (req, res, next) => {
     try {

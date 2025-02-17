@@ -1,10 +1,12 @@
 const express = require('express');
 const router = express.Router();
-const { checkAuthenticated, handleValidationErrors, idParamsValidator, deleteBodyValidator,
-    updateCartValidators, createCheckoutValidators } = require('../Utilities/expressValidators')
+const { handleValidationErrors, idParamsValidator,
+    updateCartValidators, createCheckoutValidators } = require('../../Utilities/expressValidators')
+const { checkAuthenticated } = require('../../middleware/appMiddlewares')
 require('dotenv').config({ path: 'variables.env' });
-const CartService = require('../ServicesLogic/CartService')
-const CartItemsModel = require('../ClassModels/cartItemsModel');
+const CartService = require('../../ServicesLogic/ServiceClientLogic/CartService')
+const CartItemsModel = require('../../ClassModels/ClassClientModels/cartItemsModel');
+
 
 
 router.get('/', checkAuthenticated, async (req, res, next) => {
@@ -44,7 +46,7 @@ router.patch('/', checkAuthenticated, updateCartValidators, handleValidationErro
 
 router.post('/checkout', checkAuthenticated, createCheckoutValidators, handleValidationErrors, async (req, res, next) => {
     try {
-        console.log('Here begins, first, the creation of checkout SESSION')
+        console.log('NUMBER ONE Here begins, first, the creation of checkout SESSION')
         const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
         const user_id = req.user.id;
         const cart_info = await CartService.getCartInfo(user_id );
@@ -52,9 +54,8 @@ router.post('/checkout', checkAuthenticated, createCheckoutValidators, handleVal
         const cartItemsToOrder = await CartItemsModel.findAllCartItemsToOrder(cart_id);
         const shipping_info = req.body
 
-        console.log('calling api route for checkout with:', user_id, cart_id, shipping_info)
-
-        // Stripe integration, this data will be             
+        console.log('NUMBER 2 calling api route for checkout with:', user_id, cart_id, shipping_info)
+                    
         const lineItems = cartItemsToOrder.map((item) =>{
             return {
                 price_data: {                    
@@ -67,6 +68,7 @@ router.post('/checkout', checkAuthenticated, createCheckoutValidators, handleVal
                 quantity: item.qty
             }
         })
+        console.log('lineItems:', lineItems)
 
         const session = await stripe.checkout.sessions.create({
             client_reference_id: user_id,
@@ -86,6 +88,8 @@ router.post('/checkout', checkAuthenticated, createCheckoutValidators, handleVal
             cancel_url: 'http://localhost:3000/account/cart',
             expires_at: Math.floor(Date.now() / 1000) + 1800
         });
+
+        console.log('SESSION in checkout route:', session)
 
         res.status(200).json({ url: session.url });
 
