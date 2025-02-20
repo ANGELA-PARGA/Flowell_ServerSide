@@ -1,15 +1,14 @@
+require('dotenv').config({ path: 'variables.env' });
 const express = require('express');
 const router = express.Router();
 const { updateUserValidators, updatePasswordValidators, resourceValidator,
         handleValidationErrors} = require('../../Utilities/expressValidators')
 const { checkAuthenticated } = require('../../middleware/appMiddlewares')
-
 const UserService = require('../../ServicesLogic/ServiceClientLogic/UserService')
 
 router.get('/', checkAuthenticated, async (req, res, next) => {
     try {
         const user_id = req.user.id;
-        console.log('calling api route for user info', user_id)
         const response = await UserService.getUserInfo(user_id);
         res.status(200).json({
             status: 'success',

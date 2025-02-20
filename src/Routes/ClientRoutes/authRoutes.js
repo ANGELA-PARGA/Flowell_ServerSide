@@ -1,10 +1,15 @@
 const express = require('express');
 const router = express.Router();
 const passport = require('passport');
-const { signupValidators, loginValidators, handleValidationErrors } = require('../../Utilities/expressValidators')
+const { signupValidators, loginValidators, handleValidationErrors, 
+    recoverEmailValidator, changePasswordOnRecoveryValidator } = require('../../Utilities/expressValidators')
+const jwt = require('jsonwebtoken');
+const {sendEmail} = require('../../Utilities/utilities');
 const { checkUserRole } = require('../../middleware/appMiddlewares')
 const CartService = require('../../ServicesLogic/ServiceClientLogic/CartService')
 const Authentication = require('../../ServicesLogic/ServiceClientLogic/AuthService')
+const UserModel = require('../../ClassModels/ClassClientModels/userModel');
+const UserService = require('../../ServicesLogic/ServiceClientLogic/UserService')
 
 router.post('/login', loginValidators, handleValidationErrors, passport.authenticate('local'), checkUserRole, async (req, res, next) => {
     try {
@@ -90,12 +95,65 @@ router.post('/logout',  async (req, res, next) => {
             if (err) {
                 return next(err);
         }})
-        res.clearCookie('connect.sid');
-        res.status(200).json({ message: 'Logged out successfully' });
+
+        // Destroy session in MongoDB
+        req.session.destroy((err) => {
+            if (err) return next(err);
+
+            // Clear the session cookie
+            res.clearCookie('connect.sid');
+            res.status(200).json({ message: 'Logged out successfully' });
+        });
+        
                 
     } catch(err) {
         next(err);
     }
+});
+
+router.post('/request_email_pwd_recovery', recoverEmailValidator,
+    handleValidationErrors, async (req, res, next) => {
+    try {
+        const email = req.body.email;
+        console.log('calling api route for recover email', email)
+        const SECRET = process.env.JWT_SECRET;
+        const userFound = await UserModel.findUserByEmail(email);
+        if(!userFound?.length){
+            return res.status(200).json({ message: "If the email exists, a reset link has been sent." });
+        }
+
+        // Generate JWT token with expiration (1 hour)
+        const token = jwt.sign({ userId: userFound[0].id }, SECRET, { expiresIn: "600000" });
+        // Create reset link
+        const resetUrl = `${process.env.NEXT_PUBLIC_HOST}/recover_process_pd?status=${token}`;
+
+        // Send reset email
+        await sendEmail(email, "Password Reset", `Click here to reset your password: ${resetUrl}`);
+
+        res.status(200).json({ message: "If the email exists, a reset link has been sent." });
+
+    } catch(err) {
+        next(err);
+    }        
+});
+
+router.patch('/reset_password', changePasswordOnRecoveryValidator,
+    handleValidationErrors, async (req, res, next) => {
+    try {
+        const {status, password} = req.body;
+        console.log('calling api route for reset password', status, password)
+        const SECRET = process.env.JWT_SECRET;
+        // Verify token and extract userId
+        const decoded = jwt.verify(status, SECRET);
+        const userId = decoded.userId;
+
+        await UserService.updateUserPassword({id:userId, password});
+
+        res.status(200).json({ message: "Password reset successful. You can now log in." });
+
+    } catch(err) {
+        next(err);
+    }        
 });
 
 module.exports = router;

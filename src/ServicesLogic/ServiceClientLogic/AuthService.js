@@ -29,7 +29,7 @@ module.exports = class Authentication {
             const userFound = await UserModel.findUserByEmail(email);
 
             if(!userFound?.length){
-                throw createError(404, 'The user does not exist, please sign up');
+                throw createError(404, 'Incorrect username or password. Try again');
             }
 
             const comparingPasswords = await comparePasswords(password, userFound[0].password);       

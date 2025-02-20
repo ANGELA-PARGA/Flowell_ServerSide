@@ -15,16 +15,36 @@ const categoryParamsValidator = [
 ]
 
 const signupValidators = [
-    body('first_name').trim().notEmpty().isString().withMessage('First name is required'),
-    body('last_name').trim().notEmpty().isString().withMessage('Last name is required'),
+    body('first_name').isString().trim().notEmpty().withMessage('First name is required'),
+    body('last_name').isString().trim().notEmpty().withMessage('Last name is required'),
     body('email').trim().notEmpty().isEmail().withMessage('Invalid email address, a valid email is required'),
-    body('password').trim().notEmpty().isString().withMessage('Password is required, and must not be empty'),
+    body('password')
+        .isString()
+        .trim()
+        .notEmpty().withMessage('Password is required')
+        .matches(/^(?=.*\d)(?=.*[A-Z])(?=.*[a-z])(?=.*[^\w\d\s:])(?!.*\s).{8,30}$/)
+        .withMessage('The password must contain: 1 number, 1 uppercase letter, 1 lowercase letter, 1 special character, minimum of 8 characters, maximum of 30 characters'),
 ]
 
 const loginValidators = [
     body('email').trim().notEmpty().isEmail().withMessage('Invalid email address, a valid email is required'),
-    body('password').trim().notEmpty().isString().withMessage('Password is required, and must not be empty'),
+    body('password').isString().trim().notEmpty().withMessage('Password is required, and must not be empty'),
 ]
+
+const recoverEmailValidator = [
+    body('email').trim().notEmpty().isEmail().withMessage('Invalid email address, a valid email is required')
+]
+
+const changePasswordOnRecoveryValidator = [
+    body('password')
+        .isString()
+        .trim()
+        .notEmpty().withMessage('Password is required')
+        .matches(/^(?=.*\d)(?=.*[A-Z])(?=.*[a-z])(?=.*[^\w\d\s:])(?!.*\s).{8,30}$/)
+        .withMessage('The password must contain: 1 number, 1 uppercase letter, 1 lowercase letter, 1 special character, minimum of 8 characters, maximum of 30 characters'),
+    body('status').trim().notEmpty().isString().withMessage('A token is required')
+]
+
 
 const updatePersonalInfoValidators = [
     body('first_name').trim().notEmpty().isString().isLength({ min: 2 }).withMessage('First name must be at least 2 characters long'),
@@ -58,11 +78,14 @@ const updateAddressInfoValidators = [
     body('zip_code').trim().notEmpty().isString().withMessage('Zip Code is required and must be a valid zip code'),
 ]
 const updatePasswordValidators = [
-    body('password').isString().trim().notEmpty()
-    .matches(/^(?=.*\d)(?=.*[A-Z])(?=.*[a-z])(?=.*[^\w\d\s:])(?!.*\s).{8,30}$/, 
-    'The password must contain: 1 number, 1 uppercase letter, 1 lowercase letter, 1 special character, minimum of 8 characters, maximum of 30 characters')
-    .withMessage('Password is required'),
-]
+    body('password')
+        .isString()
+        .trim()
+        .notEmpty().withMessage('Password is required')
+        .matches(/^(?=.*\d)(?=.*[A-Z])(?=.*[a-z])(?=.*[^\w\d\s:])(?!.*\s).{8,30}$/)
+        .withMessage('The password must contain: 1 number, 1 uppercase letter, 1 lowercase letter, 1 special character, minimum of 8 characters, maximum of 30 characters'),
+];
+
 const updateContactInfoValidators = [
     body('phone')
     .trim().notEmpty().isString()
@@ -145,12 +168,13 @@ const deleteBodyValidator = [
 /*middleware for routes handle validation errors */
 
 const handleValidationErrors = (req, res, next) => {
+    console.log('calling validation errors')
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
         console.log(errors)
-        return res.status(400).json({ errors: errors.array() });
+        next(errors);
     }
-    next();
+    next()    
 }
 
 module.exports = {
@@ -162,6 +186,8 @@ module.exports = {
     updatePasswordValidators,
     signupValidators,
     loginValidators,
+    recoverEmailValidator,
+    changePasswordOnRecoveryValidator,
     orderShippingInfoValidators,
     orderDeliveryInfoValidator,
     updateCartValidators,
