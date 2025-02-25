@@ -3,7 +3,7 @@ const moment = require('moment');
 const { hashPassword, verifyResource } = require('../../Utilities/utilities');
 const {selectAllUserInfoQuery} = require('../../DBQueries/userQueries')
 const {insertQuery, updateQuery, standardSelectQuery, deleteDoubleConditionQuery} = require('../../DBQueries/generalQueries')
-const {selectAllOrderInfoQuery} = require('../../DBQueries/orderQueries')
+
 
 module.exports = class UserModel {
     constructor(data){
@@ -32,8 +32,22 @@ module.exports = class UserModel {
 
             const userCreated = await insertQuery(newUser, 'users');
             return userCreated
+
         } catch(error) {
-            throw createError(500, 'error on server while creating the user', error.stack, error);
+            const dbError = createError(
+                error.status || (error.code ? 400 : 500), // If error.code exists, it's likely a DB error
+                error.code 
+                    ? 'DatabaseError: Issue while creating the user' 
+                    : 'ServerError: Unexpected error while creating the user'
+            );
+    
+            dbError.name = error.code ? 'DatabaseError' : 'ServerError';
+            dbError.message = error.message || 'An unexpected error occurred while creating a user';
+            dbError.details = error.details || (error.code ? 'Possible constraint violation' : 'No additional details');
+            dbError.stack = process.env.NODE_ENV === 'development' ? error.stack : 'userModel / createUser';
+            dbError.timestamp = new Date().toISOString();
+    
+            throw dbError;
         }
     }
 
@@ -53,7 +67,20 @@ module.exports = class UserModel {
                 return updatedUser;  
             }
         } catch (error) {
-            throw createError(500, 'error on server while updating the user password', error.stack, error);            
+            const dbError = createError(
+                error.status || (error.code ? 400 : 500), // If error.code exists, it's likely a DB error
+                error.code 
+                    ? 'DatabaseError: Issue while updating the user password' 
+                    : 'ServerError: Unexpected error while updating the user password'
+            );
+    
+            dbError.name = error.code ? 'DatabaseError' : 'ServerError';
+            dbError.message = error.message || 'An unexpected error occurred while updating a user password';
+            dbError.details = error.details || (error.code ? 'Possible constraint violation' : 'No additional details');
+            dbError.stack = process.env.NODE_ENV === 'development' ? error.stack : 'userModel / updateUserPassword';
+            dbError.timestamp = new Date().toISOString();
+    
+            throw dbError;
         }
     }
 
@@ -72,7 +99,20 @@ module.exports = class UserModel {
             const updatedUserInfo = await updateQuery({id, ...params}, 'id', tableName)
             return updatedUserInfo;
         } catch (error) {
-            throw createError(500, `error updating the user information`, error.stack, error);            
+            const dbError = createError(
+                error.status || (error.code ? 400 : 500), // If error.code exists, it's likely a DB error
+                error.code 
+                    ? 'DatabaseError: Issue while updating the user information' 
+                    : 'ServerError: Unexpected error while updating the user information'
+            );
+    
+            dbError.name = error.code ? 'DatabaseError' : 'ServerError';
+            dbError.message = error.message || 'An unexpected error occurred while updating a user information';
+            dbError.details = error.details || (error.code ? 'Possible constraint violation' : 'No additional details');
+            dbError.stack = process.env.NODE_ENV === 'development' ? error.stack : 'userModel / updateUserInfo';
+            dbError.timestamp = new Date().toISOString();
+    
+            throw dbError;          
         }
     }
 
@@ -92,7 +132,20 @@ module.exports = class UserModel {
             const newUserInfo = await insertQuery({user_id, ...params}, tableName)
             return newUserInfo;            
         } catch (error) {
-            throw createError(500, `error on server while adding the new user information`, error.stack, error);            
+            const dbError = createError(
+                error.status || (error.code ? 400 : 500), // If error.code exists, it's likely a DB error
+                error.code 
+                    ? 'DatabaseError: Issue while adding new user information' 
+                    : 'ServerError: Unexpected error while adding new user information'
+            );
+    
+            dbError.name = error.code ? 'DatabaseError' : 'ServerError';
+            dbError.message = error.message || 'An unexpected error occurred while adding new user information';
+            dbError.details = error.details || (error.code ? 'Possible constraint violation' : 'No additional details');
+            dbError.stack = process.env.NODE_ENV === 'development' ? error.stack : 'userModel / addNewUserInfo';
+            dbError.timestamp = new Date().toISOString();
+    
+            throw dbError;
         }
     }
 
@@ -107,7 +160,20 @@ module.exports = class UserModel {
             const foundUser = await standardSelectQuery(email, 'users', 'email')  
             return foundUser
         } catch (error) {
-            throw createError(500, 'error on server while finding user by email', error.stack, error); 
+            const dbError = createError(
+                error.status || (error.code ? 400 : 500), // If error.code exists, it's likely a DB error
+                error.code 
+                    ? 'DatabaseError: Issue while finding user by email' 
+                    : 'ServerError: Unexpected error while finding user by email'
+            );
+    
+            dbError.name = error.code ? 'DatabaseError' : 'ServerError';
+            dbError.message = error.message || 'An unexpected error occurred while finding user by email';
+            dbError.details = error.details || (error.code ? 'Possible constraint violation' : 'No additional details');
+            dbError.stack = process.env.NODE_ENV === 'development' ? error.stack : 'userModel / findUserByEmail';
+            dbError.timestamp = new Date().toISOString();
+    
+            throw dbError;
         }
     }
 
@@ -119,11 +185,31 @@ module.exports = class UserModel {
      */
     static async findAllUserInfoById(user_id){
         try {
-            console.log('getting all user info', user_id)  
+            console.log('findAllUserInfoById MODEL CALL', user_id)  
             const userCompleteInfo = await selectAllUserInfoQuery(user_id);
+            console.log(userCompleteInfo)
             return userCompleteInfo;    
         } catch (error) {
-            throw createError(500, 'error finding user by ID', error.stack, error); 
+             // If it's a custom error (like a 404), rethrow it
+            if (error.status === 404) {
+                throw error;
+            }
+
+            // Handle unexpected database errors
+            const dbError = createError(
+                error.status || (error.code ? 400 : 500), // If error.code exists, it's likely a DB error
+                error.code 
+                    ? 'DatabaseError: Issue while finding all user information' 
+                    : 'ServerError: Unexpected error while finding all user information'
+            );
+    
+            dbError.name = error.code ? 'DatabaseError' : 'ServerError';
+            dbError.message = error.message || 'An unexpected error occurred while finding all user information';
+            dbError.details = error.details || (error.code ? 'Possible constraint violation' : 'No additional details');
+            dbError.stack = process.env.NODE_ENV === 'development' ? error.stack : 'userModel / findAllUserInfoById';
+            dbError.timestamp = new Date().toISOString();
+    
+            throw dbError; 
         }
     }
 
@@ -135,6 +221,7 @@ module.exports = class UserModel {
      * @throws {Error}
      */
     static async deleteUserInfo(data){
+        console.log('deleteUserInfo MODEL CALL', data)
         try {
             const { param1, param2, resource } = data
             const tableName = verifyResource(resource)
@@ -145,7 +232,20 @@ module.exports = class UserModel {
             }
             return true;
         } catch (error) {
-            throw createError(500, `error on server while deleting the user information`, error.stack, error);            
+            const dbError = createError(
+                error.status || (error.code ? 400 : 500), // If error.code exists, it's likely a DB error
+                error.code 
+                    ? 'DatabaseError: Issue while deleting user information' 
+                    : 'ServerError: Unexpected error while deleting user information'
+            );
+    
+            dbError.name = error.code ? 'DatabaseError' : 'ServerError';
+            dbError.message = error.message || 'An unexpected error occurred while deleting user information';
+            dbError.details = error.details || (error.code ? 'Possible constraint violation' : 'No additional details');
+            dbError.stack = process.env.NODE_ENV === 'development' ? error.stack : 'userModel / deleteUserInfo';
+            dbError.timestamp = new Date().toISOString();
+    
+            throw dbError;            
         }
     }
 }

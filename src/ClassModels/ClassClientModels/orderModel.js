@@ -48,7 +48,20 @@ module.exports = class OrderModel {
             newOrder.items = await Promise.all(orderedItemsPromises);
             return newOrder;
         } catch(error) {
-            throw createError(500, 'error on server while creating the order', error.stack, error);
+            const dbError = createError(
+                error.status || (error.code ? 400 : 500), // If error.code exists, it's likely a DB error
+                error.code 
+                    ? 'DatabaseError: Issue while creating a new order' 
+                    : 'ServerError: Unexpected error while creating a new order'
+            );
+
+            dbError.name = error.code ? 'DatabaseError' : 'ServerError';
+            dbError.message = error.message || 'An unexpected error occurred while creating a new order';
+            dbError.details = error.details || (error.code ? 'Possible constraint violation' : 'No additional details');
+            dbError.stack = process.env.NODE_ENV === 'development' ? error.stack : 'orderModel / createOrder';
+            dbError.timestamp = new Date().toISOString();
+
+            throw dbError;
         }
     }
 
@@ -71,7 +84,20 @@ module.exports = class OrderModel {
             const updatedOrder = await updateQuery(data, 'id','orders');
             return updatedOrder;            
         } catch (error) {
-            throw createError(500, 'error on server while updating the order shipping information', error.stack, error);            
+            const dbError = createError(
+                error.status || (error.code ? 400 : 500), // If error.code exists, it's likely a DB error
+                error.code 
+                    ? 'DatabaseError: Issue while updating shipping information' 
+                    : 'ServerError: Unexpected error while updating shipping information'
+            );
+
+            dbError.name = error.code ? 'DatabaseError' : 'ServerError';
+            dbError.message = error.message || 'An unexpected error occurred while updating shipping information';
+            dbError.details = error.details || (error.code ? 'Possible constraint violation' : 'No additional details');
+            dbError.stack = process.env.NODE_ENV === 'development' ? error.stack : 'orderModel / updateShippingInfo';
+            dbError.timestamp = new Date().toISOString();
+
+            throw dbError;
         }
     }
 
@@ -91,7 +117,20 @@ module.exports = class OrderModel {
             
             return updatedOrder;                 
         } catch (error) {
-            throw createError(500, 'error on sever while updating the order', error.stack, error);            
+            const dbError = createError(
+                error.status || (error.code ? 400 : 500), // If error.code exists, it's likely a DB error
+                error.code 
+                    ? 'DatabaseError: Issue while updating items information' 
+                    : 'ServerError: Unexpected error while updating items information'
+            );
+
+            dbError.name = error.code ? 'DatabaseError' : 'ServerError';
+            dbError.message = error.message || 'An unexpected error occurred while updating items information';
+            dbError.details = error.details || (error.code ? 'Possible constraint violation' : 'No additional details');
+            dbError.stack = process.env.NODE_ENV === 'development' ? error.stack : 'orderModel / updateItemsInfo';
+            dbError.timestamp = new Date().toISOString();
+
+            throw dbError;
         }
     }
     
@@ -106,7 +145,20 @@ module.exports = class OrderModel {
             const orderFound = await selectAllOrderInfoQuery(id, 'id')
             return orderFound
         } catch (error) {
-            throw createError(500, 'error on server while retrieving the order by id', error.stack, error);            
+            const dbError = createError(
+                error.status || (error.code ? 400 : 500), // If error.code exists, it's likely a DB error
+                error.code 
+                    ? 'DatabaseError: Issue while finding order information by id' 
+                    : 'ServerError: Unexpected error while finding order information by id'
+            );
+
+            dbError.name = error.code ? 'DatabaseError' : 'ServerError';
+            dbError.message = error.message || 'An unexpected error occurred while finding order information by id';
+            dbError.details = error.details || (error.code ? 'Possible constraint violation' : 'No additional details');
+            dbError.stack = process.env.NODE_ENV === 'development' ? error.stack : 'orderModel / findOrderById';
+            dbError.timestamp = new Date().toISOString();
+
+            throw dbError;
         }
     }
 
@@ -121,7 +173,20 @@ module.exports = class OrderModel {
             const ordersFound = await selectAllOrderInfoQuery(user_id, 'user_id')
             return ordersFound
         } catch (error) {
-            throw createError(500, 'error on server while retrieving the order by user_id', error.stack, error);            
+            const dbError = createError(
+                error.status || (error.code ? 400 : 500), // If error.code exists, it's likely a DB error
+                error.code 
+                    ? 'DatabaseError: Issue while finding user orders by user id' 
+                    : 'ServerError: Unexpected error while finding user orders by user id'
+            );
+
+            dbError.name = error.code ? 'DatabaseError' : 'ServerError';
+            dbError.message = error.message || 'An unexpected error occurred while finding user orders by user id';
+            dbError.details = error.details || (error.code ? 'Possible constraint violation' : 'No additional details');
+            dbError.stack = process.env.NODE_ENV === 'development' ? error.stack : 'orderModel / findOrdersByUserId';
+            dbError.timestamp = new Date().toISOString();
+
+            throw dbError;
         }
     }
 
@@ -140,7 +205,20 @@ module.exports = class OrderModel {
             }            
             return true;          
         } catch (error) {
-            throw createError(500, 'error on server while deleting the order by id', error.stack, error);            
+            const dbError = createError(
+                error.status || (error.code ? 400 : 500), // If error.code exists, it's likely a DB error
+                error.code 
+                    ? 'DatabaseError: Issue while deleting an order by order id' 
+                    : 'ServerError: Unexpected error while deleting an order by order id'
+            );
+
+            dbError.name = error.code ? 'DatabaseError' : 'ServerError';
+            dbError.message = error.message || 'An unexpected error occurred while deleting an order by order id';
+            dbError.details = error.details || (error.code ? 'Possible constraint violation' : 'No additional details');
+            dbError.stack = process.env.NODE_ENV === 'development' ? error.stack : 'orderModel / deleteOrder';
+            dbError.timestamp = new Date().toISOString();
+
+            throw dbError;
         }
     }
 

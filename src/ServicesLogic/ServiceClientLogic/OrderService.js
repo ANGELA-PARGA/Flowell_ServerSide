@@ -12,7 +12,7 @@ module.exports = class OrderService {
             }            
             return newOrder;            
         } catch (error) {
-            throw createError(500, 'Error on server while creating the order', error.stack, error);            
+            throw error
         }
     }
 
@@ -25,7 +25,7 @@ module.exports = class OrderService {
             } 
             return orderUpdated; 
         } catch (error) {
-            throw createError(500, 'Error on server while updating the order', error.stack, error);            
+            throw error
         }
     }
 
@@ -37,7 +37,7 @@ module.exports = class OrderService {
             } 
             return orderUpdated; 
         } catch (error) {
-            throw createError(500, 'Error on server while updating the order', error.stack, error);            
+            throw error
         }
     }
     //data is an object with possibly one of two properties {id, user_id}
@@ -57,7 +57,7 @@ module.exports = class OrderService {
             }
             return ordersFound;
         } catch (error) {
-            throw createError(500, 'Error on server while searching the order', error.stack, error);            
+            throw error
         }
     }
 
@@ -69,7 +69,7 @@ module.exports = class OrderService {
             } 
             return {message: 'Order succesfully deleted', status:204};  
         } catch (error) {
-            throw createError(500, 'Error on server while deleting the order', error.stack, error);            
+            throw error
         }
     }
 

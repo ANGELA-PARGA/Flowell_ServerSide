@@ -14,13 +14,15 @@ module.exports = class Authentication {
             }
 
             const newUserInstance = new UserModel(userData);
-            const newUser = await newUserInstance.createUser(userData);              
+            const newUser = await newUserInstance.createUser(userData); 
+
             if(!Object.keys(newUser)?.length){
                 throw createError(400, 'The user could not be created');
             }
+
             return newUser;           
         } catch (error) {
-            throw createError(500, 'Error on server while registering the new user', error.stack, error );            
+            throw error;            
         }
     }
 
@@ -32,13 +34,15 @@ module.exports = class Authentication {
                 throw createError(404, 'Incorrect username or password. Try again');
             }
 
-            const comparingPasswords = await comparePasswords(password, userFound[0].password);       
+            const comparingPasswords = await comparePasswords(password, userFound[0].password);
+
             if(!comparingPasswords){
                 throw createError(403, 'Incorrect username or password. Try again')            
             }
+
             return userFound[0];
         } catch (error) {
-            throw createError(500, 'Error on server while authenticating the user', error.stack, error);            
+            throw error;
         }
     }
 }

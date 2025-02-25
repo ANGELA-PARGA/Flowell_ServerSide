@@ -47,7 +47,7 @@ const errorHandler = (err, req, res, next) => {
     const stack = err.stack || 'Stack was not provided';
     const error = err || 'Error object was not provided';
 
-    console.error(`Error: ${statusCode} - ${message}\n${stack}\n${error}`);
+    console.error(`Error: ${statusCode} - ${message}\n\n${error}`);
 
     res.status(statusCode).json({        
         status: statusCode,

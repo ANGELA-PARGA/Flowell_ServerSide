@@ -7,12 +7,12 @@ module.exports = class UserService{
     static async getUserInfo(id){
         try {       
             const userFound = await UserModel.findAllUserInfoById(id)          
-            /*if(!Object.keys(userFound)?.length) {
-                throw createError(404, 'User Not Found');
-            }*/
+            if(!Object.keys(userFound)?.length) {
+                return 'User information was not found'
+            }
             return userFound;
         } catch (error) {
-            throw createError(500, 'Error on server while searching the user', error.stack, error);            
+            throw error            
         }
     }
 
@@ -25,7 +25,7 @@ module.exports = class UserService{
             }
             return updatedUser;
         } catch (error) {
-            throw createError(500, 'Error on server while updating the user', error.stack, error);            
+            throw error             
         }
     }
 
@@ -38,7 +38,7 @@ module.exports = class UserService{
             }
             return updatedUser;
         } catch (error) {
-            throw createError(500, 'Error on server while updating the user password', error.stack, error);            
+            throw error 
         }
     }
 
@@ -51,7 +51,7 @@ module.exports = class UserService{
             }
             return newUserInfo;
         } catch (error) {
-            throw createError(500, 'Error on server while adding new user information', error.stack, error);            
+            throw error 
         }
     }
 
@@ -64,7 +64,7 @@ module.exports = class UserService{
             }      
             return {message: 'the user information was succesfully deleted', status:204};
         } catch (error) {
-            throw createError(500, 'Error on server while deleting the user info', error.stack, error);            
+            throw error 
         }
     }
 }

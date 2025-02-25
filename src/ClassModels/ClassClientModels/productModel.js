@@ -18,7 +18,20 @@ module.exports = class ProductModel {
             const productInfo = await selectAllProductInfoQuery(id)
             return productInfo
         } catch (error) {
-            throw createError(500, 'error on server while retrieving product information by ID', error.stack, error);        
+            const dbError = createError(
+                error.status || (error.code ? 400 : 500), // If error.code exists, it's likely a DB error
+                error.code 
+                    ? 'DatabaseError: Issue while retrieving product information' 
+                    : 'ServerError: Unexpected error while retrieving product information'
+            );
+
+            dbError.name = error.code ? 'DatabaseError' : 'ServerError';
+            dbError.message = error.message || 'An unexpected error occurred while retrieving product information';
+            dbError.details = error.details || (error.code ? 'Possible constraint violation' : 'No additional details');
+            dbError.stack = process.env.NODE_ENV === 'development' ? error.stack : 'productModel / retrieveProductInfo';
+            dbError.timestamp = new Date().toISOString();
+
+            throw dbError;
         }
     }
 
@@ -32,7 +45,20 @@ module.exports = class ProductModel {
             const productsList = await selectAllProducts(limit, offset, filters)
             return productsList;
         } catch (error) {
-            throw createError(500, 'error on server while retrieving all products', error.stack, error);        
+            const dbError = createError(
+                error.status || (error.code ? 400 : 500), // If error.code exists, it's likely a DB error
+                error.code 
+                    ? 'DatabaseError: Issue while retrieving the list of products' 
+                    : 'ServerError: Unexpected error while retrieving the list of products'
+            );
+
+            dbError.name = error.code ? 'DatabaseError' : 'ServerError';
+            dbError.message = error.message || 'An unexpected error occurred while retrieving the list of products';
+            dbError.details = error.details || (error.code ? 'Possible constraint violation' : 'No additional details');
+            dbError.stack = process.env.NODE_ENV === 'development' ? error.stack : 'productModel / returnProductsList';
+            dbError.timestamp = new Date().toISOString();
+
+            throw dbError;
         }
     }
 
@@ -46,7 +72,20 @@ module.exports = class ProductModel {
             const categoriesList = await selectAllCategories();
             return categoriesList;
         } catch (error) {
-            throw createError(500, 'error on server while retrieving all categories', error.stack, error);        
+            const dbError = createError(
+                error.status || (error.code ? 400 : 500), // If error.code exists, it's likely a DB error
+                error.code 
+                    ? 'DatabaseError: Issue while retrieving the categories of products' 
+                    : 'ServerError: Unexpected error while retrieving the categories of products'
+            );
+
+            dbError.name = error.code ? 'DatabaseError' : 'ServerError';
+            dbError.message = error.message || 'An unexpected error occurred while retrieving the categories of products';
+            dbError.details = error.details || (error.code ? 'Possible constraint violation' : 'No additional details');
+            dbError.stack = process.env.NODE_ENV === 'development' ? error.stack : 'productModel / returnCategories';
+            dbError.timestamp = new Date().toISOString();
+
+            throw dbError;
         }
     }
 
@@ -61,7 +100,20 @@ module.exports = class ProductModel {
             const categoryProducts = await selectAllProductsByCategory(id, limit, offset ,filters)
             return categoryProducts;
         } catch (error) {
-            throw createError(500,'error on server while retrieving all products from a category', error.stack, error);        
+            const dbError = createError(
+                error.status || (error.code ? 400 : 500), // If error.code exists, it's likely a DB error
+                error.code 
+                    ? 'DatabaseError: Issue while retrieving the products by category' 
+                    : 'ServerError: Unexpected error while retrieving the products by category'
+            );
+
+            dbError.name = error.code ? 'DatabaseError' : 'ServerError';
+            dbError.message = error.message || 'An unexpected error occurred while retrieving the products by category';
+            dbError.details = error.details || (error.code ? 'Possible constraint violation' : 'No additional details');
+            dbError.stack = process.env.NODE_ENV === 'development' ? error.stack : 'productModel / returnProductsByCategory';
+            dbError.timestamp = new Date().toISOString();
+
+            throw dbError;
         }
     }
 
@@ -85,7 +137,20 @@ module.exports = class ProductModel {
 
             return {item:itemToAdd, cart:updatedCart};
         } catch (error) {
-            throw createError(500, 'error adding product to the cart', error.stack, error);        
+            const dbError = createError(
+                error.status || (error.code ? 400 : 500), // If error.code exists, it's likely a DB error
+                error.code 
+                    ? 'DatabaseError: Issue while adding products to the cart' 
+                    : 'ServerError: Unexpected error while adding products to the cart'
+            );
+
+            dbError.name = error.code ? 'DatabaseError' : 'ServerError';
+            dbError.message = error.message || 'An unexpected error occurred while adding products to the cart';
+            dbError.details = error.details || (error.code ? 'Possible constraint violation' : 'No additional details');
+            dbError.stack = process.env.NODE_ENV === 'development' ? error.stack : 'productModel / addProductToCart';
+            dbError.timestamp = new Date().toISOString();
+
+            throw dbError;        
         }
     }
 
@@ -100,7 +165,20 @@ module.exports = class ProductModel {
             const searchResults = await selectProductBySearchParameters(searchTerm, filters);
             return searchResults
         } catch (error) {
-            throw createError(500, `error on server finding products by search term`, error.stack, error);
+            const dbError = createError(
+                error.status || (error.code ? 400 : 500), // If error.code exists, it's likely a DB error
+                error.code 
+                    ? 'DatabaseError: Issue while finding products using a search term' 
+                    : 'ServerError: Unexpected error while finding products using a search term'
+            );
+
+            dbError.name = error.code ? 'DatabaseError' : 'ServerError';
+            dbError.message = error.message || 'An unexpected error occurred while finding products using a search term';
+            dbError.details = error.details || (error.code ? 'Possible constraint violation' : 'No additional details');
+            dbError.stack = process.env.NODE_ENV === 'development' ? error.stack : 'productModel / findProductsBySearch';
+            dbError.timestamp = new Date().toISOString();
+
+            throw dbError;
         }
     }
 }

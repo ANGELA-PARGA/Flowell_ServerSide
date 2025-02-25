@@ -17,7 +17,7 @@ module.exports = class CartService{
             } 
             return newCart;         
         } catch (error) {
-            throw createError(500, 'Error on server while creating the cart', error.stack, error);            
+            throw error
         }
     }
 
@@ -27,7 +27,7 @@ module.exports = class CartService{
             const cartInfo = await CartsModel.findCartByUserId(user_id);
             return cartInfo;          
         } catch (error) {
-            throw createError(500, 'Error on server while retrieving the cart information', error.stack, error);            
+            throw error
         }
     }
 
@@ -40,7 +40,7 @@ module.exports = class CartService{
             }            
             return cartUpdated         
         } catch (error) {
-            throw createError(500, 'Error on server while updating the cart item', error.stack, error);            
+            throw error
         }
     }
 
@@ -53,7 +53,7 @@ module.exports = class CartService{
             }
             return { message:'Item succesfully deleted', status:204};
         } catch (error) {
-            throw createError(500, 'Error on server while deleting the item', error.stack, error);            
+            throw error
         }
     }
 
@@ -67,7 +67,7 @@ module.exports = class CartService{
             }
             return { message:'Cart succesfully emptied' , status:204}
         } catch (error) {
-            throw createError(500, 'Error on server while emptying the cart', error.stack, error);            
+            throw error
         }
     }
 
@@ -128,7 +128,7 @@ module.exports = class CartService{
             }                                             
 
         } catch(error) {
-            throw createError(500, 'Error on server while placing the order', error.stack, error);            
+            throw error
         }
     }
 }

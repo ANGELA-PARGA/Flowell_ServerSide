@@ -6,7 +6,9 @@ const MongoDBStore = require('connect-mongodb-session')(session);
 
 const store = new MongoDBStore({
     uri: process.env.MONGODB, 
-    collection: 'sessions' 
+    collection: 'sessions' ,
+    autoRemoveInterval: 10
+    
 });
 
 store.on('error', function(error) {

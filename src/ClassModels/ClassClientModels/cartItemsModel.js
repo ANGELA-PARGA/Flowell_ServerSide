@@ -17,7 +17,7 @@ module.exports = class CartItemsModel {
      * @param {number} cart_id
      * @param {number} product_id
      * @param {number} qty
-     * @returns {Object|null}
+     * @returns {Object}
      * @throws {Error}
      */
     async createCartItem(){

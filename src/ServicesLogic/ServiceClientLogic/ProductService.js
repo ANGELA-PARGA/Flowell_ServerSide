@@ -8,7 +8,7 @@ module.exports = class ProductService {
             const product = await ProductModel.retrieveProductInfo(id);
             return product;  
         } catch (error) {
-            throw createError(500, 'error on server while finding product information by ID', error.stack, error);        
+            throw error
         }
     }
 
@@ -18,7 +18,7 @@ module.exports = class ProductService {
             const productToAdd = await ProductModel.addProductToCart(data);           
             return productToAdd;         
         } catch (error) {
-            throw createError(500, 'Error on server while adding the item to the cart', error.stack, error);            
+            throw error
         }
     }
 
@@ -28,7 +28,7 @@ module.exports = class ProductService {
             const productsList = await ProductModel.returnProductsList(limit, offset, filters);
             return productsList;
         } catch (error) {
-            throw createError(500, 'error on server while finding all products', error.stack, error);        
+            throw error
         }
     }
 
@@ -38,7 +38,7 @@ module.exports = class ProductService {
             const categoriesList = await ProductModel.returnCategories();
             return categoriesList;
         } catch (error) {
-            throw createError(500, 'error on server while finding all categories', error.stack, error);        
+            throw error
         }
     }
 
@@ -48,7 +48,7 @@ module.exports = class ProductService {
             const categoryProducts = await ProductModel.returnProductsByCategory(id, limit, offset, filters);
             return categoryProducts;
         } catch (error) {
-            throw createError(500, 'error on server while finding all products by category', error.stack, error);        
+            throw error
         }
     }
 
@@ -63,7 +63,7 @@ module.exports = class ProductService {
             const searchResults = await ProductModel.findProductsBySearch(searchTerm, filters);
             return searchResults
         } catch (error) {
-            throw createError(500, `error on server while finding products by search term`, error.stack, error); 
+            throw error
         }
     }
 

@@ -62,10 +62,10 @@ router.patch('/:resourceType/:resourceId', checkAuthenticated, resourceValidator
 router.patch('/mine', checkAuthenticated, updatePasswordValidators, handleValidationErrors, 
             async (req, res, next) => {
     try {
-        const data = req.body
+        const password = req.body.password
         const user_id = req.user.id;
-        console.log('calling api route for patch password', data, user_id)
-        const response = await UserService.updateUserPassword({id:user_id, ...data});
+        console.log('calling api route for patch password', password, user_id)
+        const response = await UserService.updateUserPassword({id:user_id, password});
         res.status(200).json({
             status: 'success',
             message: 'The user password was updated successfully',
