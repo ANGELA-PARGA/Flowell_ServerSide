@@ -2,12 +2,12 @@ openapi: 3.0.1
 info:
   title: Flowell e-commerce API
   version: 1.0.0
-  description: A basic API to connect Flowell with the DB and Server.
+  description: A basic API to connect Flowell e-commerce with the DB and Server.
 paths:
-  /auth/login:
+  api/auth/login:
     summary: Allow user to login into account
     description: >-
-      This is the path to login a user into an account. It requires an email and a password.It searchs the user into the DB and the compare the passwords (hashed passwords)
+      This is the path to login a user into an account. It requires an email and a password. It searchs the user into the DB and the compare the passwords (hashed passwords)
     post:
       summary: login/authenticate the user into the page
       description: Allow the user to login and authenticate. 
@@ -754,15 +754,15 @@ paths:
           description: Error on server while searching the order
       tags:
         - Orders
-    delete:
-      summary: Delete an order by ID
-      description: Delete an order by its ID. To access this route the user must be authenticated
-      operationId: deleteOrder
+    patch:
+      summary: Cancel an order by ID
+      description: Cancel an order by its ID. To access this route the user must be authenticated
+      operationId: cancelOrder
       parameters:
         - in: path
           name: id
           required: true
-          description: ID of the order to delete
+          description: ID of the order to cancel
           schema:
             type: integer
             example: 15
@@ -775,15 +775,16 @@ paths:
                   value: |-
                     {
                       "status": "success",
-                      "message": "Order deleted succesfully"
+                      "message": "Order cancelled succesfully"
                       "code": 204,
                       "response": 
                         {
                           "status": 204,
-                          "message": "Order succesfully deleted"
+                          "message": "Order succesfully cancelled"
                         }
                     }
-          description: Order deleted successfully
+          description: Order cancelled
+           successfully
         '400':
           content:
             application/json:

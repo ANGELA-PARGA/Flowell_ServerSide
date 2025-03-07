@@ -61,6 +61,15 @@ app.use('/api/cart', cartRoutes);
 const authAdminRoutes = require('./Routes/AdminRoutes/authAdminRoutes');
 app.use('/api/admin/auth', authAdminRoutes);
 
+const productAdminRoutes = require('./Routes/AdminRoutes/productsAdminRoutes');
+app.use('/api/admin/products', productAdminRoutes);
+
+const orderAdminRoutes = require('./Routes/AdminRoutes/ordersAdminRoutes');
+app.use('/api/admin/orders', orderAdminRoutes);
+
+const userAdminRoutes = require('./Routes/AdminRoutes/usersAdminRoutes');
+app.use('/api/admin/users', userAdminRoutes);
+
 const {errorHandler} = require('./middleware/appMiddlewares');
 /*setting error handler middleware */
 app.use(errorHandler);

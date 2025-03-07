@@ -53,7 +53,10 @@ const errorHandler = (err, req, res, next) => {
         status: statusCode,
         error: message,
         stack: stack,
-        customError: error
+        customError: {
+            status: statusCode,
+            message: message,
+        }
     });
 };
 

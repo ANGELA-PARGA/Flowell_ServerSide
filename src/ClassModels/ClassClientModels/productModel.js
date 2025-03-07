@@ -1,7 +1,7 @@
 const createError = require('http-errors');
 const {selectAllProductInfoQuery, selectAllProducts, 
-    selectProductBySearchParameters,
-    selectAllCategories, selectAllProductsByCategory} = require('../../DBQueries/productQueries')
+        selectProductBySearchParameters,
+        selectAllCategories, selectAllProductsByCategory} = require('../../DBQueries/productQueries')
 const { calculateTotal, updateQuery, calculateTotalItems } = require('../../DBQueries/generalQueries')
 const CartItemsModel = require('./cartItemsModel')
 

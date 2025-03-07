@@ -38,6 +38,23 @@ router.get('/:id', checkAuthenticated, idParamsValidator, handleValidationErrors
         }
 });
 
+router.patch('/:id', checkAuthenticated, idParamsValidator, 
+                handleValidationErrors, async (req, res, next) => {
+    try {
+        const id = parseInt(req.params.id, 10);
+        console.log('calling api route to delete/cancel an order:', id)
+        const response = await OrderService.deleteOrder(id);
+        res.status(200).send({
+            status: 'success',
+            message: 'Order cancelled successfully',
+            code: 204,
+            order_cancelled: response 
+        });
+    } catch(err) {
+        next(err);
+    }        
+});
+
 
 router.patch('/:id/shipping_info', checkAuthenticated, idParamsValidator, orderShippingInfoValidators, 
             handleValidationErrors, async (req, res, next) => {
@@ -69,24 +86,11 @@ router.patch('/:id/delivery_date', checkAuthenticated, idParamsValidator, orderD
         message: 'Orders delivery date updated successfully',
         code: 200,
         order_updated: response 
-    });
-    } catch(err) {
-    next(err);
-    }        
-});
-
-router.delete('/:id', checkAuthenticated, idParamsValidator, 
-                handleValidationErrors, async (req, res, next) => {
-    try {
-        const id = parseInt(req.params.id, 10);
-        console.log('calling api route to delete an order:', id)
-        const response = await OrderService.deleteOrder(id);
-        res.status(200).send(response);
+        });
     } catch(err) {
         next(err);
     }        
 });
-
 
 
 module.exports = router;

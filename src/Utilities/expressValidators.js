@@ -2,44 +2,44 @@ const { body, query, param, validationResult } = require('express-validator');
 const { luhnCheck } = require('./utilities')
 
 const idParamsValidator = [
-    param('id').trim().notEmpty().isNumeric().withMessage('An ID is required and must be a number') 
+    param('id').trim().notEmpty().isInt().withMessage('An ID is required and must be a number') 
 ]
 
 const resourceValidator = [
     param('resourceType').trim().optional().notEmpty().isString().withMessage('The resource type is required'),
-    param('resourceId').trim().optional().notEmpty().isNumeric().withMessage('The resource ID to delete is required and must be a number') 
+    param('resourceId').trim().optional().notEmpty().isInt().withMessage('The resource ID to delete is required and must be a number') 
 ]
 
 const categoryParamsValidator = [
-    param('categoryId').trim().optional().notEmpty().isNumeric().withMessage('The category ID is required and must be a number') 
+    param('categoryId').trim().optional().notEmpty().isInt().withMessage('The category ID is required and must be a number') 
 ]
 
 const signupValidators = [
-    body('first_name').isString().trim().notEmpty().withMessage('First name is required'),
-    body('last_name').isString().trim().notEmpty().withMessage('Last name is required'),
-    body('email').trim().notEmpty().isEmail().withMessage('Invalid email address, a valid email is required'),
+    body('first_name').trim().notEmpty().isString().escape().withMessage('First name is required'),
+    body('last_name').trim().notEmpty().isString().escape().withMessage('Last name is required'),
+    body('email').trim().normalizeEmail({gmail_remove_dots: false}).notEmpty().isEmail().withMessage('Invalid email address, a valid email is required'),
     body('password')
-        .isString()
         .trim()
         .notEmpty().withMessage('Password is required')
+        .isString()       
         .matches(/^(?=.*\d)(?=.*[A-Z])(?=.*[a-z])(?=.*[^\w\d\s:])(?!.*\s).{8,30}$/)
         .withMessage('The password must contain: 1 number, 1 uppercase letter, 1 lowercase letter, 1 special character, minimum of 8 characters, maximum of 30 characters'),
 ]
 
 const loginValidators = [
-    body('email').trim().notEmpty().isEmail().withMessage('Invalid email address, a valid email is required'),
-    body('password').isString().trim().notEmpty().withMessage('Password is required, and must not be empty'),
+    body('email').trim().normalizeEmail({gmail_remove_dots: false}).notEmpty().isEmail().withMessage('Invalid email address, a valid email is required'),
+    body('password').trim().notEmpty().isString().withMessage('Password is required, and must not be empty'),
 ]
 
 const recoverEmailValidator = [
-    body('email').trim().notEmpty().isEmail().withMessage('Invalid email address, a valid email is required')
+    body('email').trim().normalizeEmail({gmail_remove_dots: false}).notEmpty().isEmail().withMessage('Invalid email address, a valid email is required')
 ]
 
 const changePasswordOnRecoveryValidator = [
     body('password')
-        .isString()
-        .trim()
+        .trim()        
         .notEmpty().withMessage('Password is required')
+        .isString()
         .matches(/^(?=.*\d)(?=.*[A-Z])(?=.*[a-z])(?=.*[^\w\d\s:])(?!.*\s).{8,30}$/)
         .withMessage('The password must contain: 1 number, 1 uppercase letter, 1 lowercase letter, 1 special character, minimum of 8 characters, maximum of 30 characters'),
     body('status').trim().notEmpty().isString().withMessage('A token is required')
@@ -79,9 +79,9 @@ const updateAddressInfoValidators = [
 ]
 const updatePasswordValidators = [
     body('password')
-        .isString()
-        .trim()
+        .trim()        
         .notEmpty().withMessage('Password is required')
+        .isString()
         .matches(/^(?=.*\d)(?=.*[A-Z])(?=.*[a-z])(?=.*[^\w\d\s:])(?!.*\s).{8,30}$/)
         .withMessage('The password must contain: 1 number, 1 uppercase letter, 1 lowercase letter, 1 special character, minimum of 8 characters, maximum of 30 characters'),
 ];
@@ -136,8 +136,18 @@ const orderDeliveryInfoValidator = [
 ]
 
 const updateCartValidators = [
-    body('product_id').trim().notEmpty().isNumeric().withMessage('The product ID is required'),
-    body('qty').trim().notEmpty().isNumeric().withMessage('The quantity is required')
+    body('product_id').trim().notEmpty().isInt().withMessage('The product ID is required'),
+    body('qty').trim().notEmpty().isInt().withMessage('The quantity is required')
+]
+
+const cartItemValidators = [
+    body('product_id').trim().notEmpty().isInt().withMessage('The product ID is required, must be a number, can not be zero'),
+    body('qty').trim().notEmpty().isInt().withMessage('The quantity is required, must be a number, can not be zero')
+]
+
+const orderedItemsValidators = [
+    body('product_id').trim().notEmpty().isInt().withMessage('The product ID is required, must be a number, can not be zero'),
+    body('qty').trim().notEmpty().isInt().withMessage('The quantity is required, must be a number, can not be zero')
 ]
 
 const createCheckoutValidators = [
@@ -152,17 +162,29 @@ const createCheckoutValidators = [
     .isLength({ min: 14, max: 14 }).withMessage('Phone number must be 10 digits long'),
 ]
 
-const cartItemValidators = [
-    body('product_id').trim().notEmpty().isNumeric().withMessage('The product ID is required, must be a number, can not be zero'),
-    body('qty').trim().notEmpty().isNumeric().withMessage('The quantity is required, must be a number, can not be zero')
-]
-
 const searchTermValidators = [
     query('term').trim().notEmpty().isString().withMessage('the search term must be a string and can not be empty'),
 ]
 
-const deleteBodyValidator = [
-    body('product_id').trim().notEmpty().isNumeric().withMessage('The product ID is required, must be a number, can not be zero')
+const newProductValidators = [
+    body('category_id').trim().notEmpty().withMessage('Category id is required').isInt().withMessage('Category id must be a number and is required'),
+    body('name').trim().notEmpty().isString().withMessage('Product name is required'),
+    body('description').trim().notEmpty().isString().withMessage('Product description is required'),
+    body('color').trim().notEmpty().isString().withMessage('Color is required'),
+    body('stem_length_cm').trim().notEmpty().isInt().withMessage('stem_length_cm is required'),
+    body('bloom_size_cm').trim().notEmpty().isInt().withMessage('bloom_size_cm is required'),
+    body('blooms_per_stem').trim().notEmpty().isInt().withMessage('blooms_per_stem is required'),
+    body('life_in_days').trim().notEmpty().isInt().withMessage('life_in_days is required'),
+    body('qty_per_case').trim().notEmpty().isInt().withMessage('qty_per_case is required'),
+    body('measure_per_case').trim().notEmpty().isInt().withMessage('measure_per_case is required'),
+    body('price_per_case').trim().notEmpty().isFloat().withMessage('price_per_case is required'),
+    body('images_urls').trim().notEmpty().isArray().withMessage('images_urls is required'),
+    body('stock_available').trim().notEmpty().isInt().withMessage('blooms_per_stem is required'),
+    body('qty_purchased').trim().notEmpty().isInt().withMessage('life_in_days is required')
+]
+
+const updateStockValidator = [
+    body('stock').trim().notEmpty().isInt().withMessage('The stock quantity is required and must be a positive number')
 ]
 
 /*middleware for routes handle validation errors */
@@ -172,7 +194,10 @@ const handleValidationErrors = (req, res, next) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
         console.log(errors)
-        next(errors);
+        const error = new Error('Validation failed')
+        error.status = 400
+        error.details = errors.array()
+        return next(error)
     }
     next()    
 }
@@ -194,5 +219,7 @@ module.exports = {
     createCheckoutValidators,
     cartItemValidators,
     searchTermValidators,
-    deleteBodyValidator,
+    newProductValidators,
+    orderedItemsValidators,
+    updateStockValidator
 }

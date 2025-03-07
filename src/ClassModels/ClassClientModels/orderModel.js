@@ -1,13 +1,14 @@
 const createError = require('http-errors');
 const moment = require('moment');
 const OrderedItemsModel = require('./orderedItemsModel')
-const {insertQuery,updateQuery,standardDeleteQuery,calculateTotal} = require('../../DBQueries/generalQueries')
+const {insertQuery,updateQuery,calculateTotal} = require('../../DBQueries/generalQueries')
 const {selectAllOrderInfoQuery} = require('../../DBQueries/orderQueries')
+const {cancelOrderedItemsQuery} = require('../../DBQueries/orderedItemsQueries')
 
 module.exports = class OrderModel {
     constructor(data) {
-        this.created = moment.utc().toISOString();
-        this.modified = moment.utc().toISOString();
+        this.created_at = moment.utc().toISOString();
+        this.updated_at = moment.utc().toISOString();
         this.user_id = data.user_id;
         this.status = 'PAID';
         this.total = data.total;
@@ -68,8 +69,6 @@ module.exports = class OrderModel {
     /**
      * Update an order using data object that have an ID and can have one or multiple of the following properties: 
      * @param {number} id // required always
-     * @param {Array} items // required only for updateItemsInfo 
-     * @param {string} status
      * @param {Date} delivery_date
      * @param {string} address
      * @param {string} city
@@ -104,6 +103,7 @@ module.exports = class OrderModel {
     static async updateItemsInfo(data){
         try {
             const { id, items } = data;
+            console.log('data received:', items)
 
             let updatedOrder = {};
 
@@ -191,29 +191,33 @@ module.exports = class OrderModel {
     }
 
     /**
-     * Delete an order using the id: 
+     * Cancel an order using the id: 
      * @param {number} id
      * @returns {boolean}
      * @throws {Error}
      */
     static async deleteOrder(id){
         try {
-            const deletedOrderedItems = await standardDeleteQuery(id, 'ordered_items', 'order_id')
-            const deletedOrder = await standardDeleteQuery(id, 'orders', 'id')
-            if(!deletedOrderedItems || !deletedOrder){
+            const deletedOrderedItems = await cancelOrderedItemsQuery({order_id:id})            
+            if(!deletedOrderedItems){
                 return false
-            }            
-            return true;          
+            }
+            const newTotal = await calculateTotal(id,'order_id','ordered_items');
+            const cancelledOrder = await updateQuery({id, total:newTotal.total, status:'CANCELLED'}, 'id','orders')                 
+            return {
+                cancelledItems: deletedOrderedItems,
+                cancelledOrder: cancelledOrder
+            };         
         } catch (error) {
             const dbError = createError(
                 error.status || (error.code ? 400 : 500), // If error.code exists, it's likely a DB error
                 error.code 
-                    ? 'DatabaseError: Issue while deleting an order by order id' 
-                    : 'ServerError: Unexpected error while deleting an order by order id'
+                    ? 'DatabaseError: Issue while canceling an order by order id' 
+                    : 'ServerError: Unexpected error while canceling an order by order id'
             );
 
             dbError.name = error.code ? 'DatabaseError' : 'ServerError';
-            dbError.message = error.message || 'An unexpected error occurred while deleting an order by order id';
+            dbError.message = error.message || 'An unexpected error occurred while canceling an order by order id';
             dbError.details = error.details || (error.code ? 'Possible constraint violation' : 'No additional details');
             dbError.stack = process.env.NODE_ENV === 'development' ? error.stack : 'orderModel / deleteOrder';
             dbError.timestamp = new Date().toISOString();

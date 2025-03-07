@@ -36,13 +36,13 @@ const insertQuery = async (data, tableName) => {
 const updateQuery = async (data, columnName, tableName) => {
     console.log('CALLING updateQuery:', data, columnName, tableName)
     const { id, ...params } = data;
-    params.modified = moment.utc().toISOString();
+    params.updated_at = moment.utc().toISOString();
 
     const condition = pgp.as.format(`WHERE ${columnName} = $1 RETURNING *`, [id]);
     const sqlStatement = pgp.helpers.update(params, null, tableName) + condition;
 
     const queryResult = await db.query(sqlStatement);
-    console.log('resource updated in update query:', queryResult.rows[0])
+    console.log('resource updated in update query:', queryResult.rows)
     if(queryResult.rows?.length) return queryResult.rows[0];
     return {};
 }

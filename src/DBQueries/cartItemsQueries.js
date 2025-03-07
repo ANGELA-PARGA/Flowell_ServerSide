@@ -2,7 +2,6 @@ const pgp = require('pg-promise')({ capSQL: true });
 const db = require('../DB/connectionDB');
 const moment = require('moment');
 
-
 /**
  * Update items of a cart stored on the DB using a data object { cart_id, product_id, qty } 
  * It returns an object with the updated information if the query was succesfull, otherwise it returns an empty object
@@ -13,10 +12,10 @@ const moment = require('moment');
 const updateCartItemsQuery = async (data) => {
     console.log('calling the update cart Items query with:', data)
     const { cart_id, product_id, qty } = data;
-    const modified = moment.utc().toISOString();
+    const updated_at = moment.utc().toISOString();
 
     const condition = pgp.as.format('WHERE cart_id = $1 AND product_id = $2 RETURNING *', [cart_id, product_id]);
-    const sqlStatement = pgp.helpers.update({qty:qty, modified:modified}, null, 'cart_items') + condition;
+    const sqlStatement = pgp.helpers.update({qty:qty, updated_at:updated_at}, null, 'cart_items') + condition;
 
     const queryResult = await db.query(sqlStatement);
     console.log('updated cart Item return:', queryResult.rows[0])

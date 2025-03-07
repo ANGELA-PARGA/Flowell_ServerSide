@@ -3,13 +3,14 @@ const {insertQuery, deleteDoubleConditionQuery, standardDeleteQuery} = require('
 const {updateCartItemsQuery, selectCartItemsQuery} = require('../../DBQueries/cartItemsQueries')
 const moment = require('moment');
 
+
 module.exports = class CartItemsModel {
     constructor(data) {
         this.cart_id = data.cart_id;
         this.product_id = data.product_id;
         this.qty = data.qty;
-        this.created = moment.utc().toISOString();
-        this.modified = moment.utc().toISOString();
+        this.created_at = moment.utc().toISOString();
+        this.updated_at = moment.utc().toISOString();
     }
 
     /**
@@ -26,7 +27,20 @@ module.exports = class CartItemsModel {
             const cartItemAdded = await insertQuery(newCartItem, 'cart_items')
             return cartItemAdded;
         } catch(error) {
-            throw createError(500, 'error on server while creating the cart item', error.stack, error);
+            const dbError = createError(
+                error.status || (error.code ? 400 : 500), // If error.code exists, it's likely a DB error
+                error.code 
+                    ? 'DatabaseError: Issue while creating a cart item' 
+                    : 'ServerError: Unexpected error while creating a cart item'
+            );
+
+            dbError.name = error.code ? 'DatabaseError' : 'ServerError';
+            dbError.message = error.message || 'An unexpected error occurred while creating a cart item';
+            dbError.details = error.details || (error.code ? 'Possible constraint violation' : 'No additional details');
+            dbError.stack = process.env.NODE_ENV === 'development' ? error.stack : 'cartItemsModel / createCartItem';
+            dbError.timestamp = new Date().toISOString();
+
+            throw dbError;
         }
     }
 
@@ -43,7 +57,20 @@ module.exports = class CartItemsModel {
             const updatedCartItem = updateCartItemsQuery(data);
             return updatedCartItem;
         } catch (error) {
-            throw createError(500, 'error on server while updating the cart item', error.stack, error);            
+            const dbError = createError(
+                error.status || (error.code ? 400 : 500), // If error.code exists, it's likely a DB error
+                error.code 
+                    ? 'DatabaseError: Issue while updating a cart item' 
+                    : 'ServerError: Unexpected error while updating a cart item'
+            );
+
+            dbError.name = error.code ? 'DatabaseError' : 'ServerError';
+            dbError.message = error.message || 'An unexpected error occurred while updating a cart item';
+            dbError.details = error.details || (error.code ? 'Possible constraint violation' : 'No additional details');
+            dbError.stack = process.env.NODE_ENV === 'development' ? error.stack : 'cartItemsModel / updateCartItem';
+            dbError.timestamp = new Date().toISOString();
+
+            throw dbError;
         }
     }
     
@@ -58,7 +85,20 @@ module.exports = class CartItemsModel {
             const foundItems = await selectCartItemsQuery(cart_id);
             return foundItems;
         } catch (error) {
-            throw createError(500, 'error on server while retrieving all items from a cart', error.stack, error);              
+            const dbError = createError(
+                error.status || (error.code ? 400 : 500), // If error.code exists, it's likely a DB error
+                error.code 
+                    ? 'DatabaseError: Issue while finding all cart items to order' 
+                    : 'ServerError: Unexpected error while finding all cart items to order'
+            );
+
+            dbError.name = error.code ? 'DatabaseError' : 'ServerError';
+            dbError.message = error.message || 'An unexpected error occurred while finding all cart items to order';
+            dbError.details = error.details || (error.code ? 'Possible constraint violation' : 'No additional details');
+            dbError.stack = process.env.NODE_ENV === 'development' ? error.stack : 'cartItemsModel / findAllCartItemsToOrder';
+            dbError.timestamp = new Date().toISOString();
+
+            throw dbError;
         }
     }
 
@@ -74,7 +114,21 @@ module.exports = class CartItemsModel {
             const deletedItem = await deleteDoubleConditionQuery(data, 'cart_items', 'cart_id', 'product_id')
             return deletedItem
         } catch (error) {
-            throw createError(500, 'error on server while deleting a cart item', error.stack, error);              
+            const dbError = createError(
+                error.status || (error.code ? 400 : 500), // If error.code exists, it's likely a DB error
+                error.code 
+                    ? 'DatabaseError: Issue while deleting a cart item' 
+                    : 'ServerError: Unexpected error while deleting a cart item'
+            );
+
+            dbError.name = error.code ? 'DatabaseError' : 'ServerError';
+            dbError.message = error.message || 'An unexpected error occurred while deleting a cart item';
+            dbError.details = error.details || (error.code ? 'Possible constraint violation' : 'No additional details');
+            dbError.stack = process.env.NODE_ENV === 'development' ? error.stack : 'cartItemsModel / deleteCartItem';
+            dbError.timestamp = new Date().toISOString();
+
+            throw dbError;
+            
         }
     }
 
@@ -83,7 +137,20 @@ module.exports = class CartItemsModel {
             const cartItemsDeleted = await standardDeleteQuery(cart_id, 'cart_items', 'cart_id')
             return cartItemsDeleted
         } catch (error) {
-            throw createError(500, 'error on server while deleting all the cart items', error.stack, error);              
+            const dbError = createError(
+                error.status || (error.code ? 400 : 500), // If error.code exists, it's likely a DB error
+                error.code 
+                    ? 'DatabaseError: Issue while deleting all cart items' 
+                    : 'ServerError: Unexpected error while deleting all cart items'
+            );
+
+            dbError.name = error.code ? 'DatabaseError' : 'ServerError';
+            dbError.message = error.message || 'An unexpected error occurred while deleting all cart items';
+            dbError.details = error.details || (error.code ? 'Possible constraint violation' : 'No additional details');
+            dbError.stack = process.env.NODE_ENV === 'development' ? error.stack : 'cartItemsModel / deleteAllCartItems';
+            dbError.timestamp = new Date().toISOString();
+
+            throw dbError;
         }
     }
 }

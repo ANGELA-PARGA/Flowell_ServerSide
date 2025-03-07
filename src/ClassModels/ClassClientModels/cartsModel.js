@@ -6,8 +6,8 @@ const CartItemsModel = require('./cartItemsModel')
 
 module.exports = class CartsModel {
     constructor(data) {
-        this.created = moment.utc().toISOString();
-        this.modified = moment.utc().toISOString();
+        this.created_at = moment.utc().toISOString();
+        this.updated_at = moment.utc().toISOString();
         this.user_id = data.user_id;
         this.total = 0;
         this.total_items = 0;

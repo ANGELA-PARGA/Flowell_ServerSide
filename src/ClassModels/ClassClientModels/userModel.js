@@ -7,8 +7,8 @@ const {insertQuery, updateQuery, standardSelectQuery, deleteDoubleConditionQuery
 
 module.exports = class UserModel {
     constructor(data){
-        this.created = moment.utc().toISOString();
-        this.modified = moment.utc().toISOString();
+        this.created_at = moment.utc().toISOString();
+        this.updated_at = moment.utc().toISOString();
         this.first_name = data.first_name;
         this.last_name = data.last_name;
         this.email = data.email;

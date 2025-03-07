@@ -29,17 +29,6 @@ module.exports = class OrderService {
         }
     }
 
-    static async updateOrderShippingInfo(dataToUpdate){
-        try {        
-            const orderUpdated = await OrderModel.updateShippingInfo(dataToUpdate);
-            if(!Object.keys(orderUpdated)?.length){
-                throw createError(400, 'order not found or unable to update');                
-            } 
-            return orderUpdated; 
-        } catch (error) {
-            throw error
-        }
-    }
     //data is an object with possibly one of two properties {id, user_id}
     static async findOrder(data){
         try {
@@ -65,9 +54,9 @@ module.exports = class OrderService {
         try {
             const deletedOrder = await OrderModel.deleteOrder(id);
             if(!deletedOrder) {
-                throw createError(400, 'order not found or unable to delete');
+                throw createError(400, 'order not found or unable to cancel');
             } 
-            return {message: 'Order succesfully deleted', status:204};  
+            return deletedOrder  
         } catch (error) {
             throw error
         }

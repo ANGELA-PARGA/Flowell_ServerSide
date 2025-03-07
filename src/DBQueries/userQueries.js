@@ -13,7 +13,7 @@ const selectAllUserInfoQuery = async (parameter) => {
     console.log('CALLING: selectAllUserInfoQuery', parameter)
         const sqlStatement = pgp.as.format(`SELECT 
                                             users.id,
-                                            users.created,
+                                            users.created_at,
                                             users.first_name,
                                             users.last_name,
                                             users.email,
@@ -62,6 +62,92 @@ const selectAllUserInfoQuery = async (parameter) => {
 }
 
 
+/**
+ * Select all users stored on the DB using limit and offset to help pagination and search term for filtering
+ * It returns an array with objects if the query was succesfull, otherwise it returns an empty array
+ * @param {number} limit
+ * @param {number} offset
+ * @param {string } searchTerm
+ * @returns {Array} successfull query
+ * @returns {[]} unsuccessfull query
+ * */
+
+const selectAllUsersQuery = async (limit, offset, searchTerm) => {
+    console.log('calling select all users:', limit, offset, searchTerm);
+
+    const search = searchTerm ? `%${searchTerm}%` : null;  // Convert to wildcard if search provided
+    const queryParams = [limit, offset];
+
+    let searchCondition = '';
+    if (search) {
+        queryParams.push(search, search, search);  // One for each column
+        searchCondition = `
+            AND (
+                first_name ILIKE $3
+                OR last_name ILIKE $4
+                OR email ILIKE $5
+            )
+        `;
+    }
+
+    const sqlStatement = pgp.as.format(
+        `SELECT 
+            users.id, 
+            users.first_name, 
+            users.last_name, 
+            users.email, 
+            users.created_at
+        FROM users
+        WHERE 1=1  -- Dummy condition to safely append the search filter
+        ${searchCondition}
+        ORDER BY users.id
+        LIMIT $1 OFFSET $2`, 
+        queryParams
+    );
+
+    console.log('Executing SQL SELECT ALL USERS:', sqlStatement);
+    console.log('with query params:', queryParams);
+
+    const queryResult = await db.query(sqlStatement);
+    console.log('results on the DB:', queryResult.rows);
+
+    if (queryResult.rows?.length) return queryResult.rows;
+    return [];
+};
+
+
+const selectTotalUsersQuery = async (searchTerm) => {
+    const search = searchTerm ? `%${searchTerm}%` : null;
+    const queryParams = [];
+    let searchCondition = '';
+    if (search) {
+        queryParams.push(search, search, search);  // One for each column
+        searchCondition = `
+            AND (
+                first_name ILIKE $1
+                OR last_name ILIKE $2
+                OR email ILIKE $3
+            )
+        `;
+    }
+
+    const sqlStatement = pgp.as.format(
+            `SELECT COUNT(*) 
+            FROM users
+            WHERE 1=1  -- Dummy condition to safely append the search filter
+            ${searchCondition}`,
+            queryParams 
+    );
+
+    console.log('Executing SQL SELECT TOTAL USERS:', sqlStatement);
+    const queryResult = await db.query(sqlStatement);
+    console.log('results on the DB:', queryResult.rows[0].count)
+    return parseInt(queryResult.rows[0].count, 10);
+};
+
+
 module.exports = {
-    selectAllUserInfoQuery
+    selectAllUserInfoQuery,
+    selectAllUsersQuery,
+    selectTotalUsersQuery
 }

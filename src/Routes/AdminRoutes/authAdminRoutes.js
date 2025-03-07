@@ -61,17 +61,31 @@ router.post('/signup', signupValidators, handleValidationErrors, async (req, res
 });
 
 
-router.post('/logout',  async (req, res, next) => {
-    try { 
-        console.log('calling logout in server')       
+router.post('/logout', async (req, res, next) => {
+    try {
+        console.log('➡️ Logout request received');
+
+        if (!req.session) {
+            console.log("🚨 No session found");
+            return res.status(400).json({ message: "No active session." });
+        }
+
+        console.log("🚨 Session found", req.session);
+
         req.logout((err) => {
             if (err) {
+                console.error("❌ Error in req.logout:", err);
                 return next(err);
-        }})
+            }
+            console.log("✅ Logout successfully");
+        })
+
+        console.log("✅ Session destroyed successfully");
         res.clearCookie('connect.sid');
         res.status(200).json({ message: 'Logged out successfully' });
-                
-    } catch(err) {
+
+    } catch (err) {
+        console.error("❌ Unexpected error in logout:", err);
         next(err);
     }
 });
