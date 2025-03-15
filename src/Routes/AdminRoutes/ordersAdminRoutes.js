@@ -1,9 +1,9 @@
 const express = require('express');
 const router = express.Router();
 const { idParamsValidator, orderShippingInfoValidators, orderDeliveryInfoValidator,
-    orderedItemsValidators, handleValidationErrors } = require('../../Utilities/expressValidators')
+    orderedItemsValidators, trackingValidator, handleValidationErrors } = require('../../Utilities/expressValidators')
 const { checkAuthenticated, checkAdminRole } = require('../../middleware/appMiddlewares')
-const { selectTotalOrdersQuery } = require('../../DBQueries/orderQueries')
+const { selectTotalOrdersQuery, selectOrdersByMonth} = require('../../DBQueries/orderQueries')
 const OrderAdminService = require('../../ServicesLogic/ServicesAdminLogic/orderAdminService')
 
 router.get('/', /*checkAuthenticated, checkAdminRole,*/ async (req, res, next) => {
@@ -28,6 +28,23 @@ router.get('/', /*checkAuthenticated, checkAdminRole,*/ async (req, res, next) =
                 totalPages: Math.ceil(totalOrders / limit),
                 totalOrders: totalOrders
             }, 
+        });
+    } catch(err) {
+        next(err);
+    }
+});
+
+router.get('/dashboard', /*checkAuthenticated, checkAdminRole,*/ async (req, res, next) => {
+    try {
+        const {ordersByStatus: ordersByStatus, ordersByMonth: ordersByMonth, monthWithMostOrders: monthWithMostOrders} = await OrderAdminService.loadGroupedOrders()
+        console.log('inside routes', ordersByStatus, ordersByMonth, monthWithMostOrders)
+        res.status(200).json({
+            status: 'success',
+            message: 'Grouped orders retrieved successfully',
+            code: 200,
+            orders: ordersByStatus, 
+            ordersByMonth: ordersByMonth,
+            monthWithMostOrders: monthWithMostOrders
         });
     } catch(err) {
         next(err);
@@ -117,6 +134,24 @@ router.patch('/:id/items_ordered', /*checkAuthenticated, checkAdminRole,*/ idPar
             message: 'Items updated successfully',
             code: 200,
             order_updated: response 
+        });
+    } catch(err) {
+        next(err);
+    }        
+});
+
+router.patch('/:id/ship_order', /*checkAuthenticated, checkAdminRole,*/ idParamsValidator, trackingValidator, 
+    handleValidationErrors, async (req, res, next) => {
+    try {
+        const tracking = req.body
+        const id = parseInt(req.params.id, 10);
+        console.log('calling api route to ship the order:', tracking, id)
+        const response = await OrderAdminService.shipOrder({id, ...tracking});
+        res.status(200).json({
+            status: 'success',
+            message: 'Order shipped successfully',
+            code: 200,
+            order: response 
         });
     } catch(err) {
         next(err);

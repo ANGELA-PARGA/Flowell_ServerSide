@@ -18,7 +18,7 @@ module.exports = class OrderModel {
         this.city = data.city
         this.state = data.state
         this.zip_code = data.zip_code
-        this.contact_phone = data.contact_phone
+        this.phone = data.phone
     }
     
     /**
@@ -31,7 +31,7 @@ module.exports = class OrderModel {
      * @param {string} city
      * @param {string} state
      * @param {string} zip_code
-     * @param {string} contact_phone
+     * @param {string} phone
      * @returns {Object}
      * @throws {Error}
      */
@@ -74,7 +74,7 @@ module.exports = class OrderModel {
      * @param {string} city
      * @param {string} state
      * @param {string} zip_code
-     * @param {string} contact_phone
+     * @param {string} phone
      * @returns {Object}
      * @throws {Error}
      */
@@ -203,7 +203,7 @@ module.exports = class OrderModel {
                 return false
             }
             const newTotal = await calculateTotal(id,'order_id','ordered_items');
-            const cancelledOrder = await updateQuery({id, total:newTotal.total, status:'CANCELLED'}, 'id','orders')                 
+            const cancelledOrder = await updateQuery({id, total:newTotal.total, status:'CANCELLED', tracking:'NO_TRACKING'}, 'id','orders')                 
             return {
                 cancelledItems: deletedOrderedItems,
                 cancelledOrder: cancelledOrder

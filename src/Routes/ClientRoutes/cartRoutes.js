@@ -82,7 +82,7 @@ router.post('/checkout', checkAuthenticated, createCheckoutValidators, handleVal
                 city: shipping_info.city,
                 state: shipping_info.state,
                 zip_code: shipping_info.zip_code,
-                contact_phone: shipping_info.contact_phone
+                phone: shipping_info.phone
             },
             success_url: `http://localhost:3000/account/orders/success?session_id={CHECKOUT_SESSION_ID}`,
             cancel_url: 'http://localhost:3000/account/cart',

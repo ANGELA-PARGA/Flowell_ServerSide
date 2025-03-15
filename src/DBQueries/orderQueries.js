@@ -17,6 +17,7 @@ const selectAllOrderInfoQuery = async (parameter, columnName) => {
                                             orders.created_at,
                                             orders.updated_at, 
                                             orders.status, 
+                                            orders.tracking,
                                             orders.delivery_date,
                                             orders.total,
                                             json_build_object(
@@ -24,14 +25,15 @@ const selectAllOrderInfoQuery = async (parameter, columnName) => {
                                                 'city', orders.city,
                                                 'state', orders.state,
                                                 'zip_code', orders.zip_code,
-                                                'phone', orders.contact_phone
+                                                'phone', orders.phone
                                             ) AS "shipping_info",
                                             json_agg(
                                                 json_build_object(
                                                     'order_id', ordered_items.order_id,
                                                     'product_id', ordered_items.product_id,
                                                     'name', products.name,
-                                                    'qty', ordered_items.qty
+                                                    'qty', ordered_items.qty,
+                                                    'price', products.price_per_case
                                                 )
                                             ) AS "items"
                                         FROM orders
@@ -60,7 +62,8 @@ const selectAllOrderInfoWithUserQuery = async (parameter, columnName) => {
                                             orders.id, 
                                             orders.created_at,
                                             orders.updated_at, 
-                                            orders.status, 
+                                            orders.status,
+                                            orders.tracking, 
                                             orders.delivery_date, 
                                             orders.total,
                                             json_build_object(
@@ -68,7 +71,7 @@ const selectAllOrderInfoWithUserQuery = async (parameter, columnName) => {
                                                 'city', orders.city,
                                                 'state', orders.state,
                                                 'zip_code', orders.zip_code,
-                                                'phone', orders.contact_phone
+                                                'phone', orders.phone
                                             ) AS "shipping_info",
                                             json_build_object(
                                                 'id', users.id,
@@ -83,7 +86,8 @@ const selectAllOrderInfoWithUserQuery = async (parameter, columnName) => {
                                                     'order_id', ordered_items.order_id,
                                                     'product_id', ordered_items.product_id,
                                                     'name', products.name,
-                                                    'qty', ordered_items.qty
+                                                    'qty', ordered_items.qty,
+                                                    'price', products.price_per_case
                                                 )
                                             ) AS "items"
                                         FROM orders
@@ -181,10 +185,76 @@ const selectTotalOrdersQuery = async (search) => {
     return parseInt(queryResult.rows[0].count, 10);
 };
 
+const selectAllOrdersDashboard = async () => {
+    const sqlStatement = pgp.as.format(`
+        WITH status_counts AS (
+            SELECT status, COUNT(id) AS count
+            FROM orders
+            GROUP BY status
+        )
+        SELECT 
+            (SELECT COUNT(id) FROM orders) AS total_orders,
+            (SELECT COALESCE(SUM(total), 0) FROM orders) AS total_revenue, 
+            json_agg(status_counts) AS status_summary
+        FROM status_counts;
+    `);
+
+    console.log('Executing SQL SELECT ALL ORDERS FOR DASHBOARD:', sqlStatement);
+    const queryResult = await db.query(sqlStatement);
+    console.log('Results on the DB:', queryResult.rows);
+
+    return queryResult.rows[0];
+};
+
+const selectOrdersByMonth = async () => {
+    const sqlStatement = pgp.as.format(`
+        SELECT 
+            TO_CHAR(created_at, 'Month') AS month,  -- ✅ Get month name (e.g., 'January')
+            EXTRACT(MONTH FROM created_at) AS month_number, -- ✅ Get month number (1-12)
+            COUNT(*) AS total_orders
+        FROM orders
+        WHERE 
+            status != 'CANCELLED'  -- ✅ Exclude cancelled orders
+            AND EXTRACT(YEAR FROM created_at) = 2025  -- ✅ Only 2025 orders
+        GROUP BY month, month_number
+        ORDER BY month_number;
+    `);
+
+    console.log('Executing SQL SELECT ORDERS BY MONTH:', sqlStatement);
+    const queryResult = await db.query(sqlStatement);
+    console.log('Results on the DB:', queryResult.rows);
+
+    return queryResult.rows;
+};
+
+const selectMonthWithMostOrders = async () => {
+    const sqlStatement = pgp.as.format(`
+        SELECT 
+            TO_CHAR(created_at, 'Month') AS month,  -- ✅ Get month name (e.g., 'January')
+            EXTRACT(MONTH FROM created_at) AS month_number, -- ✅ Get month number (1-12)
+            COUNT(*) AS total_orders
+        FROM orders
+        WHERE 
+            status != 'CANCELLED'  -- ✅ Exclude cancelled orders
+            AND EXTRACT(YEAR FROM created_at) = 2025  -- ✅ Only 2025 orders
+        GROUP BY month, month_number
+        ORDER BY total_orders DESC  -- ✅ Sort by highest orders first
+        LIMIT 1;  -- ✅ Only return the top month
+    `);
+
+    console.log('Executing SQL SELECT MONTH WITH MOST ORDERS:', sqlStatement);
+    const queryResult = await db.query(sqlStatement);
+    console.log('Results on the DB:', queryResult.rows);
+
+    return queryResult.rows[0] || {};  // ✅ Return only the highest month or an empty object
+};
 
 module.exports = {
     selectAllOrderInfoQuery,
     selectAllOrderInfoWithUserQuery,
     selectAllOrdersQuery,
-    selectTotalOrdersQuery
+    selectTotalOrdersQuery,
+    selectAllOrdersDashboard,
+    selectOrdersByMonth,
+    selectMonthWithMostOrders
 }

@@ -1,7 +1,8 @@
 const createError = require('http-errors');
-const { selectAllProductInfoQueryWithStock, selectAllProducts, 
-        selectProductBySearchParameters,
-        selectAllCategories, selectAllProductsByCategory} = require('../../DBQueries/productQueries')
+const { selectAllProductInfoQueryWithStock, 
+        selectProductBySearchParameters,  selectAllCategories, 
+        selectAllProductsByCategory, selectTopSellingProducts,
+        selectAllProductsDashboard} = require('../../DBQueries/productQueries')
 const { updateQuery } = require('../../DBQueries/generalQueries')
 const moment = require('moment');
 
@@ -22,7 +23,6 @@ module.exports = class ProductAdminModel {
         this.price_per_case = data.price_per_case;
         this.images_urls = data.images_urls;
         this.stock_available = data.stock_available;
-        this.qty_purchased = data.qty_purchased;
     }
 
     /**
@@ -40,16 +40,15 @@ module.exports = class ProductAdminModel {
      * @param {number} price_per_case
      * @param {Array} images_urls
      * @param {number} stock_available
-     * @param {number} qty_purchased
      * @returns {Object}
      * @throws {Error}
      */
     static async createNewProduct(){
         try {
-            const { stock_available, qty_purchased, ...parameters } = this
+            const { stock_available, ...parameters } = this
             const newProduct = await insertQuery(parameters, 'products')   
             const product_id = newProduct.id
-            await insertQuery({product_id, stock_available, qty_purchased}, 'product_stock')
+            await insertQuery({product_id, stock_available, qty_purchased:0, created_at:newProduct.created_at}, 'product_stock')
             return newProduct;
         } catch (error) {
             const dbError = createError(
@@ -100,6 +99,35 @@ module.exports = class ProductAdminModel {
     } 
 
     /**
+     * Update the product details, using an object with the information to be changed and the id:
+     * @param {number} id 
+     * @param {Object} multiple_product_details (color, category_id, among other optional details) 
+     * @returns {Object}
+     * @throws {Error}
+     */
+    static async updateProductDetails(data){
+        try { 
+            const updatedProduct = await updateQuery(data, 'id', 'products')          
+            return updatedProduct;
+        } catch (error) {
+            const dbError = createError(
+                error.status || (error.code ? 400 : 500), // If error.code exists, it's likely a DB error
+                error.code 
+                    ? 'DatabaseError: Issue while updating product details' 
+                    : 'ServerError: Unexpected error while updating product details'
+            );
+
+            dbError.name = error.code ? 'DatabaseError' : 'ServerError';
+            dbError.message = error.message || 'An unexpected error occurred while updating product details';
+            dbError.details = error.details || (error.code ? 'Possible constraint violation' : 'No additional details');
+            dbError.stack = process.env.NODE_ENV === 'development' ? error.stack : 'productAdminModel / updateProductDetails';
+            dbError.timestamp = new Date().toISOString();
+
+            throw dbError;        
+        }
+    } 
+
+    /**
      * Find a all product information using the product ID: 
      * @param {number} id
      * @returns {Object}
@@ -128,13 +156,13 @@ module.exports = class ProductAdminModel {
     }
 
     /**
-     * Returns a list of products: 
+     * Returns a list of products for the E-commerce platform: 
      * @returns {Array}
      * @throws {Error}
      */
     static async returnProductsList(limit, offset, search){
         try {
-            const productsList = await selectAllProducts(limit, offset, search)
+            const productsList = await selectAllProductsDashboard(limit, offset, search)
             return productsList;
         } catch (error) {
             const dbError = createError(
@@ -153,6 +181,33 @@ module.exports = class ProductAdminModel {
             throw dbError;
         }
     }
+
+        /**
+     * Returns most sold products with revenew: 
+     * @returns {Array}
+     * @throws {Error}
+     */
+        static async returnMostSold(){
+            try {
+                const mostSold = await selectTopSellingProducts()
+                return mostSold;
+            } catch (error) {
+                const dbError = createError(
+                    error.status || (error.code ? 400 : 500), // If error.code exists, it's likely a DB error
+                    error.code 
+                        ? 'DatabaseError: Issue while retrieving the most sold products' 
+                        : 'ServerError: Unexpected error while retrieving the most sold products'
+                );
+    
+                dbError.name = error.code ? 'DatabaseError' : 'ServerError';
+                dbError.message = error.message || 'An unexpected error occurred while retrieving the most sold products';
+                dbError.details = error.details || (error.code ? 'Possible constraint violation' : 'No additional details');
+                dbError.stack = process.env.NODE_ENV === 'development' ? error.stack : 'productAdminModel / returnMostSold';
+                dbError.timestamp = new Date().toISOString();
+    
+                throw dbError;
+            }
+        }
 
     /**
      * Returns a list of categories: 

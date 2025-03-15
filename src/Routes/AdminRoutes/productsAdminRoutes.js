@@ -1,9 +1,9 @@
 const express = require('express');
 const router = express.Router();
 const { idParamsValidator, handleValidationErrors,
-        searchTermValidators, newProductValidators, updateStockValidator } = require('../../Utilities/expressValidators')
+        searchTermValidators, newProductValidators, updateStockValidator, updateProductValidators } = require('../../Utilities/expressValidators')
 const { checkAuthenticated, checkAdminRole } = require('../../middleware/appMiddlewares')
-const {selectTotalProducts} = require('../../DBQueries/productQueries')
+const {selectTotalProductsDashboard} = require('../../DBQueries/productQueries')
 
 
 const ProductAdminService = require('../../ServicesLogic/ServicesAdminLogic/productAdminService')
@@ -17,7 +17,7 @@ router.get('/', /*checkAuthenticated, checkAdminRole,*/ async (req, res, next) =
         const search = req.query.term;
 
         const bestProducts = await ProductAdminService.loadAllProducts(limit, offset, search);
-        const totalProducts = await selectTotalProducts(search);
+        const totalProducts = await selectTotalProductsDashboard(search);
 
         res.status(200).json({
             status: 'success',
@@ -36,6 +36,20 @@ router.get('/', /*checkAuthenticated, checkAdminRole,*/ async (req, res, next) =
     }
 });
 
+router.get('/dashboard', /*checkAuthenticated, checkAdminRole,*/ async (req, res, next) => {
+    try {
+        const products = await ProductAdminService.returnMostSold()
+
+        res.status(200).json({
+            status: 'success',
+            message: 'The 3 most sold products retrieved successfully',
+            code: 200,
+            products: products, 
+        });
+    } catch(err) {
+        next(err);
+    }
+});
 
 router.get('/search', /*checkAuthenticated, checkAdminRole,*/ searchTermValidators, handleValidationErrors,
             async (req, res, next) => {
@@ -91,7 +105,25 @@ router.post('/', /*checkAuthenticated, checkAdminRole,*/ newProductValidators, h
 });
 
 
-router.patch('/:id', /*checkAuthenticated, checkAdminRole,*/ idParamsValidator, updateStockValidator, handleValidationErrors, 
+router.patch('/:id/product_details', /*checkAuthenticated, checkAdminRole,*/ idParamsValidator, updateProductValidators, handleValidationErrors, 
+    async (req, res, next) => {
+    try {
+        const id = parseInt(req.params.id, 10);
+        const details = req.body
+        console.log('calling api route to update product details by id:', id, details)
+        const response = await ProductAdminService.updateProductDetails({id, ...details});
+        res.status(200).json({
+            status: 'success',
+            message: 'Product details updated succesfully',
+            code: 200,
+            product_updated: response 
+        });
+    } catch(err) {
+        next(err);
+    }
+});
+
+router.patch('/:id/stock', /*checkAuthenticated, checkAdminRole,*/ idParamsValidator, updateStockValidator, handleValidationErrors, 
             async (req, res, next) => {
     try {
         const id = parseInt(req.params.id, 10);

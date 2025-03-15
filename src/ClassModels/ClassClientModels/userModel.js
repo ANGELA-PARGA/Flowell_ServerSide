@@ -126,8 +126,8 @@ module.exports = class UserModel {
     static async addNewUserInfo(data){
         try {
             const { user_id, resource, ...params } = data
-            params.created = moment.utc().toISOString();
-            params.modified = moment.utc().toISOString();
+            params.created_at = moment.utc().toISOString();
+            params.updated_at = moment.utc().toISOString();
             const tableName = verifyResource(resource);            
             const newUserInfo = await insertQuery({user_id, ...params}, tableName)
             return newUserInfo;            

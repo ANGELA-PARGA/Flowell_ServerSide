@@ -112,7 +112,7 @@ module.exports = class CartService{
                         city: session.metadata.city,
                         state: session.metadata.state,
                         zip_code: session.metadata.zip_code, 
-                        contact_phone: session.metadata.contact_phone
+                        phone: session.metadata.phone
                     }
                 );               
     

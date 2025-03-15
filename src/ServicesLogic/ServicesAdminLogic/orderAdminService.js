@@ -11,6 +11,15 @@ module.exports = class OrderService {
             throw error
         }
     }
+
+    static async loadGroupedOrders(){
+        try {
+            const groupedOrders = await OrderAdminModel.loadGroupedOrders()
+            return groupedOrders
+        } catch (error) {
+            throw error
+        }
+    }
     
     static async updateOrderShippingInfo(dataToUpdate){
         try {        
@@ -31,6 +40,18 @@ module.exports = class OrderService {
                 throw createError(400, 'order not found or unable to update');                
             } 
             return orderUpdated; 
+        } catch (error) {
+            throw error
+        }
+    }
+
+    static async shipOrder(data){
+        try {        
+            const orderShipped = await OrderAdminModel.shipOrder(data);
+            if(!Object.keys(orderShipped)?.length){
+                throw createError(400, 'order not found or unable to ship');                
+            } 
+            return orderShipped; 
         } catch (error) {
             throw error
         }

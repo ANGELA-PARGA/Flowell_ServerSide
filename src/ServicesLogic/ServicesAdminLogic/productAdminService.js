@@ -21,6 +21,16 @@ module.exports = class ProductAdminService {
         }
     }
 
+    //Returns the 3 most products sold:     
+    static async returnMostSold(){
+        try {
+            const mostSoldProducts = await ProductAdminModel.returnMostSold()
+            return mostSoldProducts;
+        } catch (error) {
+            throw error
+        }
+    }
+
     //Returns a list of categories:     
     static async loadAllCategories(){
         try {
@@ -77,6 +87,16 @@ module.exports = class ProductAdminService {
         try { 
             const productUpdated = await ProductAdminModel.updateStock(stockData);
             return productUpdated
+        } catch (error) {
+            throw error
+        }
+    }
+
+    //update the details of a product
+    static async updateProductDetails(data){
+        try {
+            const productUpdated = await ProductAdminModel.updateProductDetails(data);           
+            return productUpdated;         
         } catch (error) {
             throw error
         }
