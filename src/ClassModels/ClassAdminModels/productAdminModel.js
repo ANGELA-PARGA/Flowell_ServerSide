@@ -3,28 +3,9 @@ const { selectAllProductInfoQueryWithStock,
         selectProductBySearchParameters,  selectAllCategories, 
         selectAllProductsByCategory, selectTopSellingProducts,
         selectAllProductsDashboard} = require('../../DBQueries/productQueries')
-const { updateQuery } = require('../../DBQueries/generalQueries')
-const moment = require('moment');
+const { updateQuery, insertQuery } = require('../../DBQueries/generalQueries');
 
 module.exports = class ProductAdminModel {
-    constructor(data) {
-        this.created_at = moment.utc().toISOString();
-        this.updated_at = moment.utc().toISOString();
-        this.category_id = data.category_id;
-        this.name = data.name;
-        this.description = data.description;
-        this.color = data.color;
-        this.stem_length_cm = data.stem_length_cm;
-        this.bloom_size_cm = data.bloom_size_cm;
-        this.blooms_per_stem = data.blooms_per_stem;
-        this.life_in_days = data.life_in_days;
-        this.qty_per_case = data.qty_per_case;
-        this.measure_per_case = data.measure_per_case;
-        this.price_per_case = data.price_per_case;
-        this.images_urls = data.images_urls;
-        this.stock_available = data.stock_available;
-    }
-
     /**
      * Create a new product using data object with the following properties: 
      * @param {number} category_id
@@ -38,16 +19,22 @@ module.exports = class ProductAdminModel {
      * @param {number} qty_per_case
      * @param {string} measure_per_case
      * @param {number} price_per_case
-     * @param {Array} images_urls
      * @param {number} stock_available
+     * @param {Array} images_url
      * @returns {Object}
      * @throws {Error}
      */
-    static async createNewProduct(){
+    static async createNewProduct(data){
         try {
-            const { stock_available, ...parameters } = this
+            const { stock_available, ...parameters } = data
+
+            console.log('data received in create new model', parameters)
+
+            /*insert the product information but not yet the images and stock*/
             const newProduct = await insertQuery(parameters, 'products')   
             const product_id = newProduct.id
+
+            /*insert the stock quantity and upload the images and set the urls to the DB*/
             await insertQuery({product_id, stock_available, qty_purchased:0, created_at:newProduct.created_at}, 'product_stock')
             return newProduct;
         } catch (error) {

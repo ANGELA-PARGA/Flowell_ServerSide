@@ -3,10 +3,9 @@ const OrderModel = require('../../ClassModels/ClassClientModels/orderModel');
 
 module.exports = class OrderService {
     
-    async createNewOrder(orderData){
+    static async createNewOrder(orderData){
         try {
-            const orderInstance = new OrderModel(orderData);
-            const newOrder = await orderInstance.createOrder();
+            const newOrder = await OrderModel.createOrder(orderData);
             if(!Object.keys(newOrder)?.length){
                 throw createError(400, 'unable to create the new order');                
             }            

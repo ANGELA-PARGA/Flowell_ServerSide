@@ -70,8 +70,8 @@ const changePasswordOnRecoveryValidator = [
 
 
 const updatePersonalInfoValidators = [
-    body('first_name').trim().notEmpty().isString().isLength({ min: 2 }).withMessage('First name must be at least 2 characters long'),
-    body('last_name').trim().notEmpty().isString().isLength({ min: 2 }).withMessage('Last name must be at least 2 characters long'),
+    body('first_name').trim().notEmpty().isString().escape().isLength({ min: 2 }).withMessage('First name must be at least 2 characters long'),
+    body('last_name').trim().notEmpty().isString().escape().isLength({ min: 2 }).withMessage('Last name must be at least 2 characters long'),
 ]
 
 const updateAddressInfoValidators = [
@@ -171,24 +171,23 @@ const searchTermValidators = [
 
 const newProductValidators = [
     body('category_id').trim().notEmpty().withMessage('Category id is required').isInt().withMessage('Category id must be a number and is required'),
-    body('name').trim().notEmpty().isString().withMessage('Product name is required'),
-    body('description').trim().notEmpty().isString().withMessage('Product description is required'),
+    body('name').trim().notEmpty().isString().escape().withMessage('Product name is required'),
+    body('description').trim().notEmpty().isString().escape().withMessage('Product description is required'),
     body('color').trim().notEmpty().isString().withMessage('Color is required'),
     body('stem_length_cm').trim().notEmpty().isInt().withMessage('stem_length_cm is required'),
-    body('bloom_size_cm').trim().notEmpty().isInt().withMessage('bloom_size_cm is required'),
+    body('bloom_size_cm').trim().notEmpty().isFloat().withMessage('bloom_size_cm is required'),
     body('blooms_per_stem').trim().notEmpty().isInt().withMessage('blooms_per_stem is required'),
     body('life_in_days').trim().notEmpty().isInt().withMessage('life_in_days is required'),
     body('qty_per_case').trim().notEmpty().isInt().withMessage('qty_per_case is required'),
-    body('measure_per_case').trim().notEmpty().isInt().withMessage('measure_per_case is required'),
+    body('measure_per_case').trim().notEmpty().isString().withMessage('measure_per_case is required'),
     body('price_per_case').trim().notEmpty().isFloat().withMessage('price_per_case is required'),
-    body('images_urls').trim().notEmpty().isArray().withMessage('images_urls is required'),
     body('stock_available').trim().notEmpty().isInt().withMessage('blooms_per_stem is required')
 ]
 
 const updateProductValidators  = [
     body('category_id').trim().optional().isInt().withMessage('Category id must be a number and is required'),
-    body('name').trim().optional().isString().withMessage('Product name is required'),
-    body('description').trim().optional().isString().withMessage('Product description is required'),
+    body('name').trim().optional().isString().escape().withMessage('Product name is required'),
+    body('description').trim().optional().isString().escape().withMessage('Product description is required'),
     body('color').trim().optional().isString().withMessage('Color is required'),
     body('stem_length_cm').trim().optional().isInt().withMessage('stem_length_cm is required'),
     body('bloom_size_cm').trim().optional().isInt().withMessage('bloom_size_cm is required'),
@@ -213,7 +212,6 @@ const trackingValidator = [
 /*middleware for routes handle validation errors */
 
 const handleValidationErrors = (req, res, next) => {
-    console.log('calling validation errors')
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
         console.log(errors)

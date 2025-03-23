@@ -8,10 +8,9 @@ require('dotenv').config({ path: 'variables.env' });
 module.exports = class CartService{
 
     //data is an object { user_id }
-    async createNewCart(data){
+    static async createNewCart(data){
         try {
-            const cartInstance = new CartsModel(data);
-            const newCart = await cartInstance.createCart();
+            const newCart = await CartsModel.createCart(data);
             if(!Object.keys(newCart)?.length){
                 throw createError(400, 'unable to create new cart');                
             } 
@@ -100,9 +99,8 @@ module.exports = class CartService{
                 })
 
                 console.log('calling createNewOrder with:', user_id, cart_id, totalPrice, itemsToOrder)
-                const OrderServiceInstance = new OrderService();
 
-                const order = await OrderServiceInstance.createNewOrder(
+                const order = await OrderService.createNewOrder(
                     {   
                         user_id, 
                         total:totalPrice, 
@@ -112,7 +110,8 @@ module.exports = class CartService{
                         city: session.metadata.city,
                         state: session.metadata.state,
                         zip_code: session.metadata.zip_code, 
-                        phone: session.metadata.phone
+                        phone: session.metadata.phone,
+                        status: 'PAID'
                     }
                 );               
     

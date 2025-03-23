@@ -1,5 +1,7 @@
 const express = require('express');
 const router = express.Router();
+const upload = require('../../config/multer');
+const uploadImage = require('../../config/cloudinary')
 const { idParamsValidator, handleValidationErrors,
         searchTermValidators, newProductValidators, updateStockValidator, updateProductValidators } = require('../../Utilities/expressValidators')
 const { checkAuthenticated, checkAdminRole } = require('../../middleware/appMiddlewares')
@@ -88,16 +90,31 @@ router.get('/:id', /*checkAuthenticated, checkAdminRole,*/ idParamsValidator, ha
     }
 });
 
-router.post('/', /*checkAuthenticated, checkAdminRole,*/ newProductValidators, handleValidationErrors, async (req, res, next) => {
+router.post('/', /*checkAuthenticated, checkAdminRole,*/upload.array('images_url', 3), newProductValidators, handleValidationErrors, async (req, res, next) => {
     try {
-        const data = req.body
-        console.log('calling api route for creating a new product', data)
-        const response = await ProductAdminService.createNewProduct({...data})
+        console.log('🛠️ Processing new product creation...');            
+        // ✅ 1. Extract text fields
+        const data = req.body;
+
+        // ✅ 2. Upload images to Cloudinary, here we have to use the buffer to 
+        const imageUrls = await Promise.all(req.files.map(async (file) => {
+            const buffer = file.buffer; 
+            return await uploadImage(`data:image/jpeg;base64,${buffer.toString('base64')}`);
+        }));
+        
+        console.log('🌄 Uploaded Images:', imageUrls);
+
+        // ✅ 3. Save product data + image URLs in the DB
+        const newProduct = await ProductAdminService.createNewProduct({
+            ...data,
+            images_urls: imageUrls
+        });
+
         res.status(200).json({
             status: 'success',
             message: 'Product created succesfully',
             code: 200,
-            new_product: response 
+            new_product: newProduct 
         });
     } catch(err) {
         next(err);

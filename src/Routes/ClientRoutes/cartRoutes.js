@@ -1,9 +1,9 @@
+require('dotenv').config({ path: 'variables.env' });
 const express = require('express');
 const router = express.Router();
 const { handleValidationErrors, idParamsValidator,
     updateCartValidators, createCheckoutValidators } = require('../../Utilities/expressValidators')
 const { checkAuthenticated } = require('../../middleware/appMiddlewares')
-require('dotenv').config({ path: 'variables.env' });
 const CartService = require('../../ServicesLogic/ServiceClientLogic/CartService')
 const CartItemsModel = require('../../ClassModels/ClassClientModels/cartItemsModel');
 
@@ -84,8 +84,8 @@ router.post('/checkout', checkAuthenticated, createCheckoutValidators, handleVal
                 zip_code: shipping_info.zip_code,
                 phone: shipping_info.phone
             },
-            success_url: `http://localhost:3000/account/orders/success?session_id={CHECKOUT_SESSION_ID}`,
-            cancel_url: 'http://localhost:3000/account/cart',
+            success_url: `${process.env.NEXT_PUBLIC_HOST}/account/orders/success?session_id={CHECKOUT_SESSION_ID}`,
+            cancel_url: `${process.env.NEXT_PUBLIC_HOST}/account/cart`,
             expires_at: Math.floor(Date.now() / 1000) + 1800
         });
 

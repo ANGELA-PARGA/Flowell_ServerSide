@@ -5,22 +5,7 @@ const {insertQuery,updateQuery,calculateTotal} = require('../../DBQueries/genera
 const {selectAllOrderInfoQuery} = require('../../DBQueries/orderQueries')
 const {cancelOrderedItemsQuery} = require('../../DBQueries/orderedItemsQueries')
 
-module.exports = class OrderModel {
-    constructor(data) {
-        this.created_at = moment.utc().toISOString();
-        this.updated_at = moment.utc().toISOString();
-        this.user_id = data.user_id;
-        this.status = 'PAID';
-        this.total = data.total;
-        this.items = data.items;
-        this.delivery_date = data.delivery_date;
-        this.address = data.address;
-        this.city = data.city
-        this.state = data.state
-        this.zip_code = data.zip_code
-        this.phone = data.phone
-    }
-    
+module.exports = class OrderModel {    
     /**
      * Create an order using data object with the following properties: 
      * @param {number} user_id
@@ -35,15 +20,14 @@ module.exports = class OrderModel {
      * @returns {Object}
      * @throws {Error}
      */
-    async createOrder(){
+    static async createOrder(orderData){
         try {     
-            const { items, ...parameters } = this
+            const { items, ...parameters } = orderData
             const newOrder = await insertQuery(parameters, 'orders')
             const order_id = newOrder.id            
 
             const orderedItemsPromises = items.map(async (item) => {
-                const newOrderedItem = new OrderedItemsModel({ ...item, order_id });
-                return await newOrderedItem.createOrderedItems();
+                return await OrderedItemsModel.createOrderedItems({ ...item, order_id });
             });
     
             newOrder.items = await Promise.all(orderedItemsPromises);

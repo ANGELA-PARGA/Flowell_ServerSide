@@ -2,15 +2,7 @@ const createError = require('http-errors');
 const {insertQuery, standardSelectQuery } = require('../../DBQueries/generalQueries')
 const moment = require('moment');
 
-module.exports = class OrderedItemsModel {
-    constructor(data) {
-        this.order_id = data.order_id;
-        this.product_id = data.product_id;
-        this.qty = data.qty;
-        this.created_at = moment.utc().toISOString();
-        this.updated_at = moment.utc().toISOString();
-    }
-    
+module.exports = class OrderedItemsModel {    
     /**
      * Create an ordered item using data object with the following properties: 
      * @param {number} order_id
@@ -19,9 +11,9 @@ module.exports = class OrderedItemsModel {
      * @returns {Object}
      * @throws {Error}
      */
-    async createOrderedItems(){
+    static async createOrderedItems(data){
         try {
-            const orderedItem = this;               
+            const orderedItem = data;               
             const newOrderedItem = await insertQuery(orderedItem, 'ordered_items')
             return newOrderedItem;
         } catch(error) {

@@ -2,8 +2,7 @@ const createError = require('http-errors');
 const UserModel = require('../../ClassModels/ClassClientModels/userModel');
 const { comparePasswords } = require('../../Utilities/utilities');
 
-module.exports = class Authentication {
-    
+module.exports = class Authentication {    
     async register(userData){
         try {
             const { email } = userData;
@@ -26,7 +25,7 @@ module.exports = class Authentication {
         }
     }
 
-    async login(email, password){
+    static async login(email, password){
         try {
             const userFound = await UserModel.findUserByEmail(email);
 

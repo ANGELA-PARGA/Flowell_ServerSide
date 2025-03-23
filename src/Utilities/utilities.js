@@ -1,5 +1,7 @@
+
 const bcrypt = require('bcrypt')
 const nodemailer = require('nodemailer');
+
 
 /**
  * Compares an unencrypted password with a password encrypted using bcrypt.
@@ -86,12 +88,13 @@ const sendEmail = async (email, subject, message) => {
             html: message
         };
         const info = await transporter.sendMail(mailOptions);
-        console.log('response after sending email', info)
         return info;
     } catch (error) {
         throw new Error('The email could not be sent' + error)        
     }
 }
+
+
 
 module.exports = {
     comparePasswords: comparePasswords,

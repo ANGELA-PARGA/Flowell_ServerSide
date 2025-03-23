@@ -14,23 +14,20 @@ router.post('/api/webhook', bodyParser.raw({type: 'application/json'}), async (r
     try {
         const sig = req.headers['stripe-signature'];
         event = stripe.webhooks.constructEvent(req.body, sig, endpointSecret);
-        console.log('1. this is the event on webhook', event)
     } catch (err) {
-        console.error(`Webhook signature verification failed.`, err);
+        console.error(`🚨 Webhook signature verification failed.`, err);
         return res.status(400).send(`Webhook Error: ${err.message}`);
     }
 
     // Handle the checkout.session.completed or async_payment_succeeded event
     if (event.type === 'checkout.session.completed') {        
-        const session = event.data.object; 
-        console.log('there is a session', session)       
+        const session = event.data.object;        
         await CartService.checkoutCart(session.id);        
     } 
     
     if (event.type === 'checkout.session.expired' || event.type === 'payment_intent.payment_failed') {
-        console.log('2. the event failed. this is the type', event)
         const session = event.data.object; 
-        console.log('the checkout session expired', session)         
+        console.log('🚨 the checkout session expired', session)         
     }
 
     res.status(200).end();

@@ -15,7 +15,6 @@ const selectAllOrderInfoQuery = async (parameter, columnName) => {
     const sqlStatement = pgp.as.format(`SELECT 
                                             orders.id, 
                                             orders.created_at,
-                                            orders.updated_at, 
                                             orders.status, 
                                             orders.tracking,
                                             orders.delivery_date,
@@ -28,12 +27,10 @@ const selectAllOrderInfoQuery = async (parameter, columnName) => {
                                                 'phone', orders.phone
                                             ) AS "shipping_info",
                                             json_agg(
-                                                json_build_object(
-                                                    'order_id', ordered_items.order_id,
+                                                json_build_object(                    
                                                     'product_id', ordered_items.product_id,
                                                     'name', products.name,
-                                                    'qty', ordered_items.qty,
-                                                    'price', products.price_per_case
+                                                    'qty', ordered_items.qty
                                                 )
                                             ) AS "items"
                                         FROM orders

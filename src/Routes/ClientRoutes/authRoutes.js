@@ -18,8 +18,7 @@ router.post('/login', loginValidators, handleValidationErrors, passport.authenti
 
         if(!Object.keys(loadCart)?.length){
             console.log('there is NOT CART...creating one')
-            const CartServiceInstance = new CartService();
-            loadCart = await CartServiceInstance.createNewCart({user_id: req.user.id})
+            loadCart = await CartService.createNewCart({user_id: req.user.id})
         }
         cartId = loadCart.id;
         const { id, first_name, last_name, email, role } = req.user;
@@ -56,8 +55,7 @@ router.post('/signup', signupValidators, handleValidationErrors, async (req, res
 
         if (!Object.keys(loadCart)?.length) {
             console.log('there is NOT CART...creating one')
-            const CartServiceInstance = new CartService();
-            loadCart = await CartServiceInstance.createNewCart({ user_id: newUser.id });
+            loadCart = await CartService.createNewCart({ user_id: newUser.id });
         }
 
         cartId = loadCart.id

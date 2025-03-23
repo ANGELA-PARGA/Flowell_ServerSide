@@ -1,18 +1,8 @@
 const createError = require('http-errors');
 const {insertQuery, deleteDoubleConditionQuery, standardDeleteQuery} = require('../../DBQueries/generalQueries')
 const {updateCartItemsQuery, selectCartItemsQuery} = require('../../DBQueries/cartItemsQueries')
-const moment = require('moment');
-
 
 module.exports = class CartItemsModel {
-    constructor(data) {
-        this.cart_id = data.cart_id;
-        this.product_id = data.product_id;
-        this.qty = data.qty;
-        this.created_at = moment.utc().toISOString();
-        this.updated_at = moment.utc().toISOString();
-    }
-
     /**
      * Create a new cart item using data object with the following properties: 
      * @param {number} cart_id
@@ -21,9 +11,9 @@ module.exports = class CartItemsModel {
      * @returns {Object}
      * @throws {Error}
      */
-    async createCartItem(){
+    static async createCartItem(data){
         try {
-            const newCartItem = this;         
+            const newCartItem = data;         
             const cartItemAdded = await insertQuery(newCartItem, 'cart_items')
             return cartItemAdded;
         } catch(error) {

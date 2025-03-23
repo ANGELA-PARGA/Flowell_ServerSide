@@ -1,27 +1,18 @@
 const createError = require('http-errors');
-const moment = require('moment');
 const {insertQuery, updateQuery, calculateTotal, calculateTotalItems} = require('../../DBQueries/generalQueries')
 const {selectAllCartInfoQuery} = require('../../DBQueries/cartQueries')
 const CartItemsModel = require('./cartItemsModel')
 
-module.exports = class CartsModel {
-    constructor(data) {
-        this.created_at = moment.utc().toISOString();
-        this.updated_at = moment.utc().toISOString();
-        this.user_id = data.user_id;
-        this.total = 0;
-        this.total_items = 0;
-    }
-    
+module.exports = class CartsModel {    
     /**
      * Create a cart using data object with the following properties: 
      * @param {number} user_id
      * @returns {Object}
      * @throws {Error}
      */
-    async createCart(){
+    static async createCart(data){
         try {   
-            const newCartCreated = this;
+            const newCartCreated = data;
             const newCartAdded = await insertQuery(newCartCreated, 'carts')      
             return newCartAdded;
         } catch(error) {

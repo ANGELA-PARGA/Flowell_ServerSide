@@ -7,8 +7,7 @@ passport.use(new LocalStrategy({
     usernameField: 'email'
 }, async (email, password, done) => {
         try {
-            const AuthenticationInstance = new Authentication();
-            const authUser = await AuthenticationInstance.login(email, password);
+            const authUser = await Authentication.login(email, password);
             if(!Object.keys(authUser)?.length) return done(null, false);
             return done(null, authUser);
         } catch (error) {
@@ -18,13 +17,11 @@ passport.use(new LocalStrategy({
 ));
 
 passport.serializeUser((user, done) => {
-    console.log('calling serialize user')
     done(null, user);
 });
 
 passport.deserializeUser(async (user, done) => {
     try {
-        console.log('calling deserialize user')
         return done(null, user);        
     } catch (error) {
         return done(error);        

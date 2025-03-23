@@ -128,8 +128,7 @@ module.exports = class ProductModel {
     static async addProductToCart(data){
         try {
             const { cart_id } = data
-            const CartItemInstance = new CartItemsModel(data)
-            const itemToAdd = await CartItemInstance.createCartItem()
+            const itemToAdd = await CartItemsModel.createCartItem(data)
 
             const newTotal = await calculateTotal(cart_id,'cart_id','cart_items');
             const newItemNumber = await calculateTotalItems(cart_id,'cart_id','cart_items');         

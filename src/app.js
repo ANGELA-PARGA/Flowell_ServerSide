@@ -5,20 +5,32 @@ const express = require('express');
 const session = require('express-session');
 const cors = require('cors');
 const morgan = require('morgan');
+const helmet = require('helmet');
+const rateLimit = require('express-rate-limit');
 const bodyParser =  require('body-parser');
 const sessionConfig = require('./config/session');
 const passport = require('./config/passport');
 
 
 const app = express();
+// Security middleware
+app.use(helmet());
 
 app.use(morgan('dev'));
 /*setting cors configuration */
 const corsOptions = {
-    origin: "http://localhost:3000",
+    origin: process.env.NEXT_PUBLIC_HOST || "http://localhost:3000",
     credentials: true,
 };
 app.use(cors(corsOptions));
+
+// Rate limiting
+const apiLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    max: 50, // Limit each IP to 50 requests per windowMs
+    message: "Too many requests from this IP, please try again later.",
+});
+app.use('/api', apiLimiter);
 
 const stripeWebhook = require('./config/stripe');
 app.use(stripeWebhook);
