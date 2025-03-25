@@ -26,8 +26,8 @@ app.use(cors(corsOptions));
 
 // Rate limiting
 const apiLimiter = rateLimit({
-    windowMs: 15 * 60 * 1000, // 15 minutes
-    max: 50, // Limit each IP to 50 requests per windowMs
+    windowMs: 5 * 60 * 1000, // 5 minutes
+    max: 20, // Limit each IP to 20 requests per windowMs
     message: "Too many requests from this IP, please try again later.",
 });
 app.use('/api', apiLimiter);
@@ -39,6 +39,7 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
 /*setting session configuration */
+app.set("trust proxy", 1);
 app.use(session(sessionConfig));
 
 /*setting passport local strategy*/
