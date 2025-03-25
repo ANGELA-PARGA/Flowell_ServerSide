@@ -28,7 +28,7 @@ const sessionConfig = {
         maxAge: 24 * 60 * 60 * 1000, // 1 day
         secure: isProduction, // Use secure cookies in production (requires HTTPS)
         httpOnly: true, // Prevent client-side JavaScript from accessing the cookie
-        sameSite: isProduction ? 'lax' : 'strict', // Use 'lax' in production for cross requests
+        sameSite: isProduction ? 'strict' : 'lax', // Use 'strict' in production for cross requests
         domain: isProduction ? process.env.NEXT_PUBLIC_HOST : 'localhost', // Use your production domain
     },
 };

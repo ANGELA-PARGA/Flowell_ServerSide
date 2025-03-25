@@ -7,8 +7,8 @@ const bodyParser =  require('body-parser');
 const CartService = require('../ServicesLogic/ServiceClientLogic/CartService');
 
 /*remember download ngrok, open the command line, paste the SECRET ID from ngrok, and use it, 
-plus '/api/webhook' inside the stripe webhook dashboard to open the connection. This webhook requires raw data */
-router.post('/api/webhook', bodyParser.raw({type: 'application/json'}), async (req, res) => {   
+plus '/webhook' inside the stripe webhook dashboard to open the connection. This webhook requires raw data */
+router.post('/webhook', bodyParser.raw({type: 'application/json'}), async (req, res) => {   
     let event;
 
     try {

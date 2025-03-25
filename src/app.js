@@ -30,7 +30,7 @@ const apiLimiter = rateLimit({
     max: 20, // Limit each IP to 20 requests per windowMs
     message: "Too many requests from this IP, please try again later.",
 });
-app.use('/api', apiLimiter);
+app.use('/', apiLimiter);
 
 const stripeWebhook = require('./config/stripe');
 app.use(stripeWebhook);
@@ -48,40 +48,40 @@ app.use(passport.session());
 
 
 /*setting root path, login and sign up paths*/
-app.get('/api', (req, res) =>{
+app.get('/', (req, res) =>{
     res.send('This is the main page of Flowell')
 });
 
 
 /*setting client role routes */
 const authRoutes = require('./Routes/ClientRoutes/authRoutes');
-app.use('/api/auth', authRoutes);
+app.use('/auth', authRoutes);
 
 const userRoutes = require('./Routes/ClientRoutes/userRoutes');
-app.use('/api/profile', userRoutes);
+app.use('/profile', userRoutes);
 
 const productRoutes = require('./Routes/ClientRoutes/productRoutes');
-app.use('/api/products', productRoutes);
+app.use('/products', productRoutes);
 
 const orderRoutes = require('./Routes/ClientRoutes/orderRoutes');
-app.use('/api/orders', orderRoutes);
+app.use('/orders', orderRoutes);
 
 const cartRoutes = require('./Routes/ClientRoutes/cartRoutes');
-app.use('/api/cart', cartRoutes);
+app.use('/cart', cartRoutes);
 
 
 /*setting admin role routes */
 const authAdminRoutes = require('./Routes/AdminRoutes/authAdminRoutes');
-app.use('/api/admin/auth', authAdminRoutes);
+app.use('/admin/auth', authAdminRoutes);
 
 const productAdminRoutes = require('./Routes/AdminRoutes/productsAdminRoutes');
-app.use('/api/admin/products', productAdminRoutes);
+app.use('/admin/products', productAdminRoutes);
 
 const orderAdminRoutes = require('./Routes/AdminRoutes/ordersAdminRoutes');
-app.use('/api/admin/orders', orderAdminRoutes);
+app.use('/admin/orders', orderAdminRoutes);
 
 const userAdminRoutes = require('./Routes/AdminRoutes/usersAdminRoutes');
-app.use('/api/admin/users', userAdminRoutes);
+app.use('/admin/users', userAdminRoutes);
 
 const {errorHandler} = require('./middleware/appMiddlewares');
 /*setting error handler middleware */
