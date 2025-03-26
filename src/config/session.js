@@ -29,7 +29,7 @@ const sessionConfig = {
         secure: isProduction, // Use secure cookies in production (requires HTTPS)
         httpOnly: true, // Prevent client-side JavaScript from accessing the cookie
         sameSite: isProduction ? 'strict' : 'lax', // Use 'strict' in production for cross requests
-        domain: isProduction ? process.env.NEXT_PUBLIC_HOST : 'localhost', // Use your production domain
+        domain: isProduction ? process.env.DOMAIN : 'localhost', // Use your production domain
     },
 };
 
