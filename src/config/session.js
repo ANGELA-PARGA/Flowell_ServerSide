@@ -3,11 +3,21 @@ require('dotenv').config({ path: 'variables.env' });
 
 /* Setting MongoDB to store sessions */
 const MongoDBStore = require('connect-mongodb-session')(session);
+const mongoose = require('mongoose'); // Ensure we use connection pooling
 
+// Use a single connection for efficiency
+mongoose.connect(process.env.MONGODB, {
+    maxPoolSize: 10, // Limit the number of concurrent connections
+}).then(() => console.log("✅ Connected to MongoDB"))
+.catch(err => console.error("🚨 MongoDB Connection Error:", err));
+
+// MongoDB Session Store Configuration
 const store = new MongoDBStore({
     uri: process.env.MONGODB,
     collection: 'sessions',
-    autoRemoveInterval: 10, // Removes expired sessions every 10 minutes
+    autoRemove: 'interval',
+    autoRemoveInterval: 60, // Clean up expired sessions every 30 minutes (was 10)
+    touchAfter: 3600, // Update session in DB only every 30 minutes (1800 sec)
 });
 
 store.on('error', function (error) {
