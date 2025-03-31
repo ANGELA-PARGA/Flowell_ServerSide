@@ -1,7 +1,6 @@
 /*middlewares for routes */
 
 const checkAuthenticated = (req, res, next) => {
-    const auth = req.isAuthenticated()
     if (req.isAuthenticated()) { 
         return next() 
     }

@@ -69,7 +69,6 @@ module.exports = class UserAdminModel {
      */
     static async findAllUserInfoById(user_id){
         try {
-            console.log('findAllUserInfoById MODEL CALL', user_id)  
             const userCompleteInfo = await selectAllUserInfoQuery(user_id);
             return userCompleteInfo;    
         } catch (error) {
@@ -104,7 +103,6 @@ module.exports = class UserAdminModel {
      */
     static async findAllUserOrdersById(user_id){
         try {
-            console.log('findAllUserOrdersById MODEL CALL', user_id)  
             const userOrdersInfo = await selectAllOrderInfoQuery(user_id, 'user_id');
             return userOrdersInfo;    
         } catch (error) {

@@ -59,7 +59,6 @@ router.get('/search', /*checkAuthenticated, checkAdminRole,*/ searchTermValidato
         const data = req.query.term;
         const { color, category } = req.query;      
 
-        console.log('calling api route for search products:', data, color, category)
         const response = await ProductAdminService.findProductsBySearch(data, {color, category})
 
         res.status(200).json({
@@ -77,7 +76,6 @@ router.get('/:id', /*checkAuthenticated, checkAdminRole,*/ idParamsValidator, ha
             async (req, res, next) => {
     try {
         const id = parseInt(req.params.id, 10);
-        console.log('calling api route for product by id:', id)
         const response = await ProductAdminService.loadSpecificProduct(id)
         res.status(200).json({
             status: 'success',
@@ -91,8 +89,7 @@ router.get('/:id', /*checkAuthenticated, checkAdminRole,*/ idParamsValidator, ha
 });
 
 router.post('/', /*checkAuthenticated, checkAdminRole,*/upload.array('images_url', 3), newProductValidators, handleValidationErrors, async (req, res, next) => {
-    try {
-        console.log('🛠️ Processing new product creation...');            
+    try {          
         // ✅ 1. Extract text fields
         const data = req.body;
 
@@ -102,8 +99,6 @@ router.post('/', /*checkAuthenticated, checkAdminRole,*/upload.array('images_url
             return await uploadImage(`data:image/jpeg;base64,${buffer.toString('base64')}`);
         }));
         
-        console.log('🌄 Uploaded Images:', imageUrls);
-
         // ✅ 3. Save product data + image URLs in the DB
         const newProduct = await ProductAdminService.createNewProduct({
             ...data,
@@ -127,7 +122,6 @@ router.patch('/:id/product_details', /*checkAuthenticated, checkAdminRole,*/ idP
     try {
         const id = parseInt(req.params.id, 10);
         const details = req.body
-        console.log('calling api route to update product details by id:', id, details)
         const response = await ProductAdminService.updateProductDetails({id, ...details});
         res.status(200).json({
             status: 'success',
@@ -145,7 +139,6 @@ router.patch('/:id/stock', /*checkAuthenticated, checkAdminRole,*/ idParamsValid
     try {
         const id = parseInt(req.params.id, 10);
         const stock = req.body.stock
-        console.log('calling api route to update product stock by id:', id, stock)
         const response = await ProductAdminService.updateProductStock({product_id:id, new_qty:stock});
         res.status(200).json({
             status: 'success',

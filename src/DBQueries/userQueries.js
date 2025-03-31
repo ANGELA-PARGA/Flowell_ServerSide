@@ -10,7 +10,6 @@ const createError = require('http-errors');
  * @returns {{}} unsuccessfull query
  */
 const selectAllUserInfoQuery = async (parameter) => {
-    console.log('CALLING: selectAllUserInfoQuery', parameter)
         const sqlStatement = pgp.as.format(`SELECT 
                                             users.id,
                                             users.created_at,
@@ -48,7 +47,7 @@ const selectAllUserInfoQuery = async (parameter) => {
                                                 users.id = $1`, [parameter]);
 
         const queryResult = await db.query(sqlStatement);
-        console.log('selectAllUserInfoQuery RESULT:', queryResult.rows)
+
         if(queryResult.rows?.length){
             return queryResult.rows[0];
         } else {
@@ -73,8 +72,6 @@ const selectAllUserInfoQuery = async (parameter) => {
  * */
 
 const selectAllUsersQuery = async (limit, offset, searchTerm) => {
-    console.log('calling select all users:', limit, offset, searchTerm);
-
     const search = searchTerm ? `%${searchTerm}%` : null;  // Convert to wildcard if search provided
     const queryParams = [limit, offset];
 
@@ -105,11 +102,7 @@ const selectAllUsersQuery = async (limit, offset, searchTerm) => {
         queryParams
     );
 
-    console.log('Executing SQL SELECT ALL USERS:', sqlStatement);
-    console.log('with query params:', queryParams);
-
     const queryResult = await db.query(sqlStatement);
-    console.log('results on the DB:', queryResult.rows);
 
     if (queryResult.rows?.length) return queryResult.rows;
     return [];
@@ -139,9 +132,8 @@ const selectTotalUsersQuery = async (searchTerm) => {
             queryParams 
     );
 
-    console.log('Executing SQL SELECT TOTAL USERS:', sqlStatement);
     const queryResult = await db.query(sqlStatement);
-    console.log('results on the DB:', queryResult.rows[0].count)
+
     return parseInt(queryResult.rows[0].count, 10);
 };
 

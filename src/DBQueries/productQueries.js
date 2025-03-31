@@ -12,14 +12,12 @@ const db = require('../DB/connectionDB');
  * @returns {[]} unsuccessfull query
  */
 const selectAllProductInfoQuery = async (parameter) => {
-    console.log('calling select all product Info query with:', parameter)
     const sqlStatement = pgp.as.format(`SELECT products_categories.name AS "category_name", products.*
                                         FROM products 
                                         LEFT JOIN products_categories ON products.category_id = products_categories.id
                                         WHERE products.id = $1`, [parameter]);
 
     const queryResult = await db.query(sqlStatement);
-    console.log('select all product Info results:', queryResult.rows[0])
     if(queryResult.rows?.length) return queryResult.rows[0];
     return []; 
 }
@@ -34,7 +32,6 @@ const selectAllProductInfoQuery = async (parameter) => {
  * @returns {[]} unsuccessfull query
  * */
 const selectAllProducts = async (limit, offset, filters) => {
-    console.log('calling select all products:', limit, offset, filters)
     const { color, category } = filters
     let queryParams = [limit, offset];    
 
@@ -65,20 +62,13 @@ const selectAllProducts = async (limit, offset, filters) => {
         queryParams
     );
 
-    console.log('Executing SQL SELECT ALL PRODUCTS:', sqlStatement);
-
-    console.log('with query params:', queryParams)
-    console.log('and where clause:', whereClause)
     const queryResult = await db.query(sqlStatement);
-
-    console.log('results on the DB:', queryResult.rows)
 
     if (queryResult.rows?.length) return queryResult.rows;
     return [];
 };
 
 const selectTotalProducts = async (filters) => {
-    console.log('calling select all products:', filters)
     const { color, category, categoryId } = filters
     let queryParams = [];
     let searchConditions = [];
@@ -110,9 +100,6 @@ const selectTotalProducts = async (filters) => {
             queryParams
     );
 
-    console.log('Executing SQL SELECT TOTAL PRODUCTS:', sqlStatement);
-    console.log('with query params:', queryParams)
-    console.log('and where clause:', whereClause)
     const queryResult = await db.query(sqlStatement);
     return parseInt(queryResult.rows[0].count, 10);
 };
@@ -124,11 +111,9 @@ const selectTotalProducts = async (filters) => {
  * @returns {[]} unsuccessfull query
  */
 const selectAllCategories = async () => {
-    console.log('calling select all categories')
     const sqlStatement = `SELECT products_categories.*
                         FROM products_categories`;
     const queryResult = await db.query(sqlStatement);
-    console.log('select all categories results:', queryResult.rows)
     if(queryResult.rows?.length) return queryResult.rows;
     return []; 
 }
@@ -144,7 +129,6 @@ const selectAllCategories = async () => {
  * */
 
 const selectAllProductsByCategory = async (id, limit, offset, filters) => {
-    console.log('calling select all products by category:', id, limit, offset, filters);
     const { color } = filters;
 
     let whereClauses = [`products.category_id = $1`];
@@ -172,10 +156,7 @@ const selectAllProductsByCategory = async (id, limit, offset, filters) => {
         queryParams
     );
 
-    console.log('Executing SQL SELECT ALL CATEGORY PRODUCTS:', sqlStatement);
     const queryResult = await db.query(sqlStatement);
-
-    console.log('select all products by category, results on the DB:', queryResult.rows);
 
     if (queryResult.rows?.length) return queryResult.rows;
     return [];
@@ -191,7 +172,6 @@ const selectAllProductsByCategory = async (id, limit, offset, filters) => {
  */
 const selectProductBySearchParameters = async (searchTerm, filters) => {
     const { color, category } = filters;
-    console.log('calling select products by search parameter:', searchTerm, filters)
     let whereClauses = [];
     let queryParams = [];
 
@@ -232,12 +212,8 @@ const selectProductBySearchParameters = async (searchTerm, filters) => {
         to_tsvector(products.name) @@ to_tsquery($${searchIndex})
         ORDER BY products.id
     `;
-
-    console.log('Executing SQL SELECT PRODUCTS BY SEARCH PARAMETERS:', sqlStatement);
-    console.log('with query params:', queryParams);
     
     const queryResult = await db.query(sqlStatement, queryParams);
-    console.log('select products by parameter result:', queryResult.rows);
 
     if (queryResult.rows?.length) return queryResult.rows;
     return [];
@@ -256,8 +232,6 @@ const selectProductBySearchParameters = async (searchTerm, filters) => {
  * @returns {[]} unsuccessfull query
  * */
 const selectAllProductsDashboard = async (limit, offset, search) => {
-    console.log('calling select all products:', limit, offset, search)
-
     let queryParams = [limit, offset];
 
     let searchCondition = '';
@@ -294,12 +268,7 @@ const selectAllProductsDashboard = async (limit, offset, search) => {
         queryParams
     );
 
-    console.log('Executing SQL SELECT ALL PRODUCTS:', sqlStatement);
-
-    console.log('with query params:', queryParams)
     const queryResult = await db.query(sqlStatement);
-
-    console.log('results on the DB:', queryResult.rows)
 
     if (queryResult.rows?.length) return queryResult.rows;
     return [];
@@ -338,8 +307,6 @@ const selectTotalProductsDashboard = async (search) => {
             queryParams
     );
 
-    console.log('Executing SQL SELECT TOTAL PRODUCTS:', sqlStatement);
-    console.log('with query params:', queryParams)
     const queryResult = await db.query(sqlStatement);
     return parseInt(queryResult.rows[0].count, 10);
 };
@@ -352,7 +319,6 @@ const selectTotalProductsDashboard = async (search) => {
  * @returns {[]} unsuccessfull query
  */
 const selectAllProductInfoQueryWithStock = async (parameter) => {
-    console.log('calling select all product Info query with:', parameter)
     const sqlStatement = pgp.as.format(`SELECT products_categories.name AS "category", products.*,
                                         product_stock.stock_available AS "stock", product_stock.qty_purchased AS "sold units"                                    
                                         FROM products 
@@ -361,7 +327,6 @@ const selectAllProductInfoQueryWithStock = async (parameter) => {
                                         WHERE products.id = $1`, [parameter]);
 
     const queryResult = await db.query(sqlStatement);
-    console.log('select all product Info results:', queryResult.rows[0])
     if(queryResult.rows?.length) return queryResult.rows[0];
     return []; 
 }

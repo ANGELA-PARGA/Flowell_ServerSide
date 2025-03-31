@@ -10,7 +10,6 @@ const db = require('../DB/connectionDB');
  * @returns {{}} unsuccessfull query
  */
 const selectAllCartInfoQuery = async (parameter) => {
-    console.log('calling select all cart info query:', parameter)
     const sqlStatement = pgp.as.format(`SELECT 
                                         carts.id AS "id",
                                         carts.total AS "total",
@@ -36,7 +35,6 @@ const selectAllCartInfoQuery = async (parameter) => {
                                         GROUP BY 
                                             carts.id, carts.total`, [parameter]);
     const queryResult = await db.query(sqlStatement);
-    console.log('select all cart info results:', queryResult.rows[0])
     if(queryResult.rows?.length) return queryResult.rows[0];
     return {};
 }

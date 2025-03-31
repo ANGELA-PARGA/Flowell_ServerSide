@@ -8,7 +8,6 @@ const OrderService = require('../../ServicesLogic/ServiceClientLogic/OrderServic
 router.get('/', checkAuthenticated, async (req, res, next) => {
     try {
         const user_id = req.user.id;
-        console.log('calling api route to fetch all orders by user id:', user_id)
         const response = await OrderService.findOrder({user_id});
         res.status(200).json({
             status: 'success',
@@ -25,7 +24,6 @@ router.get('/:id', checkAuthenticated, idParamsValidator, handleValidationErrors
     async (req, res, next) => {
         try {
             const id = parseInt(req.params.id, 10);
-            console.log('calling api route to fetch an order info by order id:', id)
             const response = await OrderService.findOrder({id});
             res.status(200).json({
                 status: 'success',
@@ -42,7 +40,6 @@ router.patch('/:id', checkAuthenticated, idParamsValidator,
                 handleValidationErrors, async (req, res, next) => {
     try {
         const id = parseInt(req.params.id, 10);
-        console.log('calling api route to delete/cancel an order:', id)
         const response = await OrderService.deleteOrder(id);
         res.status(200).send({
             status: 'success',
@@ -61,7 +58,6 @@ router.patch('/:id/shipping_info', checkAuthenticated, idParamsValidator, orderS
     try {
         const data = req.body
         const id = parseInt(req.params.id, 10);
-        console.log('calling api route to update the shipping info of an order:', data, id)
         const response = await OrderService.updateOrderShippingInfo({id, ...data});
         res.status(200).json({
             status: 'success',
@@ -79,7 +75,6 @@ router.patch('/:id/delivery_date', checkAuthenticated, idParamsValidator, orderD
     try {
     const data = req.body
     const id = parseInt(req.params.id, 10);
-    console.log('calling api route to update the delivery info of an order:', data, id)
     const response = await OrderService.updateOrderShippingInfo({id, ...data});
     res.status(200).json({
         status: 'success',

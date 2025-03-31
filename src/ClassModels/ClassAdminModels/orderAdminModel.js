@@ -115,7 +115,6 @@ module.exports = class OrderAdminModel {
     static async updateItemsInfo(data){
         try {
             const { id, product_id, qty } = data;
-            console.log('data received:', id, product_id, qty)
 
             let updatedOrder = {};
 
@@ -125,8 +124,6 @@ module.exports = class OrderAdminModel {
             
             const newTotal = await calculateTotal(id,'order_id','ordered_items');     
             updatedOrder.order = await updateQuery({id, total:newTotal.total }, 'id','orders')
-
-            console.log('item updated and new total:', orderedItemUpdated, newTotal)
             
             return updatedOrder;                 
         } catch (error) {

@@ -13,7 +13,6 @@ router.get('/', checkAuthenticated, async (req, res, next) => {
     try {
         const user_id = req.user.id;
         const response = await CartService.getCartInfo(user_id);
-        console.log('calling api route for get cart with:', user_id)
         res.status(200).json({
             status: 'success',
             message: 'Cart information retrieved successfully',
@@ -30,7 +29,6 @@ router.patch('/', checkAuthenticated, updateCartValidators, handleValidationErro
         const data = req.body
         const cart_info = await CartService.getCartInfo(req.user.id)
         const cart_id = cart_info.id 
-        console.log('calling api route for update cart items with:', cart_id, data)
         const response = await CartService.updateCartItems({cart_id:cart_id, ...data});
         res.status(200).json({
             status: 'success',
@@ -46,15 +44,12 @@ router.patch('/', checkAuthenticated, updateCartValidators, handleValidationErro
 
 router.post('/checkout', checkAuthenticated, createCheckoutValidators, handleValidationErrors, async (req, res, next) => {
     try {
-        console.log('NUMBER ONE Here begins, first, the creation of checkout SESSION')
         const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
         const user_id = req.user.id;
         const cart_info = await CartService.getCartInfo(user_id );
         const cart_id = cart_info.id 
         const cartItemsToOrder = await CartItemsModel.findAllCartItemsToOrder(cart_id);
         const shipping_info = req.body
-
-        console.log('NUMBER 2 calling api route for checkout with:', user_id, cart_id, shipping_info)
                     
         const lineItems = cartItemsToOrder.map((item) =>{
             return {
@@ -89,8 +84,6 @@ router.post('/checkout', checkAuthenticated, createCheckoutValidators, handleVal
             expires_at: Math.floor(Date.now() / 1000) + 1800
         });
 
-        console.log('SESSION in checkout route:', session)
-
         res.status(200).json({ url: session.url });
 
     } catch(err) {
@@ -102,8 +95,7 @@ router.post('/checkout', checkAuthenticated, createCheckoutValidators, handleVal
 router.delete('/', checkAuthenticated, handleValidationErrors, async (req, res, next) => {
     try {
         const cart_info = await CartService.getCartInfo(req.user.id)
-        const cart_id = cart_info.id   
-        console.log('calling api route for emptying a cart with:', cart_id)   
+        const cart_id = cart_info.id    
         const response = await CartService.emptyCart(cart_id);
         res.status(200).json({
             status: 'success',
@@ -121,7 +113,6 @@ router.delete('/:id', checkAuthenticated, idParamsValidator, handleValidationErr
         const cart_info = await CartService.getCartInfo(req.user.id)
         const cart_id = cart_info.id             
         const product_id = parseInt(req.params.id, 10);
-        console.log('calling api route for deleting a carts item #:', cart_id, product_id)
         const response = await CartService.deleteItemFromCart({ param1: cart_id, param2: product_id });
         res.status(200).json({
             status: 'success',

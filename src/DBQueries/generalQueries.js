@@ -13,11 +13,9 @@ const moment = require('moment');
  * @returns {{}} query unsuccesfull
  */
 const insertQuery = async (data, tableName) => {
-    console.log('CALLING insertQuery:', data, tableName)
     const sqlStatement = pgp.helpers.insert(data, null, tableName) + 'RETURNING *';
     const queryResult = await db.query(sqlStatement);
 
-    console.log('resource created in insert query:', queryResult.rows[0])
     if(queryResult.rows?.length) return queryResult.rows[0];
     return {};
 }
@@ -34,7 +32,6 @@ const insertQuery = async (data, tableName) => {
  * @returns {{}} query unsuccesfull
  */
 const updateQuery = async (data, columnName, tableName) => {
-    console.log('CALLING updateQuery:', data, columnName, tableName)
     const { id, ...params } = data;
     params.updated_at = moment.utc().toISOString();
 
@@ -42,7 +39,6 @@ const updateQuery = async (data, columnName, tableName) => {
     const sqlStatement = pgp.helpers.update(params, null, tableName) + condition;
 
     const queryResult = await db.query(sqlStatement);
-    console.log('resource updated in update query:', queryResult.rows)
     if(queryResult.rows?.length) return queryResult.rows[0];
     return {};
 }
@@ -59,12 +55,10 @@ const updateQuery = async (data, columnName, tableName) => {
  * @returns {[]} query unsuccesfull
  */
 const standardSelectQuery = async (parameter, tableName, columnName) => {
-    console.log('CALLING standardSelectQuery:', parameter, tableName, columnName)
     const sqlStatement = pgp.as.format(`SELECT ${tableName}.* FROM ${tableName}
                                         WHERE ${tableName}.${columnName} = $1`,[parameter]);
 
     const queryResult = await db.query(sqlStatement);
-    console.log('standard select query result', queryResult.rows)
 
     if(queryResult.rows?.length) return queryResult.rows;
     return [];
@@ -79,11 +73,9 @@ const standardSelectQuery = async (parameter, tableName, columnName) => {
  * @param {string} parameter
  * @returns {number} rowCount
  */
-const standardDeleteQuery = async (parameter, tableName, columnName) => {
-    console.log('CALLING standardDeleteQuery:', parameter, tableName, columnName)   
+const standardDeleteQuery = async (parameter, tableName, columnName) => { 
     const sqlStatement = pgp.as.format(`DELETE FROM ${tableName} WHERE ${columnName} = $1`, [parameter] );
     const queryResult = await db.query(sqlStatement);
-    console.log('standard delete query result', queryResult.rowCount)
     return queryResult.rowCount;
 }
 
@@ -100,11 +92,9 @@ const standardDeleteQuery = async (parameter, tableName, columnName) => {
  * @returns {number} rowCount
  */
 const deleteDoubleConditionQuery = async (data, tableName, cond1, cond2) => {
-    console.log('CALLING deleteDoubleConditionQuery:', data, tableName, cond1, cond2) 
     const { param1, param2 } = data
     const sqlStatement = pgp.as.format(`DELETE FROM ${tableName} WHERE ${cond1} = $1 AND ${cond2} = $2`, [param1, param2]);
     const queryResult = await db.query(sqlStatement);
-    console.log('double delete query result', queryResult.rowCount)
     return queryResult.rowCount;
 }
 
@@ -121,14 +111,12 @@ const deleteDoubleConditionQuery = async (data, tableName, cond1, cond2) => {
  * @returns {0} unsuccessfull query
  */
 const calculateTotal = async (parameter, columnName, tableName) => {
-    console.log('CALLING calculateTotal:', parameter, columnName, tableName)
     const sqlStatement = pgp.as.format(`SELECT SUM(${tableName}.qty * products.price_per_case) AS "total"
                                             FROM ${tableName}
                                             INNER JOIN products ON ${tableName}.product_id = products.id
                                             WHERE ${tableName}.${columnName} = $1`,[parameter]);
 
     const queryResult = await db.query(sqlStatement);
-    console.log('calculate total result', queryResult.rows)
     if (queryResult.rows?.length) return queryResult.rows[0];
     return 0; 
 }
@@ -144,13 +132,11 @@ const calculateTotal = async (parameter, columnName, tableName) => {
  * @returns {0} unsuccessfull query
  */
 const calculateTotalItems = async (parameter, columnName, tableName) => {
-    console.log('CALLING calculateTotalItems:', parameter)
     const sqlStatement = pgp.as.format(`SELECT SUM(${tableName}.qty) AS "total_items"
                                         FROM ${tableName}
                                         WHERE ${tableName}.${columnName} = $1`, [parameter]);
 
     const queryResult = await db.query(sqlStatement);
-    console.log('calculate total items result', queryResult.rows)
     if (queryResult.rows?.length) return queryResult.rows[0].total_items;
     return 0; 
 }

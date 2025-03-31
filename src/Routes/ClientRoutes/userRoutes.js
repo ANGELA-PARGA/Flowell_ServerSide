@@ -27,7 +27,6 @@ router.post('/:resourceType', checkAuthenticated, resourceValidator, updateUserV
         const resource = req.params.resourceType
         const data = req.body
         const user_id = req.user.id;
-        console.log('calling api route for add new user info', resource, data, user_id)
         const response = await UserService.addUserInfo({user_id, resource:resource, ...data});
         res.status(200).json({
             status: 'success',
@@ -46,7 +45,6 @@ router.patch('/:resourceType/:resourceId', checkAuthenticated, resourceValidator
         const resource = req.params.resourceType
         const resource_id = parseInt(req.params.resourceId, 10);
         const data = req.body
-        console.log('calling api route for patch new user info', resource, resource_id, data)
         const response = await UserService.updateUserInfo({id:resource_id, resource, ...data});
         res.status(200).json({
             status: 'success',
@@ -64,7 +62,6 @@ router.patch('/mine', checkAuthenticated, updatePasswordValidators, handleValida
     try {
         const password = req.body.password
         const user_id = req.user.id;
-        console.log('calling api route for patch password', password, user_id)
         const response = await UserService.updateUserPassword({id:user_id, password});
         res.status(200).json({
             status: 'success',
@@ -83,7 +80,6 @@ router.delete('/:resourceType/:resourceId', checkAuthenticated, resourceValidato
         const resource = req.params.resourceType
         const resource_id = parseInt(req.params.resourceId, 10);
         const user_id = req.user.id;
-        console.log('calling api route for delete new user info', resource, resource_id, user_id)
         const response = await UserService.deleteUserInfo({param1:resource_id, param2:user_id, resource:resource});
         res.status(200).json({
             status: 'success',

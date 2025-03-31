@@ -13,7 +13,6 @@ router.get('/', /*checkAuthenticated, checkAdminRole,*/ async (req, res, next) =
         const offset = (page - 1) * limit;
         const search = req.query.term;
 
-        console.log('calling api route to fetch all orders:', search)
         const orders = await OrderAdminService.loadAllOrders(limit, offset, search);
         const totalOrders = await selectTotalOrdersQuery(search);
 
@@ -37,7 +36,6 @@ router.get('/', /*checkAuthenticated, checkAdminRole,*/ async (req, res, next) =
 router.get('/dashboard', /*checkAuthenticated, checkAdminRole,*/ async (req, res, next) => {
     try {
         const {ordersByStatus: ordersByStatus, ordersByMonth: ordersByMonth, monthWithMostOrders: monthWithMostOrders} = await OrderAdminService.loadGroupedOrders()
-        console.log('inside routes', ordersByStatus, ordersByMonth, monthWithMostOrders)
         res.status(200).json({
             status: 'success',
             message: 'Grouped orders retrieved successfully',
@@ -55,7 +53,6 @@ router.get('/:id', /*checkAuthenticated, checkAdminRole,*/ idParamsValidator, ha
     async (req, res, next) => {
         try {
             const id = parseInt(req.params.id, 10);
-            console.log('calling api route to fetch an order info by order id:', id)
             const response = await OrderAdminService.findOrder(id);
             res.status(200).json({
                 status: 'success',
@@ -72,7 +69,6 @@ router.patch('/:id', /*checkAuthenticated, checkAdminRole,*/ idParamsValidator,
                 handleValidationErrors, async (req, res, next) => {
     try {
         const id = parseInt(req.params.id, 10);
-        console.log('calling api route to delete/cancel an order:', id)
         const response = await OrderAdminService.deleteOrder(id);
         res.status(200).send({
             status: 'success',
@@ -91,7 +87,6 @@ router.patch('/:id/shipping_info', /*checkAuthenticated, checkAdminRole,*/ idPar
     try {
         const data = req.body
         const id = parseInt(req.params.id, 10);
-        console.log('calling api route to update the shipping info of an order:', data, id)
         const response = await OrderAdminService.updateOrderShippingInfo({id, ...data});
         res.status(200).json({
             status: 'success',
@@ -109,7 +104,6 @@ router.patch('/:id/delivery_date', /*checkAuthenticated, checkAdminRole,*/ idPar
     try {
     const data = req.body
     const id = parseInt(req.params.id, 10);
-    console.log('calling api route to update the delivery info of an order:', data, id)
     const response = await OrderAdminService.updateOrderShippingInfo({id, ...data});
     res.status(200).json({
         status: 'success',
@@ -127,7 +121,6 @@ router.patch('/:id/items_ordered', /*checkAuthenticated, checkAdminRole,*/ idPar
     try {
         const data = req.body
         const id = parseInt(req.params.id, 10);
-        console.log('calling api route to update the order items quantities:', data, id)
         const response = await OrderAdminService.updateOrderItemsInfo({id, ...data});
         res.status(200).json({
             status: 'success',
@@ -145,7 +138,6 @@ router.patch('/:id/ship_order', /*checkAuthenticated, checkAdminRole,*/ idParams
     try {
         const tracking = req.body
         const id = parseInt(req.params.id, 10);
-        console.log('calling api route to ship the order:', tracking, id)
         const response = await OrderAdminService.shipOrder({id, ...tracking});
         res.status(200).json({
             status: 'success',

@@ -11,7 +11,6 @@ const db = require('../DB/connectionDB');
  * @returns {[]} unsuccessfull query
  */
 const selectAllOrderInfoQuery = async (parameter, columnName) => {
-    console.log('calling select all order Info query with:', parameter)
     const sqlStatement = pgp.as.format(`SELECT 
                                             orders.id, 
                                             orders.created_at,
@@ -40,7 +39,6 @@ const selectAllOrderInfoQuery = async (parameter, columnName) => {
                                         GROUP BY orders.id`, [parameter]);
 
     const queryResult = await db.query(sqlStatement);
-    console.log('select all order Info results:', queryResult.rows)
     if(queryResult.rows?.length) return queryResult.rows;
     return [];
 }
@@ -54,7 +52,6 @@ const selectAllOrderInfoQuery = async (parameter, columnName) => {
  * @returns {[]} unsuccessfull query
  */
 const selectAllOrderInfoWithUserQuery = async (parameter, columnName) => {
-    console.log('calling select all order Info query with user information:', parameter)
     const sqlStatement = pgp.as.format(`SELECT 
                                             orders.id, 
                                             orders.created_at,
@@ -98,7 +95,6 @@ const selectAllOrderInfoWithUserQuery = async (parameter, columnName) => {
                                         `, [parameter]);
 
     const queryResult = await db.query(sqlStatement);
-    console.log('select all order Info results:', queryResult.rows)
     if(queryResult.rows?.length) return queryResult.rows;
     return [];
 }
@@ -106,8 +102,6 @@ const selectAllOrderInfoWithUserQuery = async (parameter, columnName) => {
 /*This query uses: limit and offset to determine the pagination, 
 and filters which is an object with status */
 const selectAllOrdersQuery = async (limit, offset, search) => {
-    console.log('calling select all orders:', limit, offset, search)
-
     let queryParams = [limit, offset];
 
     let searchCondition = '';
@@ -138,11 +132,7 @@ const selectAllOrdersQuery = async (limit, offset, search) => {
         queryParams
     );
 
-    console.log('Executing SQL SELECT ALL ORDERS:', sqlStatement);
-    console.log('with query params:', queryParams)
     const queryResult = await db.query(sqlStatement);
-
-    console.log('results on the DB:', queryResult.rows)
 
     if (queryResult.rows?.length) return queryResult.rows;
     return [];
@@ -176,9 +166,7 @@ const selectTotalOrdersQuery = async (search) => {
             queryParams
     );
 
-    console.log('Executing SQL SELECT TOTAL ORDERS:', sqlStatement);
     const queryResult = await db.query(sqlStatement);
-    console.log('results on the DB:', queryResult.rows[0].count)
     return parseInt(queryResult.rows[0].count, 10);
 };
 
@@ -196,10 +184,7 @@ const selectAllOrdersDashboard = async () => {
         FROM status_counts;
     `);
 
-    console.log('Executing SQL SELECT ALL ORDERS FOR DASHBOARD:', sqlStatement);
     const queryResult = await db.query(sqlStatement);
-    console.log('Results on the DB:', queryResult.rows);
-
     return queryResult.rows[0];
 };
 
@@ -217,9 +202,7 @@ const selectOrdersByMonth = async () => {
         ORDER BY month_number;
     `);
 
-    console.log('Executing SQL SELECT ORDERS BY MONTH:', sqlStatement);
     const queryResult = await db.query(sqlStatement);
-    console.log('Results on the DB:', queryResult.rows);
 
     return queryResult.rows;
 };
@@ -239,9 +222,7 @@ const selectMonthWithMostOrders = async () => {
         LIMIT 1;  -- ✅ Only return the top month
     `);
 
-    console.log('Executing SQL SELECT MONTH WITH MOST ORDERS:', sqlStatement);
     const queryResult = await db.query(sqlStatement);
-    console.log('Results on the DB:', queryResult.rows);
 
     return queryResult.rows[0] || {};  // ✅ Return only the highest month or an empty object
 };

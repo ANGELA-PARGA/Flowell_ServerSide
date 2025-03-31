@@ -17,7 +17,6 @@ router.post('/login', loginValidators, handleValidationErrors, passport.authenti
         let cartId;
 
         if(!Object.keys(loadCart)?.length){
-            console.log('there is NOT CART...creating one')
             loadCart = await CartService.createNewCart({user_id: req.user.id})
         }
         cartId = loadCart.id;
@@ -47,14 +46,12 @@ router.post('/login', loginValidators, handleValidationErrors, passport.authenti
 router.post('/signup', signupValidators, handleValidationErrors, async (req, res, next) => {
     try {
         const data = req.body;
-        console.log('calling route for signup user', data)
         const AuthServiceInstance = new Authentication();
         const newUser = await AuthServiceInstance.register({...data, role:'client'});
         let loadCart = await CartService.getCartInfo(newUser.id);
         let cartId;
 
         if (!Object.keys(loadCart)?.length) {
-            console.log('there is NOT CART...creating one')
             loadCart = await CartService.createNewCart({ user_id: newUser.id });
         }
 
@@ -88,14 +85,10 @@ router.post('/signup', signupValidators, handleValidationErrors, async (req, res
 
 router.post('/logout', async (req, res, next) => {
     try {
-        console.log('➡️ Logout request received');
-
         if (!req.session) {
             console.log("🚨 No session found");
             return res.status(400).json({ message: "No active session." });
         }
-
-        console.log("🚨 Session found", req.session);
 
         req.logout((err) => {
             if (err) {
@@ -105,7 +98,6 @@ router.post('/logout', async (req, res, next) => {
             console.log("✅ Logout successfully");
         })
 
-        console.log("✅ Session destroyed successfully");
         res.clearCookie('connect.sid');
         res.status(200).json({ message: 'Logged out successfully' });
 
@@ -121,7 +113,6 @@ router.post('/request_email_pwd_recovery', recoverEmailValidator,
     handleValidationErrors, async (req, res, next) => {
     try {
         const email = req.body.email;
-        console.log('calling api route for recover email', email)
         const SECRET = process.env.JWT_SECRET;
         const userFound = await UserModel.findUserByEmail(email);
         if(!userFound?.length){
@@ -147,7 +138,6 @@ router.patch('/reset_password', changePasswordOnRecoveryValidator,
     handleValidationErrors, async (req, res, next) => {
     try {
         const {status, password} = req.body;
-        console.log('calling api route for reset password', status, password)
         const SECRET = process.env.JWT_SECRET;
         // Verify token and extract userId
         const decoded = jwt.verify(status, SECRET);

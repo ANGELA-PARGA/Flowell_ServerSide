@@ -10,7 +10,6 @@ const moment = require('moment');
  * @returns {{}} unsuccessfull query
  */
 const updateCartItemsQuery = async (data) => {
-    console.log('calling the update cart Items query with:', data)
     const { cart_id, product_id, qty } = data;
     const updated_at = moment.utc().toISOString();
 
@@ -18,7 +17,6 @@ const updateCartItemsQuery = async (data) => {
     const sqlStatement = pgp.helpers.update({qty:qty, updated_at:updated_at}, null, 'cart_items') + condition;
 
     const queryResult = await db.query(sqlStatement);
-    console.log('updated cart Item return:', queryResult.rows[0])
     if(queryResult.rows?.length) return queryResult.rows[0];
     return {};
 
@@ -32,7 +30,6 @@ const updateCartItemsQuery = async (data) => {
  * @returns {[]} unsuccessfull query
  */
 const selectCartItemsQuery = async (parameter) => {
-    console.log('calling the select cart Items query with:', parameter)
     const sqlStatement = pgp.as.format(`SELECT cart_items.product_id, cart_items.qty,
                                         products.price_per_case AS price, 
                                         products.name 
@@ -42,7 +39,6 @@ const selectCartItemsQuery = async (parameter) => {
                                         WHERE cart_items.cart_id = $1`,[parameter]);
 
     const queryResult = await db.query(sqlStatement);
-    console.log('selected cart Items return:', queryResult.rows)
     if(queryResult.rows?.length) return queryResult.rows;
     return []; 
 

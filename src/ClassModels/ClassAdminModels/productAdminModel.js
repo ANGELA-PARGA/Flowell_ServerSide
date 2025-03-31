@@ -27,9 +27,7 @@ module.exports = class ProductAdminModel {
     static async createNewProduct(data){
         try {
             const { stock_available, ...parameters } = data
-
-            console.log('data received in create new model', parameters)
-
+            
             /*insert the product information but not yet the images and stock*/
             const newProduct = await insertQuery(parameters, 'products')   
             const product_id = newProduct.id

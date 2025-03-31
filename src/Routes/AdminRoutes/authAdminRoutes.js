@@ -7,7 +7,6 @@ const Authentication = require('../../ServicesLogic/ServiceClientLogic/AuthServi
 
 router.post('/login', loginValidators, handleValidationErrors, passport.authenticate('local'), checkAdminRole, async (req, res, next) => {
     try {
-        console.log('calling route for login admin')
         const { id, first_name, last_name, email, role } = req.user;
         
         res.status(200).json({
@@ -32,7 +31,6 @@ router.post('/login', loginValidators, handleValidationErrors, passport.authenti
 router.post('/signup', signupValidators, handleValidationErrors, async (req, res, next) => {
     try {
         const data = req.body;
-        console.log('calling route for signup ADMIN', data)
         const AuthServiceInstance = new Authentication();
         const newUser = await AuthServiceInstance.register({...data, role:'admin'});
 
@@ -63,14 +61,10 @@ router.post('/signup', signupValidators, handleValidationErrors, async (req, res
 
 router.post('/logout', async (req, res, next) => {
     try {
-        console.log('➡️ Logout request received');
-
         if (!req.session) {
             console.log("🚨 No session found");
             return res.status(400).json({ message: "No active session." });
         }
-
-        console.log("🚨 Session found", req.session);
 
         req.logout((err) => {
             if (err) {
@@ -80,7 +74,6 @@ router.post('/logout', async (req, res, next) => {
             console.log("✅ Logout successfully");
         })
 
-        console.log("✅ Session destroyed successfully");
         res.clearCookie('connect.sid');
         res.status(200).json({ message: 'Logged out successfully' });
 

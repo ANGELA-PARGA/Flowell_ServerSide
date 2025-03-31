@@ -43,8 +43,6 @@ router.get('/search', searchTermValidators, handleValidationErrors,
     try {
         const data = req.query.term;
         const { color, category } = req.query;      
-
-        console.log('calling api route for search products:', data, color, category)
         const response = await ProductService.findProductsBySearch(data, {color, category})
 
         res.status(200).json({
@@ -59,9 +57,7 @@ router.get('/search', searchTermValidators, handleValidationErrors,
 });
 
 router.get('/categories', async (req, res, next) => {
-    try {
-        console.log('calling api route for getting all categories')
-        
+    try {        
         const allCategories = await ProductService.loadAllCategories();
         res.status(200).json({
             status: 'success',
@@ -83,7 +79,6 @@ router.get('/categories/:categoryId', categoryParamsValidator, handleValidationE
         const categoryId = parseInt(req.params.categoryId, 10);
 
         const { color } = req.query;
-        console.log('calling api route for products by category with:', categoryId, limit, offset, color)
 
         const response = await ProductService.loadAllProductsByCategory(categoryId, limit, offset, { color })
         const totalProducts = await selectTotalProducts({ color, categoryId });
@@ -110,7 +105,6 @@ router.get('/:id', idParamsValidator, handleValidationErrors,
             async (req, res, next) => {
     try {
         const id = parseInt(req.params.id, 10);
-        console.log('calling api route for product by id:', id)
         const response = await ProductService.loadSpecificProduct(id)
         res.status(200).json({
             status: 'success',
@@ -128,7 +122,6 @@ router.post('/', checkAuthenticated, cartItemValidators, handleValidationErrors,
         const cart_info = await CartsService.getCartInfo(req.user.id)
         const cart_id = cart_info.id
         const data = req.body
-        console.log('calling api route for adding product to cart', data, cart_id)
         const response = await ProductService.addProductToCart({cart_id, ...data})
         res.status(200).json({
             status: 'success',

@@ -10,7 +10,6 @@ const moment = require('moment');
  * @returns {{}} unsuccessfull query
  */
 const updateOrderedItemsQuery = async (data) => {
-    console.log('calling update ordered items query with:', data)
     const { order_id, product_id, qty } = data;
     const updated_at = moment.utc().toISOString();
     
@@ -19,7 +18,6 @@ const updateOrderedItemsQuery = async (data) => {
 
     
     const queryResult = await db.query(sqlStatement);
-    console.log('updated ordered items results:', queryResult.rows[0])
     if(queryResult.rows?.length) return queryResult.rows[0];
     return {};
 
@@ -34,7 +32,6 @@ const updateOrderedItemsQuery = async (data) => {
  * @returns {{}} unsuccessfull query
  */
 const cancelOrderedItemsQuery = async (data) => {
-    console.log('calling cancel ordered items query with:', data)
     const { order_id } = data;
     const updated_at = moment.utc().toISOString();
     
@@ -43,7 +40,6 @@ const cancelOrderedItemsQuery = async (data) => {
 
     
     const queryResult = await db.query(sqlStatement);
-    console.log('updated ordered items results:', queryResult.rows)
     if(queryResult.rows?.length) return queryResult.rows;
     return {};
 

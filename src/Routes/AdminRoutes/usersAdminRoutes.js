@@ -38,7 +38,6 @@ router.get('/:id/user_info', /*checkAuthenticated, checkAdminRole,*/ idParamsVal
     async (req, res, next) => {
         try {
             const id = parseInt(req.params.id, 10);
-            console.log('calling api route to fetch the user info by user id:', id)
             const response = await UserAdminService.getUserInfo(id);
             res.status(200).json({
                 status: 'success',
@@ -55,7 +54,6 @@ router.get('/:id/orders_history', /*checkAuthenticated, checkAdminRole,*/ idPara
     async (req, res, next) => {
         try {
             const id = parseInt(req.params.id, 10);
-            console.log('calling api route to fetch the users order history:', id)
             const response = await UserAdminService.getUserOrdersHistory(id);
             res.status(200).json({
                 status: 'success',

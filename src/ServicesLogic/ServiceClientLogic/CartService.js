@@ -59,7 +59,6 @@ module.exports = class CartService{
     // this method require a cart_id
     static async emptyCart(cart_id){
         try {
-            console.log('calling empty cart in checkout', cart_id)
             const emptiedCart = await CartsModel.emptyCart(cart_id);
             if(!emptiedCart) {
                 throw createError(400, 'cart not found or unable to empty completely');
@@ -71,16 +70,10 @@ module.exports = class CartService{
     }
 
     static async checkoutCart(session_id){
-        try {
-            console.log('ON CHECKOUT SERVICE: 1. Fulfilling Checkout Session ' + session_id);
-            
+        try {            
             const session = await stripe.checkout.sessions.retrieve(session_id, {
                 expand: ['line_items'],
             });
-
-
-            console.log('session items', session.line_items);
-            console.log('session metadata',  session.metadata);
 
             if (session.payment_status === 'paid'){
                 const user_id = session.client_reference_id
@@ -97,8 +90,6 @@ module.exports = class CartService{
                         qty: item.qty
                     }
                 })
-
-                console.log('calling createNewOrder with:', user_id, cart_id, totalPrice, itemsToOrder)
 
                 const order = await OrderService.createNewOrder(
                     {   
