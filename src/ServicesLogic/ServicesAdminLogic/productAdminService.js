@@ -1,10 +1,14 @@
 const ProductAdminModel = require('../../ClassModels/ClassAdminModels/productAdminModel');
+const {triggerRevalidationEccomerce} = require('../../Utilities/utilities');
 module.exports = class ProductAdminService { 
 
     //create a new product and add stock to it
     static async createNewProduct(data){
         try {
-            const newProduct = await ProductAdminModel.createNewProduct(data);           
+            const newProduct = await ProductAdminModel.createNewProduct(data); 
+            // Trigger revalidation for the new product
+            const path = `/products`; 
+            await triggerRevalidationEccomerce(path);          
             return newProduct;         
         } catch (error) {
             throw error
@@ -86,6 +90,9 @@ module.exports = class ProductAdminService {
     static async updateProductStock(stockData){
         try { 
             const productUpdated = await ProductAdminModel.updateStock(stockData);
+            const path = `/products/${productUpdated.id}`; 
+            const tag = 'products'
+            await triggerRevalidationEccomerce(path, tag);  
             return productUpdated
         } catch (error) {
             throw error
@@ -95,7 +102,11 @@ module.exports = class ProductAdminService {
     //update the details of a product
     static async updateProductDetails(data){
         try {
-            const productUpdated = await ProductAdminModel.updateProductDetails(data);           
+            const productUpdated = await ProductAdminModel.updateProductDetails(data);  
+            // Trigger revalidation for the updated product
+            const path = `/products/${productUpdated.id}`; 
+            const tag = 'products'
+            await triggerRevalidationEccomerce(path, tag);        
             return productUpdated;         
         } catch (error) {
             throw error

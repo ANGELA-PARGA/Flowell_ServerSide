@@ -63,7 +63,6 @@ router.post('/checkout', checkAuthenticated, createCheckoutValidators, handleVal
                 quantity: item.qty
             }
         })
-        console.log('lineItems:', lineItems)
 
         const session = await stripe.checkout.sessions.create({
             client_reference_id: user_id,

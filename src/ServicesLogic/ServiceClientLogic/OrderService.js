@@ -1,5 +1,6 @@
 const createError = require('http-errors');
 const OrderModel = require('../../ClassModels/ClassClientModels/orderModel');
+const {triggerRevalidationDashboard} = require('../../Utilities/utilities');
 
 module.exports = class OrderService {
     
@@ -8,7 +9,10 @@ module.exports = class OrderService {
             const newOrder = await OrderModel.createOrder(orderData);
             if(!Object.keys(newOrder)?.length){
                 throw createError(400, 'unable to create the new order');                
-            }            
+            }
+            // Trigger revalidation for the new order
+            const path = `/admin_panel/orders`;
+            await triggerRevalidationDashboard(path);            
             return newOrder;            
         } catch (error) {
             throw error
@@ -21,7 +25,11 @@ module.exports = class OrderService {
             const orderUpdated = await OrderModel.updateShippingInfo(dataToUpdate);
             if(!Object.keys(orderUpdated)?.length){
                 throw createError(400, 'order not found or unable to update');                
-            } 
+            }
+            // Trigger revalidation for the new order
+            const path = `/admin_panel/orders/${orderUpdated.id}`;
+            const tag = `orders`
+            await triggerRevalidationDashboard(path, tag);            
             return orderUpdated; 
         } catch (error) {
             throw error
@@ -54,7 +62,10 @@ module.exports = class OrderService {
             const deletedOrder = await OrderModel.deleteOrder(id);
             if(!deletedOrder) {
                 throw createError(400, 'order not found or unable to cancel');
-            } 
+            }
+            // Trigger revalidation for the new order
+            const path = `/admin_panel/orders`;
+            await triggerRevalidationDashboard(path);  
             return deletedOrder  
         } catch (error) {
             throw error

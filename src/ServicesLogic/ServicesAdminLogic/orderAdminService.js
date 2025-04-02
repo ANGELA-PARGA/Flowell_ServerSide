@@ -1,5 +1,6 @@
 const createError = require('http-errors');
 const OrderAdminModel = require('../../ClassModels/ClassAdminModels/orderAdminModel');
+const {triggerRevalidationEccomerce} = require('../../Utilities/utilities');
 
 module.exports = class OrderService {
 
@@ -26,7 +27,11 @@ module.exports = class OrderService {
             const orderUpdated = await OrderAdminModel.updateShippingInfo(dataToUpdate);
             if(!Object.keys(orderUpdated)?.length){
                 throw createError(400, 'order not found or unable to update');                
-            } 
+            }
+            // Trigger revalidation for the new product
+            const path = `/account/orders/${orderUpdated.id}`; 
+            const tag = `orders`
+            await triggerRevalidationEccomerce(path, tag);    
             return orderUpdated; 
         } catch (error) {
             throw error
@@ -38,7 +43,11 @@ module.exports = class OrderService {
             const orderUpdated = await OrderAdminModel.updateItemsInfo(dataToUpdate);
             if(!Object.keys(orderUpdated)?.length){
                 throw createError(400, 'order not found or unable to update');                
-            } 
+            }
+            // Trigger revalidation for the new product
+            const path = `/account/orders/${orderUpdated.id}`; 
+            const tag = `orders`
+            await triggerRevalidationEccomerce(path, tag); 
             return orderUpdated; 
         } catch (error) {
             throw error
@@ -51,6 +60,10 @@ module.exports = class OrderService {
             if(!Object.keys(orderShipped)?.length){
                 throw createError(400, 'order not found or unable to ship');                
             } 
+            // Trigger revalidation for the new product
+            const path = `/account/orders/${orderShipped.id}`; 
+            const tag = `orders`
+            await triggerRevalidationEccomerce(path, tag); 
             return orderShipped; 
         } catch (error) {
             throw error
@@ -75,6 +88,9 @@ module.exports = class OrderService {
             if(!deletedOrder) {
                 throw createError(400, 'order not found or unable to cancel');
             } 
+            // Trigger revalidation for the new product
+            const path = `/account/orders`; 
+            await triggerRevalidationEccomerce(path);
             return deletedOrder  
         } catch (error) {
             throw error

@@ -185,9 +185,7 @@ module.exports = class UserModel {
      */
     static async findAllUserInfoById(user_id){
         try {
-            console.log('findAllUserInfoById MODEL CALL', user_id)  
             const userCompleteInfo = await selectAllUserInfoQuery(user_id);
-            console.log(userCompleteInfo)
             return userCompleteInfo;    
         } catch (error) {
              // If it's a custom error (like a 404), rethrow it
@@ -221,7 +219,6 @@ module.exports = class UserModel {
      * @throws {Error}
      */
     static async deleteUserInfo(data){
-        console.log('deleteUserInfo MODEL CALL', data)
         try {
             const { param1, param2, resource } = data
             const tableName = verifyResource(resource)

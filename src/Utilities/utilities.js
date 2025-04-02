@@ -1,4 +1,4 @@
-
+const crypto = require('crypto')
 const bcrypt = require('bcrypt')
 const nodemailer = require('nodemailer');
 
@@ -94,6 +94,81 @@ const sendEmail = async (email, subject, message) => {
     }
 }
 
+async function triggerRevalidationEccomerce(path, tag) {
+    const webhookUrl = process.env.ECOMMERCE_WEBHOOK_URL; 
+    const secret = process.env.WEBHOOK_SECRET;
+    if (!webhookUrl || !secret) {
+        throw new Error('Webhook URL or secret not defined in environment variables');
+    }
+
+    if (!path || !tag) {
+        throw new Error('Path and tag are required for revalidation');
+    }
+    // Create the request body
+    // The body should include the path and tag for revalidation. Tag is optional, path is required.
+    const pathTag = tag ? { path, tag } : { path };
+    const body = JSON.stringify(pathTag);
+
+
+    // Create HMAC signature using SHA-256
+    const hmac = crypto.createHmac('sha256', secret);
+    hmac.update(body);
+    const signature = hmac.digest('hex');
+
+    // Send the webhook request with the signature header
+    const response = await fetch(webhookUrl, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'x-webhook-signature': signature,
+        },
+        body,
+    });
+
+    const data = await response.json();
+    if (!response.ok) {
+        throw new Error(`Failed to revalidate: ${data.message}`);
+    }
+}
+
+async function triggerRevalidationDashboard(path, tag) {
+    const webhookUrl = process.env.DASHBOARD_WEBHOOK_URL; 
+    const secret = process.env.WEBHOOK_SECRET;
+    if (!webhookUrl || !secret) {
+        throw new Error('Webhook URL or secret not defined in environment variables');
+    }
+
+    if (!path || !tag) {
+        throw new Error('Path and tag are required for revalidation');
+    }
+    // Create the request body
+    // The body should include the path and tag for revalidation. Tag is optional, path is required.
+    const pathTag = tag ? { path, tag } : { path };
+    const body = JSON.stringify(pathTag);
+
+
+    // Create HMAC signature using SHA-256
+    const hmac = crypto.createHmac('sha256', secret);
+    hmac.update(body);
+    const signature = hmac.digest('hex');
+
+    // Send the webhook request with the signature header
+    const response = await fetch(webhookUrl, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'x-webhook-signature': signature,
+        },
+        body,
+    });
+
+    const data = await response.json();
+    if (!response.ok) {
+        throw new Error(`Failed to revalidate: ${data.message}`);
+    }
+}
+
+
 
 
 module.exports = {
@@ -101,5 +176,7 @@ module.exports = {
     hashPassword: hashPassword,
     verifyResource: verifyResource, 
     luhnCheck: luhnCheck,
-    sendEmail: sendEmail 
+    sendEmail: sendEmail,
+    triggerRevalidationEccomerce: triggerRevalidationEccomerce, 
+    triggerRevalidationDashboard: triggerRevalidationDashboard
 }

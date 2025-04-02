@@ -98,20 +98,16 @@ const updateContactInfoValidators = [
 
 const updateUserValidators = (req, res, next) => {
     const resourceType = req.params.resourceType;
-    console.log('calling validator', resourceType)
 
     let validationRules;
     switch (resourceType) {
         case 'personal_inf':
-            console.log('validator for personal inf', resourceType)
             validationRules = updatePersonalInfoValidators;
             break;
         case 'contact_inf':
-            console.log('validator for contact inf', resourceType)
             validationRules = updateContactInfoValidators;
             break;
         case 'address_inf':
-            console.log('validator for phone', resourceType)
             validationRules = updateAddressInfoValidators;
         break;
         default:

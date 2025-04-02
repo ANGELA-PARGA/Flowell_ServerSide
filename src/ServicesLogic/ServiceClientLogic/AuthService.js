@@ -1,6 +1,7 @@
 const createError = require('http-errors');
 const UserModel = require('../../ClassModels/ClassClientModels/userModel');
 const { comparePasswords } = require('../../Utilities/utilities');
+const {triggerRevalidationDashboard} = require('../../Utilities/utilities');
 
 module.exports = class Authentication {    
     async register(userData){
@@ -18,7 +19,9 @@ module.exports = class Authentication {
             if(!Object.keys(newUser)?.length){
                 throw createError(400, 'The user could not be created');
             }
-
+            // Trigger revalidation for the new user
+            const path = `/admin_panel/customers`;
+            await triggerRevalidationDashboard(path);
             return newUser;           
         } catch (error) {
             throw error;            

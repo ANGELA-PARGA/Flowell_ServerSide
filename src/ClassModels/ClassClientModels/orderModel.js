@@ -87,7 +87,6 @@ module.exports = class OrderModel {
     static async updateItemsInfo(data){
         try {
             const { id, items } = data;
-            console.log('data received:', items)
 
             let updatedOrder = {};
 

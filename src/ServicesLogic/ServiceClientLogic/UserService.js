@@ -1,5 +1,7 @@
 const createError = require('http-errors');
 const UserModel = require('../../ClassModels/ClassClientModels/userModel');
+const {triggerRevalidationDashboard} = require('../../Utilities/utilities');
+const { use } = require('passport');
 
 module.exports = class UserService{
 
@@ -23,6 +25,10 @@ module.exports = class UserService{
             if(!Object.keys(updatedUser)?.length) {
                 throw createError(400, 'unable to update the user or user not found');
             }
+            // Trigger revalidation for the changed user
+            const path = `/admin_panel/customers/${updatedUser.user_id}`;
+            const tag = `customers`;
+            await triggerRevalidationDashboard(path, tag);   
             return updatedUser;
         } catch (error) {
             throw error             
@@ -49,6 +55,10 @@ module.exports = class UserService{
             if(!Object.keys(newUserInfo)?.length) {
                 throw createError(400, 'unable to add new user information');
             }
+            // Trigger revalidation for the changed user
+            const path = `/admin_panel/customers/${userData.user_id}`;
+            const tag = `customers`;
+            await triggerRevalidationDashboard(path, tag);
             return newUserInfo;
         } catch (error) {
             throw error 
@@ -57,11 +67,16 @@ module.exports = class UserService{
 
     // this method expects the data object { resource_id, user_id, resource }
     static async deleteUserInfo(data){
+        console.log('data', data)
         try {          
             const infoToDelete = await UserModel.deleteUserInfo(data) 
             if(!infoToDelete) {
                 throw createError(400, 'unable to delete the user information, or user information not found');
-            }      
+            }
+            // Trigger revalidation for the changed user
+            const path = `/admin_panel/customers/${data.param2}`;
+            const tag = `customers`;
+            await triggerRevalidationDashboard(path, tag);      
             return {message: 'the user information was succesfully deleted', status:204};
         } catch (error) {
             throw error 

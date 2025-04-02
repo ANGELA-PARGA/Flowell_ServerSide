@@ -346,9 +346,7 @@ const selectTopSellingProducts = async () => {
         LIMIT 3;
     `);
 
-    console.log('Executing SQL SELECT TOP SELLING PRODUCTS:', sqlStatement);
     const queryResult = await db.query(sqlStatement);
-    console.log('Results on the DB:', queryResult.rows);
 
     return queryResult.rows;
 };
