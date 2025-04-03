@@ -1,4 +1,4 @@
-const session = require('express-session');
+/*const session = require('express-session');
 require('dotenv').config({ path: 'variables.env' });
 
 //Setting MongoDB to store sessions 
@@ -43,9 +43,9 @@ const sessionConfig = {
     },
 };
 
-module.exports = sessionConfig;
+module.exports = sessionConfig;*/
 
-/*const {RedisStore} = require("connect-redis") 
+const {RedisStore} = require("connect-redis") 
 const { createClient } = require('redis');
 require('dotenv').config({ path: 'variables.env' });
 
@@ -85,4 +85,4 @@ const sessionConfig = {
     },
 };
 
-module.exports = sessionConfig; */
+module.exports = sessionConfig; 
