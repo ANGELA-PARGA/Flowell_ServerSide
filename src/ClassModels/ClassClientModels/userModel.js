@@ -99,6 +99,7 @@ module.exports = class UserModel {
             const updatedUserInfo = await updateQuery({id, ...params}, 'id', tableName)
             return updatedUserInfo;
         } catch (error) {
+            console.log('ERROR', error)
             const dbError = createError(
                 error.status || (error.code ? 400 : 500), // If error.code exists, it's likely a DB error
                 error.code 

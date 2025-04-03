@@ -95,6 +95,13 @@ const sendEmail = async (email, subject, message) => {
 }
 
 async function triggerRevalidationEccomerce(path, tag) {
+    // This is because the dashboard is not deployed yet, so we need to skip the webhook call in development mode
+    // and in production mode to not crash the deployed e commerce
+    // After the deployment just delete the || condition.
+    if (process.env.NODE_ENV !== 'production' || process.env.NODE_ENV === 'production') {
+        console.log('Skipping webhook call in development mode.');
+        return; // Exit gracefully
+    }    
     const webhookUrl = process.env.ECOMMERCE_WEBHOOK_URL; 
     const secret = process.env.WEBHOOK_SECRET;
     if (!webhookUrl || !secret) {
@@ -132,6 +139,13 @@ async function triggerRevalidationEccomerce(path, tag) {
 }
 
 async function triggerRevalidationDashboard(path, tag) {
+    // This is because the dashboard is not deployed yet, so we need to skip the webhook call in development mode
+    // and in production mode to not crash the deployed e commerce
+    // To test / developer mode, comment this condition.
+    if (process.env.NODE_ENV !== 'production' || process.env.NODE_ENV === 'production') {
+        console.log('Skipping webhook call while the dahsboard is deployed.');
+        return; // Exit gracefully
+    } 
     const webhookUrl = process.env.DASHBOARD_WEBHOOK_URL; 
     const secret = process.env.WEBHOOK_SECRET;
     if (!webhookUrl || !secret) {

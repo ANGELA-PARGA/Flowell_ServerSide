@@ -1,6 +1,0 @@
-services:
-  mongodb:
-    resources:
-      cpu: 0.2vCPU
-      memory: 150MB
-      disk: 1GB

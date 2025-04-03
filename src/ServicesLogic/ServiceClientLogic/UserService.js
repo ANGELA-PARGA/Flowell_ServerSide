@@ -1,7 +1,6 @@
 const createError = require('http-errors');
 const UserModel = require('../../ClassModels/ClassClientModels/userModel');
 const {triggerRevalidationDashboard} = require('../../Utilities/utilities');
-const { use } = require('passport');
 
 module.exports = class UserService{
 
