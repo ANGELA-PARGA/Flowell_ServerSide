@@ -1,7 +1,7 @@
 const session = require('express-session');
 require('dotenv').config({ path: 'variables.env' });
 
-/* Setting MongoDB to store sessions */
+//Setting MongoDB to store sessions 
 const MongoDBStore = require('connect-mongodb-session')(session);
 const mongoose = require('mongoose'); // Ensure connection pooling
 
@@ -24,10 +24,10 @@ store.on('error', function (error) {
     console.error('🚨 Error storing the sessions:', error);
 });
 
-/* Determine environment */
+
 const isProduction = process.env.NODE_ENV === 'production';
 
-/* Setting the session-express middleware */
+
 const sessionConfig = {
     secret: process.env.SECRET,
     resave: false,
