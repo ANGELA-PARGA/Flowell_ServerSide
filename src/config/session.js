@@ -49,9 +49,10 @@ const {RedisStore} = require("connect-redis")
 const { createClient } = require('redis');
 require('dotenv').config({ path: 'variables.env' });
 
+const isProduction = process.env.NODE_ENV === 'production'; 
 
 const redisClient = createClient({
-    url: process.env.REDIS_PUBLIC_URL, // Redis connection URL
+    url: isProduction ? process.env.REDIS_URL : process.env.REDIS_PUBLIC_URL , // Redis connection URL
 });
 
 redisClient.on('error', (err) => console.error('🚨 Redis Client Error:', err));
@@ -65,9 +66,6 @@ redisClient.on('connect', () => console.log('✅ Connected to Redis'));
         console.error('🚨 Failed to connect to Redis:', err);
     }
 })();
-
-
-const isProduction = process.env.NODE_ENV === 'production';
 
 
 const sessionConfig = {
