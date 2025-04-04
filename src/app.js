@@ -18,8 +18,13 @@ app.use(helmet());
 
 app.use(morgan('dev'));
 /*setting cors configuration */
+const allowedOrigins = [
+    process.env.NEXT_PUBLIC_HOST || "http://localhost:3000",
+    process.env.NEXT_PUBLIC_DASHBOARD_HOST || "http://localhost:3001"
+]
+
 const corsOptions = {
-    origin: process.env.NEXT_PUBLIC_HOST || "http://localhost:3000",
+    origin: allowedOrigins,
     credentials: true,
 };
 app.use(cors(corsOptions));
@@ -88,4 +93,5 @@ const {errorHandler} = require('./middleware/appMiddlewares');
 app.use(errorHandler);
 
 
+// Export the notification function
 module.exports = app;
