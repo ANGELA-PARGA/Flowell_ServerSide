@@ -10,7 +10,7 @@ const {selectTotalProductsDashboard} = require('../../DBQueries/productQueries')
 
 const ProductAdminService = require('../../ServicesLogic/ServicesAdminLogic/productAdminService')
 
-router.get('/', /*checkAuthenticated, checkAdminRole,*/ async (req, res, next) => {
+router.get('/', checkAuthenticated, checkAdminRole, async (req, res, next) => {
     try {
         const limit = 10;
         const page = parseInt(req.query.page) || 1;
@@ -38,7 +38,7 @@ router.get('/', /*checkAuthenticated, checkAdminRole,*/ async (req, res, next) =
     }
 });
 
-router.get('/dashboard', /*checkAuthenticated, checkAdminRole,*/ async (req, res, next) => {
+router.get('/dashboard', checkAuthenticated, checkAdminRole, async (req, res, next) => {
     try {
         const products = await ProductAdminService.returnMostSold()
 
@@ -53,7 +53,7 @@ router.get('/dashboard', /*checkAuthenticated, checkAdminRole,*/ async (req, res
     }
 });
 
-router.get('/search', /*checkAuthenticated, checkAdminRole,*/ searchTermValidators, handleValidationErrors,
+router.get('/search', checkAuthenticated, checkAdminRole, searchTermValidators, handleValidationErrors,
             async (req, res, next) => {
     try {
         const data = req.query.term;
@@ -72,7 +72,7 @@ router.get('/search', /*checkAuthenticated, checkAdminRole,*/ searchTermValidato
     }        
 });
 
-router.get('/:id', /*checkAuthenticated, checkAdminRole,*/ idParamsValidator, handleValidationErrors, 
+router.get('/:id', checkAuthenticated, checkAdminRole, idParamsValidator, handleValidationErrors, 
             async (req, res, next) => {
     try {
         const id = parseInt(req.params.id, 10);
@@ -88,7 +88,7 @@ router.get('/:id', /*checkAuthenticated, checkAdminRole,*/ idParamsValidator, ha
     }
 });
 
-router.post('/', /*checkAuthenticated, checkAdminRole,*/upload.array('images_url', 3), newProductValidators, handleValidationErrors, async (req, res, next) => {
+router.post('/', checkAuthenticated, checkAdminRole, upload.array('images_url', 3), newProductValidators, handleValidationErrors, async (req, res, next) => {
     try {          
         // ✅ 1. Extract text fields
         const data = req.body;
@@ -117,7 +117,7 @@ router.post('/', /*checkAuthenticated, checkAdminRole,*/upload.array('images_url
 });
 
 
-router.patch('/:id/product_details', /*checkAuthenticated, checkAdminRole,*/ idParamsValidator, updateProductValidators, handleValidationErrors, 
+router.patch('/:id/product_details', checkAuthenticated, checkAdminRole, idParamsValidator, updateProductValidators, handleValidationErrors, 
     async (req, res, next) => {
     try {
         const id = parseInt(req.params.id, 10);
@@ -134,7 +134,7 @@ router.patch('/:id/product_details', /*checkAuthenticated, checkAdminRole,*/ idP
     }
 });
 
-router.patch('/:id/stock', /*checkAuthenticated, checkAdminRole,*/ idParamsValidator, updateStockValidator, handleValidationErrors, 
+router.patch('/:id/stock', checkAuthenticated, checkAdminRole, idParamsValidator, updateStockValidator, handleValidationErrors, 
             async (req, res, next) => {
     try {
         const id = parseInt(req.params.id, 10);

@@ -6,7 +6,7 @@ const { checkAuthenticated, checkAdminRole } = require('../../middleware/appMidd
 const { selectTotalOrdersQuery, selectOrdersByMonth} = require('../../DBQueries/orderQueries')
 const OrderAdminService = require('../../ServicesLogic/ServicesAdminLogic/orderAdminService')
 
-router.get('/', /*checkAuthenticated, checkAdminRole,*/ async (req, res, next) => {
+router.get('/', checkAuthenticated, checkAdminRole, async (req, res, next) => {
     try {
         const limit = 5;
         const page = parseInt(req.query.page) || 1;
@@ -33,7 +33,7 @@ router.get('/', /*checkAuthenticated, checkAdminRole,*/ async (req, res, next) =
     }
 });
 
-router.get('/dashboard', /*checkAuthenticated, checkAdminRole,*/ async (req, res, next) => {
+router.get('/dashboard', checkAuthenticated, checkAdminRole, async (req, res, next) => {
     try {
         const {ordersByStatus: ordersByStatus, ordersByMonth: ordersByMonth, monthWithMostOrders: monthWithMostOrders} = await OrderAdminService.loadGroupedOrders()
         res.status(200).json({
@@ -49,7 +49,7 @@ router.get('/dashboard', /*checkAuthenticated, checkAdminRole,*/ async (req, res
     }
 });
 
-router.get('/:id', /*checkAuthenticated, checkAdminRole,*/ idParamsValidator, handleValidationErrors, 
+router.get('/:id', checkAuthenticated, checkAdminRole, idParamsValidator, handleValidationErrors, 
     async (req, res, next) => {
         try {
             const id = parseInt(req.params.id, 10);
@@ -65,7 +65,7 @@ router.get('/:id', /*checkAuthenticated, checkAdminRole,*/ idParamsValidator, ha
         }
 });
 
-router.patch('/:id', /*checkAuthenticated, checkAdminRole,*/ idParamsValidator, 
+router.patch('/:id', checkAuthenticated, checkAdminRole, idParamsValidator, 
                 handleValidationErrors, async (req, res, next) => {
     try {
         const id = parseInt(req.params.id, 10);
@@ -82,7 +82,7 @@ router.patch('/:id', /*checkAuthenticated, checkAdminRole,*/ idParamsValidator,
 });
 
 
-router.patch('/:id/shipping_info', /*checkAuthenticated, checkAdminRole,*/ idParamsValidator, orderShippingInfoValidators, 
+router.patch('/:id/shipping_info', checkAuthenticated, checkAdminRole, idParamsValidator, orderShippingInfoValidators, 
             handleValidationErrors, async (req, res, next) => {
     try {
         const data = req.body
@@ -99,7 +99,7 @@ router.patch('/:id/shipping_info', /*checkAuthenticated, checkAdminRole,*/ idPar
     }        
 });
 
-router.patch('/:id/delivery_date', /*checkAuthenticated, checkAdminRole,*/ idParamsValidator, orderDeliveryInfoValidator, 
+router.patch('/:id/delivery_date', checkAuthenticated, checkAdminRole, idParamsValidator, orderDeliveryInfoValidator, 
         handleValidationErrors, async (req, res, next) => {
     try {
     const data = req.body
@@ -116,7 +116,7 @@ router.patch('/:id/delivery_date', /*checkAuthenticated, checkAdminRole,*/ idPar
     }        
 });
 
-router.patch('/:id/items_ordered', /*checkAuthenticated, checkAdminRole,*/ idParamsValidator, orderedItemsValidators, 
+router.patch('/:id/items_ordered', checkAuthenticated, checkAdminRole, idParamsValidator, orderedItemsValidators, 
             handleValidationErrors, async (req, res, next) => {
     try {
         const data = req.body
@@ -133,7 +133,7 @@ router.patch('/:id/items_ordered', /*checkAuthenticated, checkAdminRole,*/ idPar
     }        
 });
 
-router.patch('/:id/ship_order', /*checkAuthenticated, checkAdminRole,*/ idParamsValidator, trackingValidator, 
+router.patch('/:id/ship_order', checkAuthenticated, checkAdminRole, idParamsValidator, trackingValidator, 
     handleValidationErrors, async (req, res, next) => {
     try {
         const tracking = req.body

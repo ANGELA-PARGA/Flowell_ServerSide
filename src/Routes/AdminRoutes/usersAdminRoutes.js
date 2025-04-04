@@ -6,7 +6,7 @@ const {selectTotalUsersQuery} = require('../../DBQueries/userQueries');
 const { idParamsValidator, handleValidationErrors } = require('../../Utilities/expressValidators');
 const UserAdminService = require('../../ServicesLogic/ServicesAdminLogic/userAdminService');
 
-router.get('/', /*checkAuthenticated, checkAdminRole,*/ async (req, res, next) => {
+router.get('/', checkAuthenticated, checkAdminRole, async (req, res, next) => {
     try {
         const limit = 10;
         const page = parseInt(req.query.page) || 1;
@@ -34,7 +34,7 @@ router.get('/', /*checkAuthenticated, checkAdminRole,*/ async (req, res, next) =
 });
 
 
-router.get('/:id/user_info', /*checkAuthenticated, checkAdminRole,*/ idParamsValidator, handleValidationErrors, 
+router.get('/:id/user_info', checkAuthenticated, checkAdminRole, idParamsValidator, handleValidationErrors, 
     async (req, res, next) => {
         try {
             const id = parseInt(req.params.id, 10);
@@ -50,7 +50,7 @@ router.get('/:id/user_info', /*checkAuthenticated, checkAdminRole,*/ idParamsVal
         }
 });
 
-router.get('/:id/orders_history', /*checkAuthenticated, checkAdminRole,*/ idParamsValidator, handleValidationErrors, 
+router.get('/:id/orders_history', checkAuthenticated, checkAdminRole, idParamsValidator, handleValidationErrors, 
     async (req, res, next) => {
         try {
             const id = parseInt(req.params.id, 10);
