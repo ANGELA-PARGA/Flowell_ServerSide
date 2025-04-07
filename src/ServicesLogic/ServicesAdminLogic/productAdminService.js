@@ -7,8 +7,9 @@ module.exports = class ProductAdminService {
         try {
             const newProduct = await ProductAdminModel.createNewProduct(data); 
             // Trigger revalidation for the new product
-            const path = `/products`; 
-            await triggerRevalidationEccomerce(path);          
+            const path = `/products`;
+            const tag = `products`;  
+            await triggerRevalidationEccomerce(path, tag);          
             return newProduct;         
         } catch (error) {
             throw error
@@ -91,8 +92,7 @@ module.exports = class ProductAdminService {
         try { 
             const productUpdated = await ProductAdminModel.updateStock(stockData);
             const path = `/products/${productUpdated.id}`; 
-            const tag = 'products'
-            await triggerRevalidationEccomerce(path, tag);  
+            await triggerRevalidationEccomerce(path);  
             return productUpdated
         } catch (error) {
             throw error

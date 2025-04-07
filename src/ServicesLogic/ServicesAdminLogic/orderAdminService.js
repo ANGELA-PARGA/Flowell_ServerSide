@@ -28,6 +28,7 @@ module.exports = class OrderService {
             if(!Object.keys(orderUpdated)?.length){
                 throw createError(400, 'order not found or unable to update');                
             }
+            
             // Trigger revalidation for the new product
             const path = `/account/orders/${orderUpdated.id}`; 
             const tag = `orders`
@@ -45,7 +46,7 @@ module.exports = class OrderService {
                 throw createError(400, 'order not found or unable to update');                
             }
             // Trigger revalidation for the new product
-            const path = `/account/orders/${orderUpdated.id}`; 
+            const path = `/account/orders/${orderUpdated.order.id}`; 
             const tag = `orders`
             await triggerRevalidationEccomerce(path, tag); 
             return orderUpdated; 

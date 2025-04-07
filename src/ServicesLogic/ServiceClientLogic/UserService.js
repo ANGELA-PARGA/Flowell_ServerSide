@@ -25,6 +25,9 @@ module.exports = class UserService{
                 throw createError(400, 'unable to update the user or user not found');
             }
             // Trigger revalidation for the changed user
+            if(!updatedUser?.user_id) { 
+                updatedUser.user_id = userData.id;
+            }
             const path = `/admin_panel/customers/${updatedUser.user_id}`;
             const tag = `customers`;
             await triggerRevalidationDashboard(path, tag);   
@@ -66,7 +69,6 @@ module.exports = class UserService{
 
     // this method expects the data object { resource_id, user_id, resource }
     static async deleteUserInfo(data){
-        console.log('data', data)
         try {          
             const infoToDelete = await UserModel.deleteUserInfo(data) 
             if(!infoToDelete) {

@@ -96,12 +96,13 @@ const sendEmail = async (email, subject, message) => {
 
 async function triggerRevalidationEccomerce(path, tag) {
     // When using in development mode, in order to work with or test the webhook we must have the 2 client apps
-    // running at the same time, so the apps dont crash when receiving the response from the webhook.
+    // running at the same time in differente browser windows, so the apps dont crash when receiving the response from the webhook.
+    // and don't logout each other if used on the same browser. Also, comment the line below to use the webhook in development mode.
 
     if (process.env.NODE_ENV !== 'production') {
         console.log('Skipping webhook call in development mode.');
         return; // Exit gracefully
-    }    
+    }   
     const webhookUrl = process.env.ECOMMERCE_WEBHOOK_URL; 
     const secret = process.env.WEBHOOK_SECRET;
     if (!webhookUrl || !secret) {
@@ -140,12 +141,13 @@ async function triggerRevalidationEccomerce(path, tag) {
 
 async function triggerRevalidationDashboard(path, tag) {
     // When using in development mode, in order to work with or test the webhook we must have the 2 client apps
-    // running at the same time, so the apps dont crash when receiving the response from the webhook.
+    // running at the same time in differente browser windows, so the apps dont crash when receiving the response from the webhook.
+    // and don't logout each other if used on the same browser. Also, comment the line below to use the webhook in development mode.
 
     if (process.env.NODE_ENV !== 'production') {
         console.log('Skipping webhook call in development mode.');
         return; // Exit gracefully
-    } 
+    }
     
     const webhookUrl = process.env.DASHBOARD_WEBHOOK_URL; 
     const secret = process.env.WEBHOOK_SECRET;
