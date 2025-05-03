@@ -1,6 +1,6 @@
 const passport = require('passport');
 const LocalStrategy = require('passport-local');
-const Authentication = require('../ServicesLogic/ServiceClientLogic/AuthService')
+const Authentication = require('../services/client/AuthService')
 
 
 passport.use(new LocalStrategy({

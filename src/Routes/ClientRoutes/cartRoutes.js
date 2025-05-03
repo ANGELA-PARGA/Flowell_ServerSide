@@ -4,8 +4,8 @@ const router = express.Router();
 const { handleValidationErrors, idParamsValidator,
     updateCartValidators, createCheckoutValidators } = require('../../Utilities/expressValidators')
 const { checkAuthenticated } = require('../../middleware/appMiddlewares')
-const CartService = require('../../ServicesLogic/ServiceClientLogic/CartService')
-const CartItemsModel = require('../../ClassModels/ClassClientModels/cartItemsModel');
+const CartService = require('../../services/client/CartService')
+const CartItemsModel = require('../../models/ClassClientModels/cartItemsModel');
 
 
 

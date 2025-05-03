@@ -4,7 +4,7 @@ require('dotenv').config({ path: 'variables.env' });
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 const endpointSecret = process.env.WEBHOOK_ENDPOINT_SECRET; // be careful this change if I delete the webhook in the stripe dashboard
 const bodyParser =  require('body-parser');
-const CartService = require('../ServicesLogic/ServiceClientLogic/CartService');
+const CartService = require('../services/client/CartService');
 
 /*remember download ngrok, open the command line, paste the SECRET ID from ngrok, and use it, 
 plus '/webhook' inside the stripe webhook dashboard to open the connection. This webhook requires raw data */

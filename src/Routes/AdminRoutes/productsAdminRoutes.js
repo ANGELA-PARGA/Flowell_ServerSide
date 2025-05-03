@@ -8,7 +8,7 @@ const { checkAuthenticated, checkAdminRole } = require('../../middleware/appMidd
 const {selectTotalProductsDashboard} = require('../../DBQueries/productQueries')
 
 
-const ProductAdminService = require('../../ServicesLogic/ServicesAdminLogic/productAdminService')
+const ProductAdminService = require('../../services/admin/productAdminService')
 
 router.get('/', checkAuthenticated, checkAdminRole, async (req, res, next) => {
     try {

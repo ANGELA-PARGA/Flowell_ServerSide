@@ -94,7 +94,7 @@ const sendEmail = async (email, subject, message) => {
     }
 }
 
-async function triggerRevalidationEccomerce(path, tag) {
+async function triggerRevalidationEcomerce(path, tag) {
     // When using in development mode, in order to work with or test the webhook we must have the 2 client apps
     // running at the same time in differente browser windows, so the apps dont crash when receiving the response from the webhook.
     // and don't logout each other if used on the same browser. Also, comment the line below to use the webhook in development mode.
@@ -194,6 +194,6 @@ module.exports = {
     verifyResource: verifyResource, 
     luhnCheck: luhnCheck,
     sendEmail: sendEmail,
-    triggerRevalidationEccomerce: triggerRevalidationEccomerce, 
+    triggerRevalidationEcomerce: triggerRevalidationEcomerce, 
     triggerRevalidationDashboard: triggerRevalidationDashboard
 }

@@ -4,7 +4,7 @@ const { idParamsValidator, orderShippingInfoValidators, orderDeliveryInfoValidat
     orderedItemsValidators, trackingValidator, handleValidationErrors } = require('../../Utilities/expressValidators')
 const { checkAuthenticated, checkAdminRole } = require('../../middleware/appMiddlewares')
 const { selectTotalOrdersQuery, selectOrdersByMonth} = require('../../DBQueries/orderQueries')
-const OrderAdminService = require('../../ServicesLogic/ServicesAdminLogic/orderAdminService')
+const OrderAdminService = require('../../services/admin/orderAdminService')
 
 router.get('/', checkAuthenticated, checkAdminRole, async (req, res, next) => {
     try {

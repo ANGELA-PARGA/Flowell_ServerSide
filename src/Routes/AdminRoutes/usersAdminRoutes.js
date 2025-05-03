@@ -4,7 +4,7 @@ const router = express.Router();
 const { checkAuthenticated, checkAdminRole } = require('../../middleware/appMiddlewares')
 const {selectTotalUsersQuery} = require('../../DBQueries/userQueries');
 const { idParamsValidator, handleValidationErrors } = require('../../Utilities/expressValidators');
-const UserAdminService = require('../../ServicesLogic/ServicesAdminLogic/userAdminService');
+const UserAdminService = require('../../services/admin/userAdminService');
 
 router.get('/', checkAuthenticated, checkAdminRole, async (req, res, next) => {
     try {

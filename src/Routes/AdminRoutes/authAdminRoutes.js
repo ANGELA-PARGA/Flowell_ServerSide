@@ -3,7 +3,7 @@ const router = express.Router();
 const passport = require('passport');
 const { signupValidators, loginValidators, handleValidationErrors} = require('../../Utilities/expressValidators')
 const { checkAdminRole } = require('../../middleware/appMiddlewares')
-const Authentication = require('../../ServicesLogic/ServiceClientLogic/AuthService')
+const Authentication = require('../../services/client/AuthService')
 
 router.post('/login', loginValidators, handleValidationErrors, passport.authenticate('local'), checkAdminRole, async (req, res, next) => {
     try {

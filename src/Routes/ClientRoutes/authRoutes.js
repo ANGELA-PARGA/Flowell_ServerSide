@@ -6,10 +6,10 @@ const { signupValidators, loginValidators, handleValidationErrors,
 const jwt = require('jsonwebtoken');
 const {sendEmail} = require('../../Utilities/utilities');
 const { checkUserRole } = require('../../middleware/appMiddlewares')
-const CartService = require('../../ServicesLogic/ServiceClientLogic/CartService')
-const Authentication = require('../../ServicesLogic/ServiceClientLogic/AuthService')
-const UserModel = require('../../ClassModels/ClassClientModels/userModel');
-const UserService = require('../../ServicesLogic/ServiceClientLogic/UserService')
+const CartService = require('../../services/client/CartService')
+const Authentication = require('../../services/client/AuthService')
+const UserModel = require('../../models/ClassClientModels/userModel');
+const UserService = require('../../services/client/UserService')
 
 router.post('/login', loginValidators, handleValidationErrors, passport.authenticate('local'), checkUserRole, async (req, res, next) => {
     try {

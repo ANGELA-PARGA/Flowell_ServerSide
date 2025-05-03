@@ -6,8 +6,8 @@ const { checkAuthenticated } = require('../../middleware/appMiddlewares')
 const {selectTotalProducts} = require('../../DBQueries/productQueries')
 
 
-const ProductService = require('../../ServicesLogic/ServiceClientLogic/ProductService')
-const CartsService = require('../../ServicesLogic/ServiceClientLogic/CartService')
+const ProductService = require('../../services/client/ProductService')
+const CartsService = require('../../services/client/CartService')
 
 router.get('/', async (req, res, next) => {
     try {

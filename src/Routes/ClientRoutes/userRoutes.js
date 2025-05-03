@@ -4,7 +4,7 @@ const router = express.Router();
 const { updateUserValidators, updatePasswordValidators, resourceValidator,
         handleValidationErrors} = require('../../Utilities/expressValidators')
 const { checkAuthenticated } = require('../../middleware/appMiddlewares')
-const UserService = require('../../ServicesLogic/ServiceClientLogic/UserService')
+const UserService = require('../../services/client/UserService')
 
 router.get('/', checkAuthenticated, async (req, res, next) => {
     try {
