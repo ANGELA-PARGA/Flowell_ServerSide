@@ -1,23 +1,27 @@
-const express = require('express');
+import express from 'express';
+import passport from 'passport';
+import { 
+    signupValidators, 
+    loginValidators, 
+    handleValidationErrors, 
+    recoverEmailValidator, 
+    changePasswordOnRecoveryValidator 
+} from '../../Utilities/expressValidators.js'
+import jwt from 'jsonwebtoken';
+import {sendEmail} from '../../Utilities/utilities.js'
+import { checkUserRole } from '../../middleware/appMiddlewares.js';
+import { cartService, userService, authenticationService } from '../../config/container.js';
+
 const router = express.Router();
-const passport = require('passport');
-const { signupValidators, loginValidators, handleValidationErrors, 
-    recoverEmailValidator, changePasswordOnRecoveryValidator } = require('../../Utilities/expressValidators')
-const jwt = require('jsonwebtoken');
-const {sendEmail} = require('../../Utilities/utilities');
-const { checkUserRole } = require('../../middleware/appMiddlewares')
-const CartService = require('../../ServicesLogic/ServiceClientLogic/CartService')
-const Authentication = require('../../ServicesLogic/ServiceClientLogic/AuthService')
-const UserModel = require('../../ClassModels/ClassClientModels/userModel');
-const UserService = require('../../ServicesLogic/ServiceClientLogic/UserService')
 
 router.post('/login', loginValidators, handleValidationErrors, passport.authenticate('local'), checkUserRole, async (req, res, next) => {
     try {
-        let loadCart = await CartService.getCartInfo(req.user.id)
+        console.log('calling login route')
+        let loadCart = await cartService.getCartInfo(req.user.id)
         let cartId;
 
         if(!Object.keys(loadCart)?.length){
-            loadCart = await CartService.createNewCart({user_id: req.user.id})
+            loadCart = await cartService.createNewCart({user_id: req.user.id})
         }
         cartId = loadCart.id;
         const { id, first_name, last_name, email, role } = req.user;
@@ -46,13 +50,12 @@ router.post('/login', loginValidators, handleValidationErrors, passport.authenti
 router.post('/signup', signupValidators, handleValidationErrors, async (req, res, next) => {
     try {
         const data = req.body;
-        const AuthServiceInstance = new Authentication();
-        const newUser = await AuthServiceInstance.register({...data, role:'client'});
-        let loadCart = await CartService.getCartInfo(newUser.id);
+        const newUser = await authenticationService.register({...data, role:'client'});
+        let loadCart = await cartService.getCartInfo(newUser.id);
         let cartId;
 
         if (!Object.keys(loadCart)?.length) {
-            loadCart = await CartService.createNewCart({ user_id: newUser.id });
+            loadCart = await cartService.createNewCart({ user_id: newUser.id });
         }
 
         cartId = loadCart.id
@@ -109,12 +112,11 @@ router.post('/logout', async (req, res, next) => {
 
 
 
-router.post('/request_email_pwd_recovery', recoverEmailValidator,
-    handleValidationErrors, async (req, res, next) => {
+router.post('/request_email_pwd_recovery', recoverEmailValidator, handleValidationErrors, async (req, res, next) => {
     try {
         const email = req.body.email;
         const SECRET = process.env.JWT_SECRET;
-        const userFound = await UserModel.findUserByEmail(email);
+        const userFound = await userService.findUserByEmail(email);
         if(!userFound?.length){
             return res.status(200).json({ message: "If the email exists, a reset link has been sent." });
         }
@@ -134,8 +136,7 @@ router.post('/request_email_pwd_recovery', recoverEmailValidator,
     }        
 });
 
-router.patch('/reset_password', changePasswordOnRecoveryValidator,
-    handleValidationErrors, async (req, res, next) => {
+router.patch('/reset_password', changePasswordOnRecoveryValidator, handleValidationErrors, async (req, res, next) => {
     try {
         const {status, password} = req.body;
         const SECRET = process.env.JWT_SECRET;
@@ -143,7 +144,7 @@ router.patch('/reset_password', changePasswordOnRecoveryValidator,
         const decoded = jwt.verify(status, SECRET);
         const userId = decoded.userId;
 
-        await UserService.updateUserPassword({id:userId, password});
+        await userService.updateUserPassword({id:userId, password});
 
         res.status(200).json({ message: "Password reset successful. You can now log in." });
 
@@ -152,4 +153,4 @@ router.patch('/reset_password', changePasswordOnRecoveryValidator,
     }        
 });
 
-module.exports = router;
+export default router;

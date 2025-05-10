@@ -1,7 +1,6 @@
-const crypto = require('crypto')
-const bcrypt = require('bcrypt')
-const nodemailer = require('nodemailer');
-
+import crypto from 'crypto'
+import bcrypt from 'bcrypt'
+import nodemailer from 'nodemailer'
 
 /**
  * Compares an unencrypted password with a password encrypted using bcrypt.
@@ -94,7 +93,7 @@ const sendEmail = async (email, subject, message) => {
     }
 }
 
-async function triggerRevalidationEccomerce(path, tag) {
+async function triggerRevalidationEcomerce(path, tag) {
     // When using in development mode, in order to work with or test the webhook we must have the 2 client apps
     // running at the same time in differente browser windows, so the apps dont crash when receiving the response from the webhook.
     // and don't logout each other if used on the same browser. Also, comment the line below to use the webhook in development mode.
@@ -188,12 +187,12 @@ async function triggerRevalidationDashboard(path, tag) {
 
 
 
-module.exports = {
-    comparePasswords: comparePasswords,
-    hashPassword: hashPassword,
-    verifyResource: verifyResource, 
-    luhnCheck: luhnCheck,
-    sendEmail: sendEmail,
-    triggerRevalidationEccomerce: triggerRevalidationEccomerce, 
-    triggerRevalidationDashboard: triggerRevalidationDashboard
+export {
+    comparePasswords,
+    hashPassword,
+    verifyResource, 
+    luhnCheck,
+    sendEmail,
+    triggerRevalidationEcomerce, 
+    triggerRevalidationDashboard
 }

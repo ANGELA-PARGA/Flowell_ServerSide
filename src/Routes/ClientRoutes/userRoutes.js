@@ -1,15 +1,20 @@
-require('dotenv').config({ path: 'variables.env' });
-const express = require('express');
-const router = express.Router();
-const { updateUserValidators, updatePasswordValidators, resourceValidator,
-        handleValidationErrors} = require('../../Utilities/expressValidators')
-const { checkAuthenticated } = require('../../middleware/appMiddlewares')
-const UserService = require('../../ServicesLogic/ServiceClientLogic/UserService')
+import express from 'express';
+import dotenv from 'dotenv';
+dotenv.config({ path: 'variables.env' });
+import { 
+    updateUserValidators, 
+    updatePasswordValidators, 
+    resourceValidator, 
+    handleValidationErrors
+} from '../../Utilities/expressValidators.js'
+import { checkAuthenticated } from '../../middleware/appMiddlewares.js'
+import { userService } from '../../config/container.js'
 
+const router = express.Router();
 router.get('/', checkAuthenticated, async (req, res, next) => {
     try {
         const user_id = req.user.id;
-        const response = await UserService.getUserInfo(user_id);
+        const response = await userService.getUserInfo(user_id);
         res.status(200).json({
             status: 'success',
             message: 'User profile retrieved successfully',
@@ -27,7 +32,7 @@ router.post('/:resourceType', checkAuthenticated, resourceValidator, updateUserV
         const resource = req.params.resourceType
         const data = req.body
         const user_id = req.user.id;
-        const response = await UserService.addUserInfo({user_id, resource:resource, ...data});
+        const response = await userService.addUserInfo({user_id, resource:resource, ...data});
         res.status(200).json({
             status: 'success',
             message: 'New user information was added successfully',
@@ -45,7 +50,7 @@ router.patch('/:resourceType/:resourceId', checkAuthenticated, resourceValidator
         const resource = req.params.resourceType
         const resource_id = parseInt(req.params.resourceId, 10);
         const data = req.body
-        const response = await UserService.updateUserInfo({id:resource_id, resource, ...data});
+        const response = await userService.updateUserInfo({id:resource_id, resource, ...data});
         res.status(200).json({
             status: 'success',
             message: 'The user information was updated successfully',
@@ -62,7 +67,7 @@ router.patch('/mine', checkAuthenticated, updatePasswordValidators, handleValida
     try {
         const password = req.body.password
         const user_id = req.user.id;
-        const response = await UserService.updateUserPassword({id:user_id, password});
+        const response = await userService.updateUserPassword({id:user_id, password});
         res.status(200).json({
             status: 'success',
             message: 'The user password was updated successfully',
@@ -80,7 +85,7 @@ router.delete('/:resourceType/:resourceId', checkAuthenticated, resourceValidato
         const resource = req.params.resourceType
         const resource_id = parseInt(req.params.resourceId, 10);
         const user_id = req.user.id;
-        const response = await UserService.deleteUserInfo({param1:resource_id, param2:user_id, resource:resource});
+        const response = await userService.deleteUserInfo({param1:resource_id, param2:user_id, resource:resource});
         res.status(200).json({
             status: 'success',
             message: 'the user information was succesfully deleted',
@@ -92,4 +97,4 @@ router.delete('/:resourceType/:resourceId', checkAuthenticated, resourceValidato
     }        
 });
 
-module.exports = router;
+export default router;

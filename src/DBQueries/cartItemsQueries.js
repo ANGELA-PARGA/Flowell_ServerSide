@@ -1,50 +1,84 @@
-const pgp = require('pg-promise')({ capSQL: true });
-const db = require('../DB/connectionDB');
-const moment = require('moment');
+import createError from 'http-errors';
 
-/**
- * Update items of a cart stored on the DB using a data object { cart_id, product_id, qty } 
- * It returns an object with the updated information if the query was succesfull, otherwise it returns an empty object
- * @param {Object} data { cart_id, product_id, qty }
- * @returns {Object} successfull query 
- * @returns {{}} unsuccessfull query
- */
-const updateCartItemsQuery = async (data) => {
-    const { cart_id, product_id, qty } = data;
-    const updated_at = moment.utc().toISOString();
+class CartItemsQueries {
+    /**
+     * CartItemsQueries class is responsible for executing queries related to cart items in the database.
+     * It contains the following methods:
+     * - updateCartItems: Updates the quantity of a specific product in a cart.
+     * - selectCartItems: Retrieves all items in a specific cart.
+     * It uses pg-promise to interact with the PostgreSQL database and also the object 'db' (dbConnection) to execute the queries.
+     * @param {Object} db - The database connection object.
+     * @param {Object} pgp - The pg-promise library instance.
+     */
+    constructor(db, pgp) {
+        this.db = db;
+        this.pgp = pgp;
+    }
 
-    const condition = pgp.as.format('WHERE cart_id = $1 AND product_id = $2 RETURNING *', [cart_id, product_id]);
-    const sqlStatement = pgp.helpers.update({qty:qty, updated_at:updated_at}, null, 'cart_items') + condition;
+    static handleDbError(error, context) {
+        const dbError = createError(
+            error.status || (error.code ? 400 : 500),
+            error.code
+                ? `DatabaseError: ${context}`
+                : `ServerError: Unexpected error in ${context}`
+        );
 
-    const queryResult = await db.query(sqlStatement);
-    if(queryResult.rows?.length) return queryResult.rows[0];
-    return {};
+        dbError.name = error.code ? 'DatabaseError' : 'ServerError';
+        dbError.message = error.message || `An unexpected error occurred during ${context}`;
+        dbError.details = error.details || (error.code ? 'Possible constraint violation' : 'No additional details');
+        dbError.stack = process.env.NODE_ENV === 'development' ? error.stack : `CartItemsQueries / ${context}`;
+        dbError.timestamp = new Date().toISOString();
 
+        return dbError;
+    }
+
+    /**
+     * Update items of a cart stored on the DB using a data object { cart_id, product_id, qty } 
+     * It returns an object with the updated information if the query was succesfull, otherwise it returns an empty object
+     * @param {Object} data { cart_id, product_id, qty }
+     * @returns {Object} successfull query 
+     * @returns {{}} unsuccessfull query
+     */
+    async updateCartItems(data){
+        try {
+            const { cart_id, product_id, qty } = data;
+            const updated_at = new Date().toISOString();
+
+            const condition = this.pgp.as.format('WHERE cart_id = $1 AND product_id = $2 RETURNING *', [cart_id, product_id]);
+            const sqlStatement = this.pgp.helpers.update({qty:qty, updated_at:updated_at}, null, 'cart_items') + condition;
+
+            const queryResult = await this.db.query(sqlStatement);
+            return queryResult.rows?.[0] || {};            
+        } catch (error) {
+            throw CartItemsQueries.handleDbError(error, 'update cart items in updateCartItems');            
+        }
+
+    }
+
+    /**
+     * Select all cart information stored on the DB using a parameter (cart id).
+     * It returns an array with an object if the query was successfull, otherwise it returns an empty array
+     * @param {number} parameter
+     * @returns {Array} successfull query 
+     * @returns {[]} unsuccessfull query
+     */
+    async selectCartItems(parameter){
+        try {
+            const sqlStatement = this.pgp.as.format(`SELECT cart_items.product_id, cart_items.qty,
+                products.price_per_case AS price, 
+                products.name 
+                FROM cart_items
+                JOIN products 
+                    ON cart_items.product_id = products.id
+                WHERE cart_items.cart_id = $1`,[parameter]);
+
+            const queryResult = await this.db.query(sqlStatement);
+            return queryResult.rows || []; 
+            
+        } catch (error) {
+            throw CartItemsQueries.handleDbError(error, 'select all cart items in selectCartItems');                        
+        }
+    }
 }
 
-/**
- * Select all cart information stored on the DB using a parameter (cart id).
- * It returns an array with an object if the query was successfull, otherwise it returns an empty array
- * @param {number} parameter
- * @returns {Array} successfull query 
- * @returns {[]} unsuccessfull query
- */
-const selectCartItemsQuery = async (parameter) => {
-    const sqlStatement = pgp.as.format(`SELECT cart_items.product_id, cart_items.qty,
-                                        products.price_per_case AS price, 
-                                        products.name 
-                                        FROM cart_items
-                                        JOIN products 
-                                            ON cart_items.product_id = products.id
-                                        WHERE cart_items.cart_id = $1`,[parameter]);
-
-    const queryResult = await db.query(sqlStatement);
-    if(queryResult.rows?.length) return queryResult.rows;
-    return []; 
-
-}
-
-module.exports = {
-    updateCartItemsQuery,
-    selectCartItemsQuery
-}
+export default CartItemsQueries

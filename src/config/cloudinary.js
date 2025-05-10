@@ -1,5 +1,6 @@
-require('dotenv').config({ path: 'variables.env' });
-const cloudinary = require('cloudinary').v2;
+import dotenv from 'dotenv';
+import { v2 as cloudinary } from 'cloudinary';
+dotenv.config({ path: 'variables.env' });
 
 cloudinary.config({
     cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
@@ -30,4 +31,4 @@ const uploadImage = async (file) => {
     }
 };
 
-module.exports = uploadImage;
+export default uploadImage;

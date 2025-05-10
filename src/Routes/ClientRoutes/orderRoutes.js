@@ -1,14 +1,17 @@
-const express = require('express');
-const router = express.Router();
-const { idParamsValidator, orderShippingInfoValidators, orderDeliveryInfoValidator,
-        handleValidationErrors } = require('../../Utilities/expressValidators')
-const { checkAuthenticated } = require('../../middleware/appMiddlewares')
-const OrderService = require('../../ServicesLogic/ServiceClientLogic/OrderService')
+import express from 'express';
+import { idParamsValidator,
+        orderShippingInfoValidators, 
+        orderDeliveryInfoValidator,
+        handleValidationErrors 
+} from '../../Utilities/expressValidators.js'
+import { checkAuthenticated } from '../../middleware/appMiddlewares.js'
+import { orderService } from '../../config/container.js'
 
+const router = express.Router();
 router.get('/', checkAuthenticated, async (req, res, next) => {
     try {
         const user_id = req.user.id;
-        const response = await OrderService.findOrder({user_id});
+        const response = await orderService.findOrder({user_id});
         res.status(200).json({
             status: 'success',
             message: 'Orders retrieved successfully',
@@ -24,7 +27,7 @@ router.get('/:id', checkAuthenticated, idParamsValidator, handleValidationErrors
     async (req, res, next) => {
         try {
             const id = parseInt(req.params.id, 10);
-            const response = await OrderService.findOrder({id});
+            const response = await orderService.findOrder({id});
             res.status(200).json({
                 status: 'success',
                 message: 'Order retrieved successfully',
@@ -36,11 +39,10 @@ router.get('/:id', checkAuthenticated, idParamsValidator, handleValidationErrors
         }
 });
 
-router.patch('/:id', checkAuthenticated, idParamsValidator, 
-                handleValidationErrors, async (req, res, next) => {
+router.patch('/:id', checkAuthenticated, idParamsValidator, handleValidationErrors, async (req, res, next) => {
     try {
         const id = parseInt(req.params.id, 10);
-        const response = await OrderService.deleteOrder(id);
+        const response = await orderService.customerCancelOrder(id);
         res.status(200).send({
             status: 'success',
             message: 'Order cancelled successfully',
@@ -58,7 +60,7 @@ router.patch('/:id/shipping_info', checkAuthenticated, idParamsValidator, orderS
     try {
         const data = req.body
         const id = parseInt(req.params.id, 10);
-        const response = await OrderService.updateOrderShippingInfo({id, ...data});
+        const response = await orderService.customerUpdateShippingInfo({id, ...data});
         res.status(200).json({
             status: 'success',
             message: 'Orders shipping information updated successfully',
@@ -75,7 +77,7 @@ router.patch('/:id/delivery_date', checkAuthenticated, idParamsValidator, orderD
     try {
     const data = req.body
     const id = parseInt(req.params.id, 10);
-    const response = await OrderService.updateOrderShippingInfo({id, ...data});
+    const response = await orderService.customerUpdateShippingInfo({id, ...data});
     res.status(200).json({
         status: 'success',
         message: 'Orders delivery date updated successfully',
@@ -88,4 +90,4 @@ router.patch('/:id/delivery_date', checkAuthenticated, idParamsValidator, orderD
 });
 
 
-module.exports = router;
+export default router;

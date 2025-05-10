@@ -1,15 +1,17 @@
-const express = require('express');
+import express from 'express';
+import upload from '../../config/multer.js';
+import uploadImage from '../../config/cloudinary.js';
+import { idParamsValidator, 
+        handleValidationErrors,
+        searchTermValidators, 
+        newProductValidators, 
+        updateStockValidator, 
+        updateProductValidators 
+    } from '../../Utilities/expressValidators.js'
+import { checkAuthenticated, checkAdminRole } from '../../middleware/appMiddlewares.js'
+import { productService } from '../../config/container.js'
+
 const router = express.Router();
-const upload = require('../../config/multer');
-const uploadImage = require('../../config/cloudinary')
-const { idParamsValidator, handleValidationErrors,
-        searchTermValidators, newProductValidators, updateStockValidator, updateProductValidators } = require('../../Utilities/expressValidators')
-const { checkAuthenticated, checkAdminRole } = require('../../middleware/appMiddlewares')
-const {selectTotalProductsDashboard} = require('../../DBQueries/productQueries')
-
-
-const ProductAdminService = require('../../ServicesLogic/ServicesAdminLogic/productAdminService')
-
 router.get('/', checkAuthenticated, checkAdminRole, async (req, res, next) => {
     try {
         const limit = 10;
@@ -18,8 +20,8 @@ router.get('/', checkAuthenticated, checkAdminRole, async (req, res, next) => {
 
         const search = req.query.term;
 
-        const bestProducts = await ProductAdminService.loadAllProducts(limit, offset, search);
-        const totalProducts = await selectTotalProductsDashboard(search);
+        const bestProducts = await productService.loadAllProducts(limit, offset, search);
+        const totalProducts = await productService.returnTotalDashboard(search);
 
         res.status(200).json({
             status: 'success',
@@ -40,7 +42,7 @@ router.get('/', checkAuthenticated, checkAdminRole, async (req, res, next) => {
 
 router.get('/dashboard', checkAuthenticated, checkAdminRole, async (req, res, next) => {
     try {
-        const products = await ProductAdminService.returnMostSold()
+        const products = await productService.returnMostSold()
 
         res.status(200).json({
             status: 'success',
@@ -59,7 +61,7 @@ router.get('/search', checkAuthenticated, checkAdminRole, searchTermValidators, 
         const data = req.query.term;
         const { color, category } = req.query;      
 
-        const response = await ProductAdminService.findProductsBySearch(data, {color, category})
+        const response = await productService.findProductsBySearch(data, {color, category})
 
         res.status(200).json({
             status: 'success',
@@ -76,7 +78,7 @@ router.get('/:id', checkAuthenticated, checkAdminRole, idParamsValidator, handle
             async (req, res, next) => {
     try {
         const id = parseInt(req.params.id, 10);
-        const response = await ProductAdminService.loadSpecificProduct(id)
+        const response = await productService.loadSpecificProduct(id)
         res.status(200).json({
             status: 'success',
             message: 'Product retrieved succesfully',
@@ -100,7 +102,7 @@ router.post('/', checkAuthenticated, checkAdminRole, upload.array('images_url', 
         }));
         
         // ✅ 3. Save product data + image URLs in the DB
-        const newProduct = await ProductAdminService.createNewProduct({
+        const newProduct = await productService.createNewProduct({
             ...data,
             images_urls: imageUrls
         });
@@ -122,7 +124,7 @@ router.patch('/:id/product_details', checkAuthenticated, checkAdminRole, idParam
     try {
         const id = parseInt(req.params.id, 10);
         const details = req.body
-        const response = await ProductAdminService.updateProductDetails({id, ...details});
+        const response = await productService.updateProductDetails({id, ...details});
         res.status(200).json({
             status: 'success',
             message: 'Product details updated succesfully',
@@ -139,7 +141,7 @@ router.patch('/:id/stock', checkAuthenticated, checkAdminRole, idParamsValidator
     try {
         const id = parseInt(req.params.id, 10);
         const stock = req.body.stock
-        const response = await ProductAdminService.updateProductStock({product_id:id, new_qty:stock});
+        const response = await productService.updateStock({product_id:id, new_qty:stock});
         res.status(200).json({
             status: 'success',
             message: 'Product stock updated succesfully',
@@ -152,4 +154,4 @@ router.patch('/:id/stock', checkAuthenticated, checkAdminRole, idParamsValidator
 });
 
 
-module.exports = router;
+export default router;

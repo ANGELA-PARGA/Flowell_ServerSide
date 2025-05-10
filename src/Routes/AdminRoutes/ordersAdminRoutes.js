@@ -1,11 +1,15 @@
-const express = require('express');
-const router = express.Router();
-const { idParamsValidator, orderShippingInfoValidators, orderDeliveryInfoValidator,
-    orderedItemsValidators, trackingValidator, handleValidationErrors } = require('../../Utilities/expressValidators')
-const { checkAuthenticated, checkAdminRole } = require('../../middleware/appMiddlewares')
-const { selectTotalOrdersQuery, selectOrdersByMonth} = require('../../DBQueries/orderQueries')
-const OrderAdminService = require('../../ServicesLogic/ServicesAdminLogic/orderAdminService')
+import express from 'express';
+import { idParamsValidator, 
+        orderShippingInfoValidators, 
+        orderDeliveryInfoValidator,
+        orderedItemsValidators, 
+        trackingValidator, 
+        handleValidationErrors 
+} from '../../Utilities/expressValidators.js'
+import { checkAuthenticated, checkAdminRole } from '../../middleware/appMiddlewares.js'
+import { orderService } from '../../config/container.js'
 
+const router = express.Router();
 router.get('/', checkAuthenticated, checkAdminRole, async (req, res, next) => {
     try {
         const limit = 5;
@@ -13,8 +17,8 @@ router.get('/', checkAuthenticated, checkAdminRole, async (req, res, next) => {
         const offset = (page - 1) * limit;
         const search = req.query.term;
 
-        const orders = await OrderAdminService.loadAllOrders(limit, offset, search);
-        const totalOrders = await selectTotalOrdersQuery(search);
+        const orders = await orderService.loadAllOrders(limit, offset, search);
+        const totalOrders = await orderService.returnTotalNumber(search);
 
         res.status(200).json({
             status: 'success',
@@ -35,7 +39,7 @@ router.get('/', checkAuthenticated, checkAdminRole, async (req, res, next) => {
 
 router.get('/dashboard', checkAuthenticated, checkAdminRole, async (req, res, next) => {
     try {
-        const {ordersByStatus: ordersByStatus, ordersByMonth: ordersByMonth, monthWithMostOrders: monthWithMostOrders} = await OrderAdminService.loadGroupedOrders()
+        const {ordersByStatus: ordersByStatus, ordersByMonth: ordersByMonth, monthWithMostOrders: monthWithMostOrders} = await orderService.loadGroupedOrders()
         res.status(200).json({
             status: 'success',
             message: 'Grouped orders retrieved successfully',
@@ -53,7 +57,7 @@ router.get('/:id', checkAuthenticated, checkAdminRole, idParamsValidator, handle
     async (req, res, next) => {
         try {
             const id = parseInt(req.params.id, 10);
-            const response = await OrderAdminService.findOrder(id);
+            const response = await orderService.findOrder(id);
             res.status(200).json({
                 status: 'success',
                 message: 'Order retrieved successfully',
@@ -69,7 +73,7 @@ router.patch('/:id', checkAuthenticated, checkAdminRole, idParamsValidator,
                 handleValidationErrors, async (req, res, next) => {
     try {
         const id = parseInt(req.params.id, 10);
-        const response = await OrderAdminService.deleteOrder(id);
+        const response = await orderService.adminCancelOrder(id);
         res.status(200).send({
             status: 'success',
             message: 'Order cancelled successfully',
@@ -87,7 +91,7 @@ router.patch('/:id/shipping_info', checkAuthenticated, checkAdminRole, idParamsV
     try {
         const data = req.body
         const id = parseInt(req.params.id, 10);
-        const response = await OrderAdminService.updateOrderShippingInfo({id, ...data});
+        const response = await orderService.adminUpdateShippingInfo({id, ...data});
         res.status(200).json({
             status: 'success',
             message: 'Orders shipping information updated successfully',
@@ -104,7 +108,7 @@ router.patch('/:id/delivery_date', checkAuthenticated, checkAdminRole, idParamsV
     try {
     const data = req.body
     const id = parseInt(req.params.id, 10);
-    const response = await OrderAdminService.updateOrderShippingInfo({id, ...data});
+    const response = await orderService.adminUpdateShippingInfo({id, ...data});
     res.status(200).json({
         status: 'success',
         message: 'Orders delivery date updated successfully',
@@ -121,7 +125,7 @@ router.patch('/:id/items_ordered', checkAuthenticated, checkAdminRole, idParamsV
     try {
         const data = req.body
         const id = parseInt(req.params.id, 10);
-        const response = await OrderAdminService.updateOrderItemsInfo({id, ...data});
+        const response = await orderService.adminUpdateItemsInfo({id, ...data});
         res.status(200).json({
             status: 'success',
             message: 'Items updated successfully',
@@ -138,7 +142,7 @@ router.patch('/:id/ship_order', checkAuthenticated, checkAdminRole, idParamsVali
     try {
         const tracking = req.body
         const id = parseInt(req.params.id, 10);
-        const response = await OrderAdminService.shipOrder({id, ...tracking});
+        const response = await orderService.shippingOrder({id, ...tracking});
         res.status(200).json({
             status: 'success',
             message: 'Order shipped successfully',
@@ -151,4 +155,4 @@ router.patch('/:id/ship_order', checkAuthenticated, checkAdminRole, idParamsVali
 });
 
 
-module.exports = router;
+export default router;

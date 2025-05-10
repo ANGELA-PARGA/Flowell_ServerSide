@@ -1,11 +1,14 @@
-const express = require('express');
-const router = express.Router();
-require('dotenv').config({ path: 'variables.env' });
-const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
-const endpointSecret = process.env.WEBHOOK_ENDPOINT_SECRET; // be careful this change if I delete the webhook in the stripe dashboard
-const bodyParser =  require('body-parser');
-const CartService = require('../ServicesLogic/ServiceClientLogic/CartService');
+import express from 'express';
+import dotenv from 'dotenv';
+dotenv.config({ path: 'variables.env' });
+import Stripe from 'stripe';
+import bodyParser from 'body-parser';
+import { cartService } from './container.js'; // Import the instance from container.js
 
+// 
+const endpointSecret = process.env.WEBHOOK_ENDPOINT_SECRET; // be careful this change if I delete the webhook in the stripe dashboard
+const router = express.Router();
+const stripe = Stripe(process.env.STRIPE_SECRET_KEY);
 /*remember download ngrok, open the command line, paste the SECRET ID from ngrok, and use it, 
 plus '/webhook' inside the stripe webhook dashboard to open the connection. This webhook requires raw data */
 router.post('/webhook', bodyParser.raw({type: 'application/json'}), async (req, res) => {   
@@ -22,7 +25,7 @@ router.post('/webhook', bodyParser.raw({type: 'application/json'}), async (req, 
     // Handle the checkout.session.completed or async_payment_succeeded event
     if (event.type === 'checkout.session.completed') {        
         const session = event.data.object;        
-        await CartService.checkoutCart(session.id);        
+        await cartService.checkoutCart(session.id);        
     } 
     
     if (event.type === 'checkout.session.expired' || event.type === 'payment_intent.payment_failed') {
@@ -33,4 +36,4 @@ router.post('/webhook', bodyParser.raw({type: 'application/json'}), async (req, 
     res.status(200).end();
 });
 
-module.exports = router;
+export default router;

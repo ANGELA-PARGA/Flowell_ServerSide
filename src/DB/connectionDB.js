@@ -1,8 +1,15 @@
 "use strict";
 
-require('dotenv').config({ path: 'variables.env' });
+import dotenv from 'dotenv';
+dotenv.config({ path: 'variables.env' });
 
-const { Pool } = require('pg')
+/**
+ * * This file is responsible for setting up the database connection using the pg library.
+ * * It exports a pool of connections that can be used to query the database.
+ * * * The connection details are loaded from environment variables using dotenv.
+ */
+import pg from 'pg';
+const Pool = pg.Pool; // Import the Pool class from the pg
 
 const pool = new Pool({
     host: process.env.DB_HOST,
@@ -12,6 +19,6 @@ const pool = new Pool({
     database: process.env.DB_DATABASE
 })
 
-module.exports = {
+export default {
     query: (text, params) => pool.query(text, params)
-} 
+};

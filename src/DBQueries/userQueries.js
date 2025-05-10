@@ -1,145 +1,177 @@
-const pgp = require('pg-promise')({ capSQL: true });
-const db = require('../DB/connectionDB');
-const createError = require('http-errors');
+import createError from 'http-errors';
 
-/**
- * Select all user personal information stored on the DB using a parameter (id) of the user
- * It returns an object with nested objects if the query was succesfull, otherwise it returns an empty object
- * @param {number} parameter
- * @returns {object} successfull query 
- * @returns {{}} unsuccessfull query
- */
-const selectAllUserInfoQuery = async (parameter) => {
-        const sqlStatement = pgp.as.format(`SELECT 
-                                            users.id,
-                                            users.created_at,
-                                            users.first_name,
-                                            users.last_name,
-                                            users.email,
-                                            (
-                                                SELECT 
-                                                    json_agg(json_build_object(
-                                                        'addressID', users_addresses.id,
-                                                        'address', users_addresses.address,
-                                                        'city', users_addresses.city,
-                                                        'state', users_addresses.state,
-                                                        'zip_code', users_addresses.zip_code
-                                                    ))
-                                                FROM 
-                                                    users_addresses
-                                                WHERE 
-                                                    users_addresses.user_id = users.id
-                                            ) AS "addresses",
-                                            (
-                                                SELECT 
-                                                    json_agg(json_build_object(
-                                                        'phoneID', users_phones.id,
-                                                        'phone', users_phones.phone
-                                                    ))
-                                                FROM 
-                                                    users_phones
-                                                WHERE 
-                                                    users_phones.user_id = users.id
-                                            ) AS "phones"
-                                            FROM 
-                                                users
-                                            WHERE 
-                                                users.id = $1`, [parameter]);
-
-        const queryResult = await db.query(sqlStatement);
-
-        if(queryResult.rows?.length){
-            return queryResult.rows[0];
-        } else {
-            const customError = createError(404, `User was not found with the provided ID`);
-            customError.name = 'NotFound';
-            customError.details = 'User was not found with the provided ID';
-            customError.stack = 'UserQueries';
-            customError.timestamp = new Date().toISOString();
-            throw customError;
-        }    
-}
-
-
-/**
- * Select all users stored on the DB using limit and offset to help pagination and search term for filtering
- * It returns an array with objects if the query was succesfull, otherwise it returns an empty array
- * @param {number} limit
- * @param {number} offset
- * @param {string } searchTerm
- * @returns {Array} successfull query
- * @returns {[]} unsuccessfull query
- * */
-
-const selectAllUsersQuery = async (limit, offset, searchTerm) => {
-    const search = searchTerm ? `%${searchTerm}%` : null;  // Convert to wildcard if search provided
-    const queryParams = [limit, offset];
-
-    let searchCondition = '';
-    if (search) {
-        queryParams.push(search, search, search);  // One for each column
-        searchCondition = `
-            AND (
-                first_name ILIKE $3
-                OR last_name ILIKE $4
-                OR email ILIKE $5
-            )
-        `;
+class UserQueries {
+    /**
+     * UserQueries class is responsible for executing queries related to users in the database.
+     * It includes the following methods:
+     * - selectAllUserInfo: Selects all personal information of a user based on their ID.
+     * - selectAllUsers: Selects all users with pagination and optional search term.
+     * - selectTotalUsers: Selects the total number of users with optional search term.
+     * It uses pg-promise to interact with the PostgreSQL database and also the object 'db' (dbConnection) to execute the queries.
+     * @param {Object} db - The database connection object.
+     * @param {Object} pgp - The pg-promise library instance.
+     */
+    constructor(db, pgp) {
+        this.db = db;
+        this.pgp = pgp;
     }
 
-    const sqlStatement = pgp.as.format(
-        `SELECT 
-            users.id, 
-            users.first_name, 
-            users.last_name, 
-            users.email, 
-            users.created_at
-        FROM users
-        WHERE 1=1  -- Dummy condition to safely append the search filter
-        ${searchCondition}
-        ORDER BY users.id
-        LIMIT $1 OFFSET $2`, 
-        queryParams
-    );
+    static handleDbError(error, context) {
+        const dbError = createError(
+            error.status || (error.code ? 400 : 500),
+            error.code
+                ? `DatabaseError: ${context}`
+                : `ServerError: Unexpected error in ${context}`
+        );
 
-    const queryResult = await db.query(sqlStatement);
+        dbError.name = error.code ? 'DatabaseError' : 'ServerError';
+        dbError.message = error.message || `An unexpected error occurred during ${context}`;
+        dbError.details = error.details || (error.code ? 'Possible constraint violation' : 'No additional details');
+        dbError.stack = process.env.NODE_ENV === 'development' ? error.stack : `UserQueries / ${context}`;
+        dbError.timestamp = new Date().toISOString();
 
-    if (queryResult.rows?.length) return queryResult.rows;
-    return [];
-};
-
-
-const selectTotalUsersQuery = async (searchTerm) => {
-    const search = searchTerm ? `%${searchTerm}%` : null;
-    const queryParams = [];
-    let searchCondition = '';
-    if (search) {
-        queryParams.push(search, search, search);  // One for each column
-        searchCondition = `
-            AND (
-                first_name ILIKE $1
-                OR last_name ILIKE $2
-                OR email ILIKE $3
-            )
-        `;
+        return dbError;
     }
 
-    const sqlStatement = pgp.as.format(
-            `SELECT COUNT(*) 
-            FROM users
-            WHERE 1=1  -- Dummy condition to safely append the search filter
-            ${searchCondition}`,
-            queryParams 
-    );
+    /**
+     * Select all user personal information stored on the DB using a parameter (id) of the user
+     * It returns an object with nested objects if the query was succesfull, otherwise it returns an empty object
+     * @param {number} parameter
+     * @returns {object} successfull query 
+     * @returns {{}} unsuccessfull query
+     */
+    async selectAllUserInfo(parameter){
+        try {
+            const sqlStatement = this.pgp.as.format(`SELECT 
+                users.id,
+                users.created_at,
+                users.first_name,
+                users.last_name,
+                users.email,
+                (
+                    SELECT 
+                        json_agg(json_build_object(
+                            'addressID', users_addresses.id,
+                            'address', users_addresses.address,
+                            'city', users_addresses.city,
+                            'state', users_addresses.state,
+                            'zip_code', users_addresses.zip_code
+                        ))
+                    FROM 
+                        users_addresses
+                    WHERE 
+                        users_addresses.user_id = users.id
+                ) AS "addresses",
+                (
+                    SELECT 
+                        json_agg(json_build_object(
+                            'phoneID', users_phones.id,
+                            'phone', users_phones.phone
+                        ))
+                    FROM 
+                        users_phones
+                    WHERE 
+                        users_phones.user_id = users.id
+                ) AS "phones"
+                FROM 
+                    users
+                WHERE 
+                    users.id = $1`, [parameter]);
 
-    const queryResult = await db.query(sqlStatement);
+            const queryResult = await this.db.query(sqlStatement);
+            return queryResult.rows?.[0] || {};
+            
+        } catch (error) {
+            throw this.handleDbError(error, 'select all user information in selectAllUserInfo');              
+        } 
+            
+    }
 
-    return parseInt(queryResult.rows[0].count, 10);
-};
+
+    /**
+    * Select all users stored on the DB using limit and offset to help pagination and search term for filtering
+    * It returns an array with objects if the query was succesfull, otherwise it returns an empty array
+    * @param {number} limit
+    * @param {number} offset
+    * @param {string } searchTerm
+    * @returns {Array} successfull query
+    * @returns {[]} unsuccessfull query
+    * */
+
+    async selectAllUsers(limit, offset, searchTerm){
+        try {
+            const search = searchTerm ? `%${searchTerm}%` : null;  // Convert to wildcard if search provided
+            const queryParams = [limit, offset];
+
+            let searchCondition = '';
+            if (search) {
+                queryParams.push(search, search, search);  // One for each column
+                searchCondition = `
+                    AND (
+                        first_name ILIKE $3
+                        OR last_name ILIKE $4
+                        OR email ILIKE $5
+                    )
+                `;
+            }
+
+            const sqlStatement = this.pgp.as.format(
+                `SELECT 
+                    users.id, 
+                    users.first_name, 
+                    users.last_name, 
+                    users.email, 
+                    users.created_at
+                FROM users
+                WHERE 1=1  -- Dummy condition to safely append the search filter
+                ${searchCondition}
+                ORDER BY users.id
+                LIMIT $1 OFFSET $2`, 
+                queryParams
+            );
+
+            const queryResult = await this.db.query(sqlStatement);
+
+            return queryResult.rows || [];
+            
+        } catch (error) {
+            throw this.handleDbError(error, 'select all users in selectAllUsers');               
+        }
+    };
 
 
-module.exports = {
-    selectAllUserInfoQuery,
-    selectAllUsersQuery,
-    selectTotalUsersQuery
+    async selectTotalUsers(searchTerm){
+        try {
+            const search = searchTerm ? `%${searchTerm}%` : null;
+            const queryParams = [];
+            let searchCondition = '';
+            if (search) {
+                queryParams.push(search, search, search);  // One for each column
+                searchCondition = `
+                    AND (
+                        first_name ILIKE $1
+                        OR last_name ILIKE $2
+                        OR email ILIKE $3
+                    )
+                `;
+            }
+
+            const sqlStatement = this.pgp.as.format(
+                    `SELECT COUNT(*) 
+                    FROM users
+                    WHERE 1=1  -- Dummy condition to safely append the search filter
+                    ${searchCondition}`,
+                    queryParams 
+            );
+
+            const queryResult = await this.db.query(sqlStatement);
+
+            return parseInt(queryResult.rows?.[0].count || 0, 10);
+            
+        } catch (error) {
+            throw this.handleDbError(error, 'select total users in selectTotalUsers');              
+        }
+    };
 }
+
+export default UserQueries
