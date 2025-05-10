@@ -1,4 +1,4 @@
-const { body, query, param, validationResult } = require('express-validator');
+import {body, query, param, validationResult } from 'express-validator';
 
 /*VALIDATORS----------------------- */
 
@@ -197,7 +197,7 @@ const handleValidationErrors = (req, res, next) => {
     next()    
 }
 
-module.exports = {
+export {
     handleValidationErrors,
     idParamsValidator,
     resourceValidator,

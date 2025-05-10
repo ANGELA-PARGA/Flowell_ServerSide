@@ -1,9 +1,20 @@
-/* This file contains the OrderQueries class, which is responsible for handling all database queries related to orders.
-   It includes methods for selecting orders, filtering by user ID or order ID, and aggregating data for dashboards.
- */
-const createError = require('http-errors');
+import createError from 'http-errors';
 
 class OrderQueries {
+    /**
+     * OrderQueries class is responsible for executing queries related to orders in the database.
+     * It contains the following methods:
+     * - selectOrderById: Selects order information based on order ID or user ID.
+     * - selectOrderAndUserInfo: Selects order information along with user information based on order ID or user ID.
+     * - selectAllOrders: Selects all orders with pagination and optional search filter.
+     * - selectTotalOrders: Selects the total number of orders with an optional search filter.
+     * - selectAllOrdersDashboard: Selects all orders with status and revenue information.
+     * - selectOrdersByMonth: Selects orders grouped by month and year, excluding cancelled orders.
+     * - selectMonthWithMostOrders: Selects the month with the most orders, excluding cancelled orders.
+     * It uses pg-promise to interact with the PostgreSQL database and also the object 'db' (dbConnection) to execute the queries.
+     * @param {Object} db - The database connection object.
+     * @param {Object} pgp - The pg-promise library instance.
+     */
     constructor(db, pgp) {
         this.db = db;
         this.pgp = pgp;
@@ -23,7 +34,7 @@ class OrderQueries {
         dbError.stack = process.env.NODE_ENV === 'development' ? error.stack : `OrderQueries / ${context}`;
         dbError.timestamp = new Date().toISOString();
 
-        throw dbError;
+        return dbError;
     }
 
     /**
@@ -66,7 +77,7 @@ class OrderQueries {
             const result = await this.db.query(sql);
             return result.rows || [];
         } catch (error) {
-            this.handleDbError(error, `select order information in selectOrderById from orders table`);
+            throw OrderQueries.handleDbError(error, `select order information in selectOrderById from orders table`);
         }
     }
 
@@ -123,7 +134,7 @@ class OrderQueries {
             const result = await this.db.query(sql);
             return result.rows || [];
         } catch (error) {
-            this.handleDbError(error, `select order and user information in selectOrderAndUserInfo from orders table`);
+            throw OrderQueries.handleDbError(error, `select order and user information in selectOrderAndUserInfo from orders table`);
         }
     }
 
@@ -169,7 +180,7 @@ class OrderQueries {
             const result = await this.db.query(sql);
             return result.rows || [];
         } catch (error) {
-            this.handleDbError(error, `select all orders in selectAllOrders from orders table`);
+            throw OrderQueries.handleDbError(error, `select all orders in selectAllOrders from orders table`);
         }
     }
 
@@ -211,7 +222,7 @@ class OrderQueries {
             const result = await this.db.query(sql);
             return parseInt(result.rows?.[0]?.count || 0, 10);       
         } catch (error) {
-            this.handleDbError(error, `select the total number of orders in selectTotalOrders from orders table`);            
+            throw OrderQueries.handleDbError(error, `select the total number of orders in selectTotalOrders from orders table`);            
         }
     }
 
@@ -238,7 +249,7 @@ class OrderQueries {
             const queryResult = await this.db.query(sqlStatement);
             return queryResult.rows?.[0];            
         } catch (error) {
-            this.handleDbError(error, `select all orders with status and the revenue in selectAllOrdersDashboard from orders table`);    
+            throw OrderQueries.handleDbError(error, `select all orders with status and the revenue in selectAllOrdersDashboard from orders table`);    
         }
     }
 
@@ -268,7 +279,7 @@ class OrderQueries {
         
             return queryResult.rows || [];            
         } catch (error) {
-            this.handleDbError(error, `select orders by month in selectOrdersByMonth from orders table`);            
+            throw OrderQueries.handleDbError(error, `select orders by month in selectOrdersByMonth from orders table`);            
         }
     }
 
@@ -299,11 +310,11 @@ class OrderQueries {
         
             return queryResult.rows?.[0] || {};  // ✅ Return only the highest month or an empty object          
         } catch (error) {
-            this.handleDbError(error, `select month with most orders excluding cancelled orders in selectMonthWithMostOrders from orders table`);                   
+            throw OrderQueries.handleDbError(error, `select month with most orders excluding cancelled orders in selectMonthWithMostOrders from orders table`);                   
         }
     }
 
 }
 
-module.exports = OrderQueries;
+export default OrderQueries;
 

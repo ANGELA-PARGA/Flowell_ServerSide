@@ -1,16 +1,18 @@
 "use strict";
 
-require('dotenv').config({ path: 'variables.env' });
-const express = require('express');
-const session = require('express-session');
-const cors = require('cors');
-const morgan = require('morgan');
-const helmet = require('helmet');
-const rateLimit = require('express-rate-limit');
-const bodyParser =  require('body-parser');
-const sessionConfig = require('./config/session');
-const passport = require('./config/passport');
+import dotenv from 'dotenv';
+dotenv.config({ path: 'variables.env' });
 
+import express from 'express';
+import session from 'express-session';
+import cors from 'cors';
+import morgan from 'morgan';
+import helmet from 'helmet';
+import rateLimit from 'express-rate-limit';
+import bodyParser from  'body-parser';
+import sessionConfig from './config/session.js';
+import passport from './config/passport.js';
+import stripeWebhook from './config/stripe.js';
 
 const app = express();
 // Security middleware
@@ -37,7 +39,8 @@ const apiLimiter = rateLimit({
 });
 app.use('/', apiLimiter);
 
-const stripeWebhook = require('./config/stripe');
+
+// configuring stripe webhook
 app.use(stripeWebhook);
 
 app.use(bodyParser.json());
@@ -59,39 +62,39 @@ app.get('/', (req, res) =>{
 
 
 /*setting client role routes */
-const authRoutes = require('./Routes/ClientRoutes/authRoutes');
+import authRoutes from './Routes/ClientRoutes/authRoutes.js';
 app.use('/auth', authRoutes);
 
-const userRoutes = require('./Routes/ClientRoutes/userRoutes');
+import userRoutes from './Routes/ClientRoutes/userRoutes.js';
 app.use('/profile', userRoutes);
 
-const productRoutes = require('./Routes/ClientRoutes/productRoutes');
+import productRoutes from './Routes/ClientRoutes/productRoutes.js';
 app.use('/products', productRoutes);
 
-const orderRoutes = require('./Routes/ClientRoutes/orderRoutes');
+import orderRoutes from './Routes/ClientRoutes/orderRoutes.js';
 app.use('/orders', orderRoutes);
 
-const cartRoutes = require('./Routes/ClientRoutes/cartRoutes');
+import cartRoutes from './Routes/ClientRoutes/cartRoutes.js';
 app.use('/cart', cartRoutes);
 
 
 /*setting admin role routes */
-const authAdminRoutes = require('./Routes/AdminRoutes/authAdminRoutes');
+import authAdminRoutes from './Routes/AdminRoutes/authAdminRoutes.js';
 app.use('/admin/auth', authAdminRoutes);
 
-const productAdminRoutes = require('./Routes/AdminRoutes/productsAdminRoutes');
+import productAdminRoutes from './Routes/AdminRoutes/productsAdminRoutes.js';
 app.use('/admin/products', productAdminRoutes);
 
-const orderAdminRoutes = require('./Routes/AdminRoutes/ordersAdminRoutes');
+import orderAdminRoutes from './Routes/AdminRoutes/ordersAdminRoutes.js';
 app.use('/admin/orders', orderAdminRoutes);
 
-const userAdminRoutes = require('./Routes/AdminRoutes/usersAdminRoutes');
+import userAdminRoutes from './Routes/AdminRoutes/usersAdminRoutes.js';
 app.use('/admin/users', userAdminRoutes);
 
-const {errorHandler} = require('./middleware/appMiddlewares');
+import { errorHandler } from './middleware/appMiddlewares.js';
 /*setting error handler middleware */
 app.use(errorHandler);
 
 
 // Export the notification function
-module.exports = app;
+export default app;

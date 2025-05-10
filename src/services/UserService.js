@@ -1,9 +1,18 @@
-const createError = require('http-errors');
-const UserModel = require('../../models/client/userModel');
-const { hashPassword, verifyResource, triggerRevalidationDashboard } = require('../Utilities/utilities');
+import createError from 'http-errors';
+import User from '../models/userModel.js';
+import { hashPassword, 
+        verifyResource, 
+        triggerRevalidationDashboard 
+} from '../Utilities/utilities.js';
 
-
-module.exports = class UserService{
+export default class UserService{
+    /**
+     * This class is responsible for handling user-related operations, such as creating, updating, and deleting users,
+     * as well as managing user information and orders.
+     * It uses the UserRepository and OrderRepository to interact with the database.
+     * @param {UserRepository} userRepository - The repository for user-related database operations.
+     * @param {OrderRepository} orderRepository - The repository for order-related database operations.
+     */
     constructor(userRepository, orderRepository) {
         this.userRepository = userRepository
         this.orderRepository = orderRepository
@@ -20,7 +29,7 @@ module.exports = class UserService{
      */
     async createUser(userData) {
         try {
-            const newUser = new UserModel(userData);
+            const newUser = new User(userData);
             const passwordHashed = await hashPassword(userData.password);    
             newUser.password = passwordHashed;
 
@@ -182,6 +191,21 @@ module.exports = class UserService{
             return usersFound
         } catch (error) {
             throw error            
+        }
+    }
+
+    /**
+     * CLIENT AND ADMIN METHOD: Returns the total number of users, it can receive a search Term: 
+     * @param {Object} searchTerm 
+     * @returns {Array}
+     * @throws {Error}
+     */     
+    async returnTotalNumber(searchTerm){
+        try {
+            const totalNumber = await this.userRepository.selectTotal(searchTerm)
+            return totalNumber;
+        } catch (error) {
+            throw error
         }
     }
 

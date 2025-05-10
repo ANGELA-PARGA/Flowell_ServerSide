@@ -1,10 +1,21 @@
-// GeneralQueries.js This class provides a set of generic database query methods for inserting, updating,
-//  selecting, and deleting records in a PostgreSQL database using the pg-promise library. 
-// It also includes error handling for database operations. This class helps to abstract the database 
-// operations and provides a reusable interface for different models or repositories in the application.
-const createError = require('http-errors');
+import createError from 'http-errors';
 
 class GeneralQueries {
+    /**
+     * GeneralQueries class is responsible for executing queries related to the database.
+     * It contains the following methods:
+     * - insert: Inserts new data into the database.
+     * - update: Updates existing data in the database.
+     * - selectBy: Selects data from the database based on a specific condition.
+     * - deleteBy: Deletes data from the database based on a specific condition.
+     * - deleteByDoubleCondition: Deletes data from the database based on two conditions.
+     * - calculateTotal: Calculates the total price of an order or a cart.
+     * - calculateTotalItems: Calculates the total number of items in a cart.
+     * 
+     * It uses pg-promise to interact with the PostgreSQL database and also the object 'db' (dbConnection) to execute the queries.
+     * @param {Object} db - The database connection object.
+     * @param {Object} pgp - The pg-promise library instance.
+     */
     constructor(db, pgp) {
         this.db = db;
         this.pgp = pgp;
@@ -42,7 +53,7 @@ class GeneralQueries {
             const result = await this.db.query(sql);
             return result.rows?.[0] || {};
         } catch (error) {
-            throw this.handleDbError(error, `insert into ${tableName}`);
+            throw GeneralQueries.handleDbError(error, `insert into ${tableName}`);
         }
     }
 
@@ -66,7 +77,7 @@ class GeneralQueries {
             const result = await this.db.query(sql);
             return result.rows?.[0] || {};
         } catch (error) {
-            throw this.handleDbError(error, `update in ${tableName}`);
+            throw GeneralQueries.handleDbError(error, `update in ${tableName}`);
         }
     }
 
@@ -87,7 +98,7 @@ class GeneralQueries {
             const result = await this.db.query(sql);
             return result.rows || [];
         } catch (error) {
-            throw this.handleDbError(error, `select from ${tableName}`);
+            throw GeneralQueries.handleDbError(error, `select from ${tableName}`);
         }
     }
 
@@ -107,7 +118,7 @@ class GeneralQueries {
             const result = await this.db.query(sql);
             return result.rowCount;
         } catch (error) {
-            throw this.handleDbError(error, `delete from ${tableName}`);
+            throw GeneralQueries.handleDbError(error, `delete from ${tableName}`);
         }
     }
 
@@ -132,7 +143,7 @@ class GeneralQueries {
             const result = await this.db.query(sql);
             return result.rowCount;
         } catch (error) {
-            throw this.handleDbError(error, `delete with double condition from ${tableName}`);
+            throw GeneralQueries.handleDbError(error, `delete with double condition from ${tableName}`);
         }
     }
 
@@ -158,7 +169,7 @@ class GeneralQueries {
             const result = await this.db.query(sql);
             return result.rows?.[0] || { total: 0 };
         } catch (error) {
-            throw this.handleDbError(error, `calculateTotal in ${tableName}`);
+            throw GeneralQueries.handleDbError(error, `calculateTotal in ${tableName}`);
         }
     }
 
@@ -182,10 +193,10 @@ class GeneralQueries {
             const result = await this.db.query(sql);
             return result.rows?.[0]?.total_items || 0;
         } catch (error) {
-            throw this.handleDbError(error, `calculateTotalItems in ${tableName}`);
+            throw GeneralQueries.handleDbError(error, `calculateTotalItems in ${tableName}`);
         }
     }
 }
 
-module.exports = GeneralQueries;
+export default GeneralQueries;
 

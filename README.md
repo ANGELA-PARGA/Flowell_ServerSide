@@ -13,6 +13,7 @@ Welcome to the **E-Commerce REST API**! This project is a robust and scalable ba
 
 ### 🗄️ Database
 - **PostgreSQL** is used to store permanent data, ensuring reliability and scalability.
+- **Redis** is used to store data session
 
 ### 🛠️ Architecture
 - **Models**, **Services**, and **Routes** are used to organize the codebase:

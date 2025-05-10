@@ -1,6 +1,4 @@
-
-
-module.exports = class ProductModel { 
+export default class ProductModel { 
     /**
      * Create a new product using data object with the following properties: 
      * @param {number} category_id

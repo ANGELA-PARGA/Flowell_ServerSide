@@ -1,20 +1,35 @@
-const createError = require('http-errors');
-const UserService = require('./UserService');
-const { comparePasswords, triggerRevalidationDashboard } = require('../Utilities/utilities');
+import createError from 'http-errors';
+import { comparePasswords, triggerRevalidationDashboard } from '../Utilities/utilities.js'
 
+export default class AuthService { 
+    /**
+     * This class is responsible for managing authentication logic, including user registration and login.
+     * It uses the UserService to interact with the user data.
+     * @param {UserService} userService - The service for managing authentication logic.
+     */
+    constructor(userService) {
+        this.userService = userService
+    }
 
-module.exports = class Authentication { 
-
+    /**
+     * Register a new user using the data object with the following properties:
+     * @param {string} first_name
+     * @param {string} last_name
+     * @param {string} email
+     * @param {string} password
+     * @returns {Object|null}
+     * @throws {Error}
+     */
     async register(userData){   
         try {
             const { email } = userData;
-            const userFound = await UserService.findUserByEmail(email);
+            const userFound = await this.userService.findUserByEmail(email);
 
             if(userFound?.length){
                 throw createError(409, 'Email already in use, please log in');
             }
 
-            const user = await UserService.createUser(userData);
+            const user = await this.userService.createUser(userData);
 
             if(!Object.keys(user)?.length){
                 throw createError(400, 'The user could not be created');
@@ -29,9 +44,16 @@ module.exports = class Authentication {
         }
     }
 
-    static async login(email, password){
+    /**
+     * Login a user using the email and password:
+     * @param {string} email
+     * @param {string} password
+     * @returns {Object|null}
+     * @throws {Error}
+     */
+    async login(email, password){
         try {
-            const userFound = await UserService.findUserByEmail(email);
+            const userFound = await this.userService.findUserByEmail(email);
 
             if(!userFound?.length){
                 throw createError(404, 'Incorrect username or password. Try again');

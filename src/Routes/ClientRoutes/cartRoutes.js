@@ -1,18 +1,20 @@
-require('dotenv').config({ path: 'variables.env' });
-const express = require('express');
+import dotenv from 'dotenv';
+dotenv.config({ path: 'variables.env' });
+import express from 'express';
+import { 
+    handleValidationErrors, 
+    idParamsValidator,
+    updateCartValidators, 
+    createCheckoutValidators 
+} from '../../Utilities/expressValidators.js'
+import { checkAuthenticated } from '../../middleware/appMiddlewares.js'
+import {cartService, cartItemsService} from '../../config/container.js'
+
 const router = express.Router();
-const { handleValidationErrors, idParamsValidator,
-    updateCartValidators, createCheckoutValidators } = require('../../Utilities/expressValidators')
-const { checkAuthenticated } = require('../../middleware/appMiddlewares')
-const CartService = require('../../services/client/CartService')
-const CartItemsModel = require('../../models/ClassClientModels/cartItemsModel');
-
-
-
 router.get('/', checkAuthenticated, async (req, res, next) => {
     try {
         const user_id = req.user.id;
-        const response = await CartService.getCartInfo(user_id);
+        const response = await cartService.getCartInfo(user_id);
         res.status(200).json({
             status: 'success',
             message: 'Cart information retrieved successfully',
@@ -27,9 +29,9 @@ router.get('/', checkAuthenticated, async (req, res, next) => {
 router.patch('/', checkAuthenticated, updateCartValidators, handleValidationErrors, async (req, res, next) => {
     try {
         const data = req.body
-        const cart_info = await CartService.getCartInfo(req.user.id)
+        const cart_info = await cartService.getCartInfo(req.user.id)
         const cart_id = cart_info.id 
-        const response = await CartService.updateCartItems({cart_id:cart_id, ...data});
+        const response = await cartService.updateCartItems({cart_id:cart_id, ...data});
         res.status(200).json({
             status: 'success',
             message: 'Carts items updated successfully',
@@ -46,9 +48,9 @@ router.post('/checkout', checkAuthenticated, createCheckoutValidators, handleVal
     try {
         const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
         const user_id = req.user.id;
-        const cart_info = await CartService.getCartInfo(user_id );
+        const cart_info = await cartService.getCartInfo(user_id );
         const cart_id = cart_info.id 
-        const cartItemsToOrder = await CartItemsModel.findAllCartItemsToOrder(cart_id);
+        const cartItemsToOrder = await cartItemsService.findAllCartItemsToOrder(cart_id);
         const shipping_info = req.body
                     
         const lineItems = cartItemsToOrder.map((item) =>{
@@ -93,9 +95,9 @@ router.post('/checkout', checkAuthenticated, createCheckoutValidators, handleVal
 
 router.delete('/', checkAuthenticated, handleValidationErrors, async (req, res, next) => {
     try {
-        const cart_info = await CartService.getCartInfo(req.user.id)
+        const cart_info = await cartService.getCartInfo(req.user.id)
         const cart_id = cart_info.id    
-        const response = await CartService.emptyCart(cart_id);
+        const response = await cartService.emptyCart(cart_id);
         res.status(200).json({
             status: 'success',
             message: 'Cart emptied successfully',
@@ -109,10 +111,10 @@ router.delete('/', checkAuthenticated, handleValidationErrors, async (req, res, 
 
 router.delete('/:id', checkAuthenticated, idParamsValidator, handleValidationErrors, async (req, res, next) => {
     try {
-        const cart_info = await CartService.getCartInfo(req.user.id)
+        const cart_info = await cartService.getCartInfo(req.user.id)
         const cart_id = cart_info.id             
         const product_id = parseInt(req.params.id, 10);
-        const response = await CartService.deleteItemFromCart({ param1: cart_id, param2: product_id });
+        const response = await cartService.deleteItemFromCart({ param1: cart_id, param2: product_id });
         res.status(200).json({
             status: 'success',
             message: 'Carts item deleted successfully',
@@ -124,5 +126,5 @@ router.delete('/:id', checkAuthenticated, idParamsValidator, handleValidationErr
     }
 });
 
-module.exports = router;
+export default router;
 

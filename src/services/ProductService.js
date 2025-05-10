@@ -1,8 +1,13 @@
-const createError = require('http-errors');
-const {triggerRevalidationEcomerce} = require('../Utilities/utilities');
-const ProductModel = require('../../models/client/productModel'); 
+import createError from 'http-errors';
+import {triggerRevalidationEcomerce} from '../Utilities/utilities.js';
+import Product from '../models/productModel.js'; 
 
-module.exports = class ProductService {
+export default class ProductService {
+    /**
+     * This class is responsible for handling product-related operations like creating, updating, and retrieving product information.
+     * It interacts with the ProductRepository to perform database operations.
+     * @param {ProductRepository} productRepository - The repository for Product-related database operations.
+     */
     constructor(productRepository) {
         this.productRepository = productRepository
     }
@@ -29,7 +34,7 @@ module.exports = class ProductService {
     async createNewProduct(data){
         try {
             const { stock_available, ...parameters } = data
-            const product = new ProductModel(parameters)
+            const product = new Product(parameters)
             
             const newProduct = await this.productRepository.insert(product)   
             const product_id = newProduct.id
@@ -81,6 +86,21 @@ module.exports = class ProductService {
                 throw createError(404, 'Products not found') 
             }
             return productsList;
+        } catch (error) {
+            throw error
+        }
+    }
+
+    /**
+     * CLIENT METHOD: Returns the total number of products, it can receive multiple filters like at the time like (color, category): 
+     * @param {Object} filters 
+     * @returns {Array}
+     * @throws {Error}
+     */     
+    async returnTotalNumber(filters){
+        try {
+            const totalNumber = await this.productRepository.selectTotal(filters)
+            return totalNumber;
         } catch (error) {
             throw error
         }
@@ -212,6 +232,22 @@ module.exports = class ProductService {
             return productsList;
         } catch (error) {
             throw error;
+        }
+    }
+
+    /**
+     * ADMIN METHOD: Returns the total number of products to feed the dashboard, 
+     * it can receive one search condition at the time like (color, category, Id, name): 
+     * @param {Object} searchTerm 
+     * @returns {Array}
+     * @throws {Error}
+     */     
+    async returnTotalDashboard(searchTerm){
+        try {
+            const totalNumber = await this.productRepository.selectTotalDashboard(searchTerm)
+            return totalNumber;
+        } catch (error) {
+            throw error
         }
     }
 

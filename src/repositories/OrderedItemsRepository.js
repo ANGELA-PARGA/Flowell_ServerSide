@@ -5,12 +5,12 @@ class OrderedItemsRepository {
         this.tableName = 'ordered_items';
     }
 
-    async selectBy(id) {
-        return this.generalQueries.selectBy(id, columnName = 'order_id', tableName = this.tableName);
+    async selectBy(id, columnName = 'order_id', tableName = this.tableName) {
+        return this.generalQueries.selectBy(id, columnName, tableName);
     }
 
-    async insert(dataToInsert) {
-        return this.generalQueries.insert(dataToInsert, tableName = this.tableName);
+    async insert(dataToInsert, tableName = this.tableName) {
+        return this.generalQueries.insert(dataToInsert, tableName);
     }
 
     async update(dataToUpdate) {
@@ -23,4 +23,4 @@ class OrderedItemsRepository {
 
 }
 
-module.exports = OrderedItemsRepository;
+export default OrderedItemsRepository;

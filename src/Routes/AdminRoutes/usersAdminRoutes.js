@@ -1,11 +1,11 @@
-require('dotenv').config({ path: 'variables.env' });
-const express = require('express');
-const router = express.Router();
-const { checkAuthenticated, checkAdminRole } = require('../../middleware/appMiddlewares')
-const {selectTotalUsersQuery} = require('../../DBQueries/userQueries');
-const { idParamsValidator, handleValidationErrors } = require('../../Utilities/expressValidators');
-const UserAdminService = require('../../services/admin/userAdminService');
+import express from 'express';
+import dotenv from 'dotenv';
+dotenv.config({ path: 'variables.env' });
+import { checkAuthenticated, checkAdminRole } from '../../middleware/appMiddlewares.js'
+import { idParamsValidator, handleValidationErrors } from '../../Utilities/expressValidators.js';
+import { userService } from '../../config/container.js'
 
+const router = express.Router();
 router.get('/', checkAuthenticated, checkAdminRole, async (req, res, next) => {
     try {
         const limit = 10;
@@ -13,8 +13,8 @@ router.get('/', checkAuthenticated, checkAdminRole, async (req, res, next) => {
         const offset = (page - 1) * limit;
         const search = req.query.term;
 
-        const response = await UserAdminService.loadAllUsers(limit, offset, search);
-        const totalUsers = await selectTotalUsersQuery(search);
+        const response = await userService.loadAllUsers(limit, offset, search);
+        const totalUsers = await userService.returnTotalNumber(search);
 
         res.status(200).json({
             status: 'success',
@@ -38,7 +38,7 @@ router.get('/:id/user_info', checkAuthenticated, checkAdminRole, idParamsValidat
     async (req, res, next) => {
         try {
             const id = parseInt(req.params.id, 10);
-            const response = await UserAdminService.getUserInfo(id);
+            const response = await userService.getUserInfo(id);
             res.status(200).json({
                 status: 'success',
                 message: 'User information retrieved successfully',
@@ -54,7 +54,7 @@ router.get('/:id/orders_history', checkAuthenticated, checkAdminRole, idParamsVa
     async (req, res, next) => {
         try {
             const id = parseInt(req.params.id, 10);
-            const response = await UserAdminService.getUserOrdersHistory(id);
+            const response = await userService.getUserOrdersHistory(id);
             res.status(200).json({
                 status: 'success',
                 message: 'Orders history information retrieved successfully',
@@ -67,4 +67,4 @@ router.get('/:id/orders_history', checkAuthenticated, checkAdminRole, idParamsVa
 });
 
 
-module.exports = router;
+export default router;

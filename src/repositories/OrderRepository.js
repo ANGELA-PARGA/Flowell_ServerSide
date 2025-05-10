@@ -5,28 +5,28 @@ class OrderRepository {
         this.tableName = 'orders';
     }
 
-    async insert(dataToInsert) {
-        return this.generalQueries.insert(dataToInsert, tableName = this.tableName);
+    async insert(dataToInsert, tableName = this.tableName) {
+        return this.generalQueries.insert(dataToInsert, tableName);
     }
 
-    async update(dataToUpdate) {
-        return this.generalQueries.update(dataToUpdate, columnName = 'id', tableName = this.tableName);
+    async update(dataToUpdate, columnName = 'id', tableName = this.tableName) {
+        return this.generalQueries.update(dataToUpdate, columnName, tableName);
     }
 
-    async findByUserId(userId) {
-        return this.orderQueries.selectOrderById(userId, columnName = 'user_id');
+    async findByUserId(userId, columnName = 'user_id') {
+        return this.orderQueries.selectOrderById(userId, columnName);
     }
 
-    async findByOrderId(orderId) {
-        return this.orderQueries.selectOrderById(orderId, columnName = 'id');
+    async findByOrderId(orderId, columnName = 'id') {
+        return this.orderQueries.selectOrderById(orderId, columnName);
     }
 
-    async getTotalByOrderId(orderId) {
-        return this.generalQueries.calculateTotal(orderId, columnName = 'order_id', tableName = 'ordered_items');
+    async getTotalByOrderId(orderId, columnName = 'order_id', tableName = 'ordered_items') {
+        return this.generalQueries.calculateTotal(orderId, columnName, tableName);
     }
 
-    async orderWithUserInfo(orderId) {
-        return this.orderQueries.selectOrderAndUserInfo(orderId, columnName = 'id');
+    async orderWithUserInfo(orderId, columnName = 'id') {
+        return this.orderQueries.selectOrderAndUserInfo(orderId, columnName);
     }
 
     async selectAll(limit, offset, search) {
@@ -51,5 +51,5 @@ class OrderRepository {
 
 }
 
-module.exports = OrderRepository;
+export default OrderRepository;
 

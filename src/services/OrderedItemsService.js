@@ -1,6 +1,12 @@
-const OrderedItem = require('../../models/client/orderedItemsModel');
+import OrderedItem from '../models/orderedItemModel.js';
 
-module.exports = class OrderedItemsService {  
+export default class OrderedItemsService {
+    /**
+     * This class is responsible for handling the business logic related to ordered items (products in an order).
+     * It creates, updates, cancels, and retrieves ordered items from the database.
+     * It uses the OrderedItemsRepository to perform database operations.
+     * @param {OrderedItemsRepository} orderedItemsRepository - The repository for ordered items-related database operations.
+     */
     constructor(orderedItemsRepository) {
         this.orderedItemsRepository = orderedItemsRepository
     }

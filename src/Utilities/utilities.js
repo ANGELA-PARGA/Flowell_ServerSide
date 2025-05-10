@@ -1,7 +1,6 @@
-const crypto = require('crypto')
-const bcrypt = require('bcrypt')
-const nodemailer = require('nodemailer');
-
+import crypto from 'crypto'
+import bcrypt from 'bcrypt'
+import nodemailer from 'nodemailer'
 
 /**
  * Compares an unencrypted password with a password encrypted using bcrypt.
@@ -188,12 +187,12 @@ async function triggerRevalidationDashboard(path, tag) {
 
 
 
-module.exports = {
-    comparePasswords: comparePasswords,
-    hashPassword: hashPassword,
-    verifyResource: verifyResource, 
-    luhnCheck: luhnCheck,
-    sendEmail: sendEmail,
-    triggerRevalidationEcomerce: triggerRevalidationEcomerce, 
-    triggerRevalidationDashboard: triggerRevalidationDashboard
+export {
+    comparePasswords,
+    hashPassword,
+    verifyResource, 
+    luhnCheck,
+    sendEmail,
+    triggerRevalidationEcomerce, 
+    triggerRevalidationDashboard
 }

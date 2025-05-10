@@ -1,10 +1,23 @@
-/* This file contains the queries related to the products stored on the DB
-It contains the queries to select all products, select a product by id, select all categories, 
-select products by category, select products by search term and select all information of a product with stock
- */
-const createError = require('http-errors');
+import createError from 'http-errors';
 
 class ProductQueries {
+    /**
+     * ProductQueries class is responsible for executing queries related to products in the database.
+     * It includes the following methods:
+     * - selectAllInfo: Selects all information of a product using its ID.
+     * - selectAllProducts: Selects all products with pagination and filtering options.
+     * - selectTotalProducts: Selects the total number of products based on filters.
+     * - selectAllCategories: Selects all product categories.
+     * - selectByCategory: Selects products by category with pagination and filtering options.
+     * - selectBySearch: Selects products based on a search term and filters.
+     * - selectAllDashboard: Selects all products for the dashboard with pagination and search options.
+     * - selectTotalDashboard: Selects the total number of products for the dashboard based on search options.
+     * - selectInfoWithStock: Selects all information of a product with stock information using its ID.
+     * - selectTopSelling: Selects the top-selling products.
+     * It uses pg-promise to interact with the PostgreSQL database and also the object 'db' (dbConnection) to execute the queries.
+     * @param {Object} db - The database connection object.
+     * @param {Object} pgp - The pg-promise library instance.
+     */
     constructor(db, pgp) {
         this.db = db;
         this.pgp = pgp;
@@ -46,7 +59,7 @@ class ProductQueries {
             return queryResult.rows?.[0] || [];
             
         } catch (error) {
-            throw this.handleDbError(error, `select product in selectAllInfo`);                   
+            throw ProductQueries.handleDbError(error, `select product in selectAllInfo`);                   
         }
 
     }
@@ -95,7 +108,7 @@ class ProductQueries {
             return queryResult.rows || [];
 
         } catch (error) {
-            throw this.handleDbError(error, `select all products in selectAllProducts`);                          
+            throw ProductQueries.handleDbError(error, `select all products in selectAllProducts`);                          
         }
     };
     
@@ -141,7 +154,7 @@ class ProductQueries {
             return parseInt(queryResult.rows?.[0].count || 0, 10);
             
         } catch (error) {
-            throw this.handleDbError(error, `select total products in selectTotalProducts`);                                     
+            throw ProductQueries.handleDbError(error, `select total products in selectTotalProducts`);                                     
         }
     };
     
@@ -209,7 +222,7 @@ class ProductQueries {
             return queryResult.rows || [];
             
         } catch (error) {
-            throw this.handleDbError(error, `select all products by category in selectByCategory`);                                    
+            throw ProductQueries.handleDbError(error, `select all products by category in selectByCategory`);                                    
         }
     };
     
@@ -271,7 +284,7 @@ class ProductQueries {
             return queryResult.rows || [];
             
         } catch (error) {
-            throw this.handleDbError(error, `select product by search parameters in selectBySearch`);                                              
+            throw ProductQueries.handleDbError(error, `select product by search parameters in selectBySearch`);                                              
         }
     };
     
@@ -331,7 +344,7 @@ class ProductQueries {
             return queryResult.rows || [];
                 
         } catch (error) {
-            throw this.handleDbError(error, `select all products in selectAllDashboard`);                                 
+            throw ProductQueries.handleDbError(error, `select all products in selectAllDashboard`);                                 
         }
     };
     
@@ -372,7 +385,7 @@ class ProductQueries {
             const queryResult = await this.db.query(sqlStatement);
             return parseInt(queryResult.rows?.[0].count || 0, 10);
         } catch (error) {
-            throw this.handleDbError(error, `select total products in selectTotalDashboard`);                                        
+            throw ProductQueries.handleDbError(error, `select total products in selectTotalDashboard`);                                        
         }
     };
     
@@ -396,7 +409,7 @@ class ProductQueries {
             return queryResult.rows?.[0] || {};
             
         } catch (error) {
-            throw this.handleDbError(error, `select product in selectInfoWithStock`);            
+            throw ProductQueries.handleDbError(error, `select product in selectInfoWithStock`);            
         } 
     }
     
@@ -421,9 +434,9 @@ class ProductQueries {
             return queryResult.rows || [];
             
         } catch (error) {
-            throw this.handleDbError(error, `select top selling products in selectTopSelling`);                        
+            throw ProductQueries.handleDbError(error, `select top selling products in selectTopSelling`);                        
         }
     };
 }
 
-module.exports = ProductQueries
+export default ProductQueries

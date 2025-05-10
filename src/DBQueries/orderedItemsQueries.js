@@ -1,9 +1,16 @@
-/* This file contains the OrderedItemsQueries class, which is responsible for handling database queries related to ordered items.
-//  * It includes methods for updating ordered items and canceling ordered items in the database.
- */
-const createError = require('http-errors');
+
+import createError from 'http-errors';
 
 class OrderedItemsQueries {
+    /**
+     * OrderedItemsQueries class is responsible for executing queries related to ordered items in the database.
+     * It contains the following methods:
+     * - updateOrderedItems: Updates the quantity of ordered items in the database.
+     * - cancelOrderedItems: Cancels the ordered items by setting their quantity to 0.
+     * It uses pg-promise to interact with the PostgreSQL database and also the object 'db' (dbConnection) to execute the queries.
+     * @param {Object} db - The database connection object.
+     * @param {Object} pgp - The pg-promise library instance.
+     */
     constructor(db, pgp) {
         this.db = db;
         this.pgp = pgp;
@@ -45,7 +52,7 @@ class OrderedItemsQueries {
             const queryResult = await this.db.query(sqlStatement);
             return queryResult.rows?.[0] || {};
         } catch (error) {
-            throw this.handleDbError(error, `update ordered items in updateOrderedItems from ordered items table`);            
+            throw OrderedItemsQueries.handleDbError(error, `update ordered items in updateOrderedItems from ordered items table`);            
         }
     }
 
@@ -70,11 +77,11 @@ class OrderedItemsQueries {
             return queryResult.rows || [];
             
         } catch (error) {
-            throw this.handleDbError(error, `update to 0 ordered items in cancelOrderedItems from ordered items table`);                      
+            throw OrderedItemsQueries.handleDbError(error, `update to 0 ordered items in cancelOrderedItems from ordered items table`);                      
         }
 
     }
 }
 
-module.exports = OrderedItemsQueries;
+export default OrderedItemsQueries;
 

@@ -1,25 +1,32 @@
-const CartModel = require('../../models/client/cartModel');
-const CartItemsService = require('./CartItemsService');
-const OrderService = require('./OrderService');
-const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
-require('dotenv').config({ path: 'variables.env' });
+import Cart from '../models/cartModel.js';
+import dotenv from 'dotenv';
+dotenv.config({ path: 'variables.env' });
+import Stripe from 'stripe';
+const stripe = Stripe(process.env.STRIPE_SECRET_KEY);
 
-module.exports = class CartService{
-    constructor(cartRepository) {
+export default class CartService{
+    /**
+     * This class is responsible for managing the cart-related operations like creating the cart, 
+     * retrieving cart information, adding and updating the items, deleting items, emptying the cart and the checkout process.
+     * @param {CartRepository} cartRepository - The repository for cart-related database operations.
+     * @param {CartItemsService} cartItemsService - The service for managing cart items.
+     * @param {OrderService} orderService - The service for managing orders.
+     */
+    constructor(cartRepository, cartItemsService, orderService) {
         this.cartRepository = cartRepository
+        this.cartItemsService = cartItemsService
+        this.orderService = orderService
     }
     
     /**
      * Create a cart using data object with the following properties: 
      * @param {number} user_id
-     * @param {number} total
-     * @param {string} total_items
      * @returns {Object}
      * @throws {Error}
      */
     async createNewCart(data){
         try {
-            const cart = new CartModel(data); 
+            const cart = new Cart(data); 
             const newCart = this.cartRepository.insert(cart);          
             return newCart;         
         } catch (error) {
@@ -53,7 +60,7 @@ module.exports = class CartService{
     async addProductToCart(data){
         try {
             const { cart_id } = data
-            const itemToAdd = await CartItemsService.createCartItem(data)
+            const itemToAdd = await  this.cartItemsService.createCartItem(data)
 
             const newTotal = await this.cartRepository.getTotalByCartId(cart_id);
             const newItemNumber = await this.cartRepository.getTotalItems(cart_id);         
@@ -79,7 +86,7 @@ module.exports = class CartService{
     async updateCartItems(data){
         try {
             const { cart_id } = data;
-            const updatedCartItem = await CartItemsService.updateCartItem(data)
+            const updatedCartItem = await  this.cartItemsService.updateCartItem(data)
 
             const newTotal = await this.cartRepository.getTotalByCartId(cart_id);
             const newItemNumber = await this.cartRepository.getTotalItems(cart_id);             
@@ -102,7 +109,7 @@ module.exports = class CartService{
     async deleteItemFromCart(data){
         try {
             const cart_id = data.param1;
-            const deletedCartItem = await CartItemsService.deleteCartItem(data)
+            const deletedCartItem = await  this.cartItemsService.deleteCartItem(data)
             const newTotal = await this.cartRepository.getTotalByCartId(cart_id);
             const newItemNumber = await this.cartRepository.getTotalItems(cart_id); 
             
@@ -128,7 +135,7 @@ module.exports = class CartService{
      */
     async emptyCart(cart_id){
         try {
-            const cartEmptied = await CartItemsService.deleteAllCartItems(cart_id)
+            const cartEmptied = await  this.cartItemsService.deleteAllCartItems(cart_id)
             const updatedCart = await this.cartRepository.update({ id:cart_id, total:0, total_items:0 })
             if(!cartEmptied || !Object.keys(updatedCart)?.length){
                 return false
@@ -161,7 +168,7 @@ module.exports = class CartService{
                 const cart = await this.getCartInfo(user_id); 
                 const cart_id = cart.id           
                 // Find all cart items
-                const cartItemsToOrder = await CartItemsService.findAllCartItemsToOrder(cart_id);
+                const cartItemsToOrder = await  this.cartItemsService.findAllCartItemsToOrder(cart_id);
                 // Retrieve total price from cart items
                 const totalPrice = cart.total
                 const itemsToOrder = cartItemsToOrder.map((item) =>{
@@ -171,7 +178,7 @@ module.exports = class CartService{
                     }
                 })
 
-                const order = await OrderService.createNewOrder(
+                const order = await this.orderService.createNewOrder(
                     {   
                         user_id, 
                         total:totalPrice, 

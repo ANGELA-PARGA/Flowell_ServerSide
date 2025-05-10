@@ -1,4 +1,15 @@
+import createError from 'http-errors';
+
 class CartItemsQueries {
+    /**
+     * CartItemsQueries class is responsible for executing queries related to cart items in the database.
+     * It contains the following methods:
+     * - updateCartItems: Updates the quantity of a specific product in a cart.
+     * - selectCartItems: Retrieves all items in a specific cart.
+     * It uses pg-promise to interact with the PostgreSQL database and also the object 'db' (dbConnection) to execute the queries.
+     * @param {Object} db - The database connection object.
+     * @param {Object} pgp - The pg-promise library instance.
+     */
     constructor(db, pgp) {
         this.db = db;
         this.pgp = pgp;
@@ -39,7 +50,7 @@ class CartItemsQueries {
             const queryResult = await this.db.query(sqlStatement);
             return queryResult.rows?.[0] || {};            
         } catch (error) {
-            throw this.handleDbError(error, 'update cart items in updateCartItems');            
+            throw CartItemsQueries.handleDbError(error, 'update cart items in updateCartItems');            
         }
 
     }
@@ -65,9 +76,9 @@ class CartItemsQueries {
             return queryResult.rows || []; 
             
         } catch (error) {
-            throw this.handleDbError(error, 'select all cart items in selectCartItems');                        
+            throw CartItemsQueries.handleDbError(error, 'select all cart items in selectCartItems');                        
         }
     }
 }
 
-module.exports = CartItemsQueries
+export default CartItemsQueries

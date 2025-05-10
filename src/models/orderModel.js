@@ -1,4 +1,4 @@
-module.exports = class Order {    
+export default class Order {    
     /**
      * Create an order using data object with the following properties [the property items is used by another class]:
      * @param {object} data

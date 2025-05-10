@@ -1,28 +1,29 @@
-const { db, pgp } = require('./dbConnection');
+import {db, pgp} from './dbConnection.js';
 
-const GeneralQueries = require('../DBQueries/generalQueries');
-const OrderQueries = require('../DBQueries/orderQueries');
-const OrderedItemsQueries = require('../DBQueries/orderedItemsQueries');
-const ProductQueries = require('../DBQueries/productQueries');
-const UserQueries = require('../DBQueries/userQueries');
-const CartQueries = require('../DBQueries/cartQueries');
-const CartItemsQueries = require('../DBQueries/cartItemsQueries');
-
-
-const OrderRepository = require('../repositories/OrderRepository');
-const OrderedItemsRepository = require('../repositories/OrderedItemsRepository');
-const ProductRepository = require('../repositories/ProductRepository');
-const UserRepository = require('../repositories/UserRepository');
-const CartRepository = require('../repositories/CartRepository');
-const CartItemsRepository = require('../repositories/CartItemsRepository');
+import GeneralQueries from '../DBQueries/generalQueries.js';
+import OrderQueries from '../DBQueries/orderQueries.js';
+import OrderedItemsQueries from '../DBQueries/orderedItemsQueries.js';
+import ProductQueries from '../DBQueries/productQueries.js';
+import UserQueries from '../DBQueries/userQueries.js';
+import CartQueries from '../DBQueries/cartQueries.js';
+import CartItemsQueries from '../DBQueries/cartItemsQueries.js';
 
 
-const OrderService = require('../services/client/OrderService')
-const OrderedItemsService = require('../services/client/OrderedItemsService');
-const CartService = require('../services/client/CartService')
-const CartItemsService = require('../services/client/CartItemsService');
-const ProductService = require('../services/client/ProductService')
-const UserService = require('../services/client/UserService')
+import OrderRepository from '../repositories/OrderRepository.js';
+import OrderedItemsRepository from '../repositories/OrderedItemsRepository.js';
+import ProductRepository from '../repositories/ProductRepository.js';
+import UserRepository from '../repositories/UserRepository.js';
+import CartRepository from '../repositories/CartRepository.js';
+import CartItemsRepository from '../repositories/CartItemsRepository.js';
+
+
+import OrderService from '../services/OrderService.js';
+import OrderedItemsService from '../services/OrderedItemsService.js';
+import CartService from '../services/CartService.js';
+import CartItemsService from '../services/CartItemsService.js';
+import ProductService from '../services/ProductService.js';
+import UserService from '../services/UserService.js';
+import AuthService from '../services/AuthService.js';
 
 
 /*
@@ -50,19 +51,22 @@ const cartRepository = new CartRepository(generalQueries, cartQueries);
 const cartItemsRepository = new CartItemsRepository(generalQueries, cartItemsQueries);
 
 
-const orderService = new OrderService(orderRepository);
+
 const orderedItemsService = new OrderedItemsService(orderedItemsRepository);
-const productService = new ProductService(productRepository);
-const userService = new UserService(userRepository, orderRepository);
-const cartService = new CartService(cartRepository);
 const cartItemsService = new CartItemsService(cartItemsRepository);
+const orderService = new OrderService(orderRepository, orderedItemsService);
+const userService = new UserService(userRepository, orderRepository);
+const cartService = new CartService(cartRepository, cartItemsService, orderService);
+const productService = new ProductService(productRepository);
+const authenticationService = new AuthService(userService)
 
 
-module.exports = { 
+export { 
     orderService, 
     orderedItemsService,
     productService,
     userService,
     cartService,
-    cartItemsService 
+    cartItemsService,
+    authenticationService 
 };

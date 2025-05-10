@@ -5,12 +5,12 @@ class ProductRepository {
         this.tableName = 'products';
     }
 
-    async insert(dataToInsert) {
-        return this.generalQueries.insert(dataToInsert, tableName= this.tableName);
+    async insert(dataToInsert, tableName= this.tableName) {
+        return this.generalQueries.insert(dataToInsert, tableName);
     }
 
-    async update(dataToUpdate) {
-        return this.generalQueries.update(dataToUpdate, columnName = 'id', tableName= this.tableName);
+    async update(dataToUpdate, columnName = 'id', tableName= this.tableName) {
+        return this.generalQueries.update(dataToUpdate, columnName, tableName);
     }
 
     async selectById(productId) {
@@ -54,4 +54,4 @@ class ProductRepository {
     }
 }
 
-module.exports = ProductRepository;
+export default ProductRepository;

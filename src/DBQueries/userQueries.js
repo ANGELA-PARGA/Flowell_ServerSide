@@ -1,6 +1,16 @@
-const createError = require('http-errors');
+import createError from 'http-errors';
 
 class UserQueries {
+    /**
+     * UserQueries class is responsible for executing queries related to users in the database.
+     * It includes the following methods:
+     * - selectAllUserInfo: Selects all personal information of a user based on their ID.
+     * - selectAllUsers: Selects all users with pagination and optional search term.
+     * - selectTotalUsers: Selects the total number of users with optional search term.
+     * It uses pg-promise to interact with the PostgreSQL database and also the object 'db' (dbConnection) to execute the queries.
+     * @param {Object} db - The database connection object.
+     * @param {Object} pgp - The pg-promise library instance.
+     */
     constructor(db, pgp) {
         this.db = db;
         this.pgp = pgp;
@@ -164,4 +174,4 @@ class UserQueries {
     };
 }
 
-module.exports = UserQueries
+export default UserQueries

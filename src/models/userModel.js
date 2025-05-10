@@ -1,5 +1,4 @@
-
-module.exports = class UserModel {
+export default class UserModel {
     constructor(data){
         this.created_at = new Date().toISOString();
         this.updated_at = new Date().toISOString();

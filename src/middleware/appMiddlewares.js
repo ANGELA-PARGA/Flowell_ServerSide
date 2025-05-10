@@ -12,7 +12,9 @@ const checkAuthenticated = (req, res, next) => {
 }
 
 const checkUserRole = (req, res, next) => {
+    console.log('🚨 checking user role')
     if (req.user.role === 'client') { 
+        console.log('🚨 User is authenticated and authorized')
         return next() 
     }
     console.log('🚨 User is authenticated but not authorized');
@@ -34,6 +36,7 @@ const checkAdminRole = (req, res, next) => {
 }
 
 const errorHandler = (err, req, res, next) => {
+    console.log('🚨 Error handler middleware triggered', err);
     const statusCode = err.status || 500;
     const message = err.message || 'Internal Server Error';
     const stack = err.stack || 'Stack was not provided';
@@ -52,7 +55,7 @@ const errorHandler = (err, req, res, next) => {
     });
 };
 
-module.exports = {
+export {
     checkAuthenticated,
     checkUserRole,
     checkAdminRole,

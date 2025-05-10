@@ -1,4 +1,13 @@
+import createError from 'http-errors';
 class CartQueries {
+    /**
+     * CartQueries class is responsible for executing queries related to the cart in the database.
+     * It contains the following methods:
+     * - selectCartInfo: Selects all cart information from the database based on a specific user ID.
+     * It uses pg-promise to interact with the PostgreSQL database and also the object 'db' (dbConnection) to execute the queries.
+     * @param {Object} db - The database connection object.
+     * @param {Object} pgp - The pg-promise library instance.
+     */
     constructor(db, pgp) {
         this.db = db;
         this.pgp = pgp;
@@ -30,7 +39,7 @@ class CartQueries {
      */
     async selectCartInfo(parameter){
         try {
-            const sqlStatement = pgp.as.format(`SELECT 
+            const sqlStatement = this.pgp.as.format(`SELECT 
                 carts.id AS "id",
                 carts.total AS "total",
                 carts.total_items AS "total_items",
@@ -54,14 +63,14 @@ class CartQueries {
                     carts.user_id = $1
                 GROUP BY 
                     carts.id, carts.total`, [parameter]);
-            const queryResult = await db.query(sqlStatement);
+            const queryResult = await this.db.query(sqlStatement);
             return queryResult.rows?.[0] || {};
             
         } catch (error) {
-            throw this.handleDbError(error, 'select all cart information in selectCartInfo');            
+            throw CartQueries.handleDbError(error, 'select all cart information in selectCartInfo');            
         }
     }
 }
 
 
-module.exports = CartQueries
+export default CartQueries

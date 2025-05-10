@@ -1,5 +1,9 @@
 // connectionDB.js
-const pgp = require('pg-promise')({ capSQL: true });
-const db = require('../DB/connectionDB');
 
-module.exports = { db, pgp };
+import db from '../DB/connectionDB.js';
+import pgPromise from 'pg-promise';
+const pgp = pgPromise({ capSQL: true });
+/**
+ * 
+ */
+export { db, pgp };

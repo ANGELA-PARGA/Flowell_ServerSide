@@ -5,25 +5,25 @@ class CartItemsRepository {
         this.tableName = 'cart_items';
     }
 
-    async insert(dataToInsert) {
-        return this.generalQueries.insert(dataToInsert, tableName= this.tableName);
+    async insert(dataToInsert, tableName= this.tableName) {
+        return this.generalQueries.insert(dataToInsert, tableName);
     }
 
     async update(dataToUpdate) {
-        return this.generalQueries.updateCartItems(dataToUpdate);
+        return this.cartItemsQueries.updateCartItems(dataToUpdate);
     }
 
     async selectItems(cartId) {
         return this.cartItemsQueries.selectCartItems(cartId);
     }
 
-    async deleteItem(data) {
-        return this.generalQueries.deleteByDoubleCondition(data, tableName= this.tableName, cond1= 'cart_id', cond2= 'product_id');
+    async deleteItem(data, tableName= this.tableName, cond1= 'cart_id', cond2= 'product_id') {
+        return this.generalQueries.deleteByDoubleCondition(data, tableName, cond1, cond2);
     }
 
-    async deleteAll(cartId) {
-        return this.generalQueries.deleteBy(cartId, columnName= 'cart_id', tableName= this.tableName);
+    async deleteAll(cartId, columnName= 'cart_id', tableName= this.tableName) {
+        return this.generalQueries.deleteBy(cartId, columnName, tableName);
     }
 }
 
-module.exports = CartItemsRepository;
+export default CartItemsRepository;

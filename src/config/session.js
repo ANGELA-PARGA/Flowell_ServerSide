@@ -1,6 +1,7 @@
-const {RedisStore} = require("connect-redis") 
-const { createClient } = require('redis');
-require('dotenv').config({ path: 'variables.env' });
+import { RedisStore } from "connect-redis";
+import { createClient } from 'redis';
+import dotenv from 'dotenv';
+dotenv.config({ path: 'variables.env' });
 
 const isProduction = process.env.NODE_ENV === 'production'; 
 
@@ -36,4 +37,4 @@ const sessionConfig = {
     },
 };
 
-module.exports = sessionConfig; 
+export default sessionConfig; 

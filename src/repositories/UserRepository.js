@@ -5,16 +5,16 @@ class UserRepository {
         this.tableName = 'users';
     }
 
-    async insert(dataToInsert) {
-        return this.generalQueries.insert(dataToInsert, tableName = this.tableName);
+    async insert(dataToInsert, tableName = this.tableName) {
+        return this.generalQueries.insert(dataToInsert, tableName);
     }
 
-    async update(dataToUpdate) {
-        return this.generalQueries.update(dataToUpdate, columnName = 'id', tableName = this.tableName);
+    async update(dataToUpdate, columnName = 'id', tableName = this.tableName) {
+        return this.generalQueries.update(dataToUpdate, columnName, tableName);
     }
 
-    async select(data) {
-        return this.generalQueries.selectBy(data, columnName = 'id', tableName = this.tableName);
+    async select(data,  columnName = 'id', tableName = this.tableName) {
+        return this.generalQueries.selectBy(data, columnName, tableName);
     }
 
     async selectById(userId) {
@@ -29,10 +29,9 @@ class UserRepository {
         return this.userQueries.selectTotalUsers(searchTerm);
     }
 
-    async deleteInfo(data) {
-        return this.generalQueries.deleteByDoubleCondition(data, tableName = this.tableName, cond1 = 'id', cond2 = 'user_id');
+    async deleteInfo(data, tableName = this.tableName, cond1 = 'id', cond2 = 'user_id') {
+        return this.generalQueries.deleteByDoubleCondition(data, tableName, cond1, cond2);
     }
 
 }
-
-module.exports = UserRepository;
+export default UserRepository;

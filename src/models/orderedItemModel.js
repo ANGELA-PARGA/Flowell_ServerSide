@@ -1,4 +1,4 @@
-module.exports = class OrderedItemModel {    
+export default class OrderedItemModel {    
     /**
      * Create an ordered item using data object with the following properties: 
      * @param {number} order_id

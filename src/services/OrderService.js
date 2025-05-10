@@ -1,12 +1,17 @@
-const createError = require('http-errors');
-const Order = require('../../models/client/orderModel');
-const OrderedItemsService = require('./OrderedItemsService');
-const {triggerRevalidationDashboard} = require('../Utilities/utilities');
-const {triggerRevalidationEcomerce} = require('../Utilities/utilities');
+import createError from 'http-errors';
+import Order from '../models/orderModel.js';
+import {triggerRevalidationDashboard, triggerRevalidationEcomerce} from '../Utilities/utilities.js';
 
-module.exports = class OrderService {
-    constructor(orderRepository) {
+export default class OrderService {
+    /**
+     * This class is responsible for managing orders and their related operations like creating, updating (shipping information and items), cancelling orders,
+     * retrieving orders for the client and also for the admin dashboard.
+     * @param {OrderRepository} orderRepository - The repository for order-related database operations.
+     * @param {OrderedItemsService} orderedItemsService - The service for managing ordered items.
+     */
+    constructor(orderRepository, orderedItemsService) {
         this.orderRepository = orderRepository
+        this.orderedItemsService = orderedItemsService
     }
     
     /**
@@ -24,7 +29,7 @@ module.exports = class OrderService {
             const order_id = orderCreated.id
 
             const orderedItemsPromises = items.map(async (item) => {
-                return await OrderedItemsService.createOrderedItems({ ...item, order_id });
+                return await this.orderedItemsService.createOrderedItems({ ...item, order_id });
             });
             
             orderCreated.items = await Promise.all(orderedItemsPromises);
@@ -103,7 +108,7 @@ module.exports = class OrderService {
      */
     async customerCancelOrder(id){
         try {
-            const cancelledItems = await OrderedItemsService.cancelOrderedItems({order_id:id})            
+            const cancelledItems = await this.orderedItemsService.cancelOrderedItems({order_id:id})            
             if(!cancelledItems){
                 return false
             }
@@ -136,6 +141,22 @@ module.exports = class OrderService {
         try {
             const foundOrders = await this.orderRepository.selectAllOrders(limit, offset, search)
             return foundOrders
+        } catch (error) {
+            throw error
+        }
+    }
+
+    /**
+     * ADMIN METHOD: Returns the total number of orders to feed the dashboard, it can receive one search term
+     * at the time like (id, status): 
+     * @param {Object} searchTerm 
+     * @returns {Array}
+     * @throws {Error}
+     */     
+    async returnTotalNumber(searchTerm){
+        try {
+            const totalNumber = await this.orderRepository.selectTotal(searchTerm)
+            return totalNumber;
         } catch (error) {
             throw error
         }
@@ -210,7 +231,7 @@ module.exports = class OrderService {
 
             let updatedOrder = {};
 
-            const orderedItemUpdated = await OrderedItemsService.updateOrderedItem({order_id:id, product_id, qty});
+            const orderedItemUpdated = await this.orderedItemsService.updateOrderedItem({order_id:id, product_id, qty});
             
             updatedOrder.item = orderedItemUpdated;
             
@@ -264,7 +285,7 @@ module.exports = class OrderService {
      * @returns {Object}
      * @throws {Error}
      */
-    async findOrder(id){
+    async findOrderWithUser(id){
         try {
             const orderFound = await this.orderRepository.orderWithUserInfo(id)
             
@@ -280,12 +301,12 @@ module.exports = class OrderService {
     /**
      * ADMIN METHOD: Cancel an order using the id: 
      * @param {number} id
-     * @returns {boolean}
+     * @returns {boolean || Object}
      * @throws {Error}
      */
     async adminCancelOrder(id){
         try {
-            const cancelledItems = await OrderedItemsService.cancelOrderedItems({order_id:id})            
+            const cancelledItems = await this.orderedItemsService.cancelOrderedItems({order_id:id})            
             if(!cancelledItems){
                 return false
             }

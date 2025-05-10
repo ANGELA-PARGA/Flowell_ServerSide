@@ -1,6 +1,11 @@
-const CartItemModel = require('../../models/client/cartItemsModel');
+import CartItem from '../models/cartItemsModel.js';
 
-module.exports = class CartItemsService{
+export default class CartItemsService{
+    /**
+     * This class is responsible for handling cart items-related business logic (e.g., creating, updating, deleting cart items).
+     * It uses the CartItemsRepository to perform database operations.
+     * @param {CartItemsRepository} cartItemsRepository - The repository for cart items-related database operations.
+     */
     constructor(cartItemsRepository) {
         this.cartItemsRepository = cartItemsRepository
     }
@@ -14,7 +19,7 @@ module.exports = class CartItemsService{
      */
     async createCartItem(data){
         try {
-            const cartItem = new CartItemModel(data);         
+            const cartItem = new CartItem(data);         
             const cartItemAdded = await this.cartItemsRepository.insert(cartItem); 
 
             return cartItemAdded;
@@ -71,6 +76,12 @@ module.exports = class CartItemsService{
         }
     }
 
+    /**
+     * delete all cart items using the cart id:
+     * @param {number} cart_id
+     * @returns {Object|null}
+     * @throws {Error}
+     */
     async deleteAllCartItems(cart_id){
         try {
             const cartItemsDeleted = await this.cartItemsRepository.deleteAll(cart_id)

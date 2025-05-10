@@ -1,4 +1,4 @@
-module.exports = class CartModel {    
+export default class CartModel {    
     /**
      * Instantiate a cart using data object with the following properties: 
      * @param {number} user_id

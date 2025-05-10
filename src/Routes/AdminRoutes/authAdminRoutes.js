@@ -1,10 +1,10 @@
-const express = require('express');
-const router = express.Router();
-const passport = require('passport');
-const { signupValidators, loginValidators, handleValidationErrors} = require('../../Utilities/expressValidators')
-const { checkAdminRole } = require('../../middleware/appMiddlewares')
-const Authentication = require('../../services/client/AuthService')
+import express from 'express';
+import passport from 'passport';
+import { signupValidators, loginValidators, handleValidationErrors} from '../../Utilities/expressValidators.js'
+import { checkAdminRole } from '../../middleware/appMiddlewares.js';
+import { authenticationService } from '../../config/container.js';
 
+const router = express.Router();
 router.post('/login', loginValidators, handleValidationErrors, passport.authenticate('local'), checkAdminRole, async (req, res, next) => {
     try {
         const { id, first_name, last_name, email, role } = req.user;
@@ -31,8 +31,7 @@ router.post('/login', loginValidators, handleValidationErrors, passport.authenti
 router.post('/signup', signupValidators, handleValidationErrors, async (req, res, next) => {
     try {
         const data = req.body;
-        const AuthServiceInstance = new Authentication();
-        const newUser = await AuthServiceInstance.register({...data, role:'admin'});
+        const newUser = await authenticationService.register({...data, role:'admin'});
 
         req.login(newUser, (err) => {
             if (err) {
@@ -83,4 +82,4 @@ router.post('/logout', async (req, res, next) => {
     }
 });
 
-module.exports = router;
+export default router;

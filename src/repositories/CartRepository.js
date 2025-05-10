@@ -2,28 +2,28 @@ class CartRepository {
     constructor(generalQueries, cartQueries) {
         this.generalQueries = generalQueries;
         this.cartQueries = cartQueries;
-        this.tableName = 'cart';
+        this.tableName = 'carts';
     }
 
-    async insert(dataToInsert) {
-        return this.generalQueries.insert(dataToInsert, tableName= this.tableName);
+    async insert(dataToInsert, tableName= this.tableName) {
+        return this.generalQueries.insert(dataToInsert, tableName);
     }
 
-    async update(dataToUpdate) {
-        return this.generalQueries.update(dataToUpdate, columnName= 'id', tableName= this.tableName);
+    async update(dataToUpdate, columnName= 'id', tableName= this.tableName) {
+        return this.generalQueries.update(dataToUpdate, columnName, tableName);
     }
 
     async selectBy(userId) {
         return this.cartQueries.selectCartInfo(userId);
     }
 
-    async getTotalByCartId(cartId) {
-        return this.generalQueries.calculateTotal(cartId, columnName= 'cart_id', tableName= 'cart_items');
+    async getTotalByCartId(cartId, columnName= 'cart_id', tableName= 'cart_items') {
+        return this.generalQueries.calculateTotal(cartId, columnName, tableName);
     }
 
-    async getTotalItems(cartId) {
-        return this.generalQueries.calculateTotalItems(cartId, columnName= 'cart_id', tableName='cart_items');
+    async getTotalItems(cartId, columnName= 'cart_id', tableName='cart_items') {
+        return this.generalQueries.calculateTotalItems(cartId, columnName, tableName);
     }
 }
 
-module.exports = CartRepository;
+export default CartRepository;
