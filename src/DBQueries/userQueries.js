@@ -1,4 +1,4 @@
-import createError from 'http-errors';
+import { createDatabaseError } from '../Utilities/errorStandard.js';
 
 class UserQueries {
     /**
@@ -17,19 +17,7 @@ class UserQueries {
     }
 
     static handleDbError(error, context) {
-        const dbError = createError(
-            error.status || (error.code ? 400 : 500),
-            error.code
-                ? `DatabaseError: ${context}`
-                : `ServerError: Unexpected error in ${context}`
-        );
-
-        dbError.name = error.code ? 'DatabaseError' : 'ServerError';
-        dbError.message = error.message || `An unexpected error occurred during ${context}`;
-        dbError.details = error.details || (error.code ? 'Possible constraint violation' : 'No additional details');
-        dbError.stack = process.env.NODE_ENV === 'development' ? error.stack : `UserQueries / ${context}`;
-        dbError.timestamp = new Date().toISOString();
-
+        const dbError = createDatabaseError( `An unexpected error occurred during ${context}`, error);
         return dbError;
     }
 
@@ -51,7 +39,7 @@ class UserQueries {
                 (
                     SELECT 
                         json_agg(json_build_object(
-                            'addressID', users_addresses.id,
+                            'id', users_addresses.id,
                             'address', users_addresses.address,
                             'city', users_addresses.city,
                             'state', users_addresses.state,
@@ -65,7 +53,7 @@ class UserQueries {
                 (
                     SELECT 
                         json_agg(json_build_object(
-                            'phoneID', users_phones.id,
+                            'id', users_phones.id,
                             'phone', users_phones.phone
                         ))
                     FROM 
@@ -78,8 +66,8 @@ class UserQueries {
                 WHERE 
                     users.id = $1`, [parameter]);
 
-            const queryResult = await this.db.query(sqlStatement);
-            return queryResult.rows?.[0] || {};
+            const queryResult = await this.db.oneOrNone(sqlStatement);
+            return queryResult;
             
         } catch (error) {
             throw this.handleDbError(error, 'select all user information in selectAllUserInfo');              
@@ -130,9 +118,9 @@ class UserQueries {
                 queryParams
             );
 
-            const queryResult = await this.db.query(sqlStatement);
+            const queryResult = await this.db.any(sqlStatement);
 
-            return queryResult.rows || [];
+            return queryResult;
             
         } catch (error) {
             throw this.handleDbError(error, 'select all users in selectAllUsers');               
@@ -166,7 +154,7 @@ class UserQueries {
 
             const queryResult = await this.db.query(sqlStatement);
 
-            return parseInt(queryResult.rows?.[0].count || 0, 10);
+            return parseInt(queryResult[0]?.count || 0, 10);
             
         } catch (error) {
             throw this.handleDbError(error, 'select total users in selectTotalUsers');              

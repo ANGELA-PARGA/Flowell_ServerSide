@@ -1,4 +1,5 @@
-import {db, pgp} from './dbConnection.js';
+import {db, pgp, pool} from './dbConnection.js';
+import GeminiConfig from './geminiConfig.js';
 
 import GeneralQueries from '../DBQueries/generalQueries.js';
 import OrderQueries from '../DBQueries/orderQueries.js';
@@ -7,7 +8,7 @@ import ProductQueries from '../DBQueries/productQueries.js';
 import UserQueries from '../DBQueries/userQueries.js';
 import CartQueries from '../DBQueries/cartQueries.js';
 import CartItemsQueries from '../DBQueries/cartItemsQueries.js';
-
+import KnowledgeQueries from '../DBQueries/knowledgeQueries.js';
 
 import OrderRepository from '../repositories/OrderRepository.js';
 import OrderedItemsRepository from '../repositories/OrderedItemsRepository.js';
@@ -15,7 +16,7 @@ import ProductRepository from '../repositories/ProductRepository.js';
 import UserRepository from '../repositories/UserRepository.js';
 import CartRepository from '../repositories/CartRepository.js';
 import CartItemsRepository from '../repositories/CartItemsRepository.js';
-
+import VectorStoreRepository from '../repositories/VectorStoreRepository.js';
 
 import OrderService from '../services/OrderService.js';
 import OrderedItemsService from '../services/OrderedItemsService.js';
@@ -24,6 +25,8 @@ import CartItemsService from '../services/CartItemsService.js';
 import ProductService from '../services/ProductService.js';
 import UserService from '../services/UserService.js';
 import AuthService from '../services/AuthService.js';
+import ChatbotAgent from '../services/ChatbotAgent.js';
+import DocumentProcessor from '../services/DocumentProcessor.js';
 
 
 /*
@@ -41,6 +44,7 @@ const productQueries = new ProductQueries(db, pgp);
 const userQueries = new UserQueries(db, pgp);
 const cartQueries = new CartQueries(db, pgp);
 const cartItemsQueries = new CartItemsQueries(db, pgp);
+const knowledgeQueries = new KnowledgeQueries(db, pgp);
 
 
 const orderRepository = new OrderRepository(generalQueries, orderQueries);
@@ -60,6 +64,22 @@ const cartService = new CartService(cartRepository, cartItemsService, orderServi
 const productService = new ProductService(productRepository);
 const authenticationService = new AuthService(userService)
 
+const geminiConfig = new GeminiConfig();
+const vectorStoreRepository = new VectorStoreRepository(geminiConfig);
+const documentProcessor = new DocumentProcessor(vectorStoreRepository);
+
+// Create repositories object for agent
+const repositories = {
+    pool,
+    pgp,
+    userRepository,
+    orderRepository,
+    productRepository,
+    cartRepository,
+    vectorStoreRepository
+};
+
+const chatbotAgent = new ChatbotAgent(repositories);
 
 export { 
     orderService, 
@@ -68,5 +88,10 @@ export {
     userService,
     cartService,
     cartItemsService,
-    authenticationService 
+    authenticationService,
+    chatbotAgent,
+    documentProcessor,
+    vectorStoreRepository,
+    geminiConfig, 
+    knowledgeQueries
 };

@@ -1,6 +1,7 @@
 import crypto from 'crypto'
 import bcrypt from 'bcrypt'
 import nodemailer from 'nodemailer'
+import { createInternalServerError } from './errorStandard.js'
 
 /**
  * Compares an unencrypted password with a password encrypted using bcrypt.
@@ -14,7 +15,7 @@ async function comparePasswords(password, hashedPassword){
         const isMatch = await bcrypt.compare(password, hashedPassword);
         return isMatch;
     } catch (error) {
-        throw new Error('The comparisson of the passwords cannot be completed' + error.message)        
+        throw createInternalServerError('The comparisson of the passwords cannot be completed', error);        
     }
     
 }
@@ -32,7 +33,7 @@ async function hashPassword(password){
         const passwordHashed = await bcrypt.hash(password, salt);
         return passwordHashed;
     } catch (error) {
-        throw new Error('The hashing of the password cannot be completed' + error.message)        
+        throw createInternalServerError('The hashing of the password cannot be completed', error);        
     }
     
 }
@@ -56,20 +57,9 @@ function verifyResource(resource){
             return 'users_phones'
         }        
     } catch (error) {
-        throw new Error('The table associated with the resource could not be found' + error.message)        
+        throw createInternalServerError('The table associated with the resource could not be found', error);        
     }    
 }
-
-const luhnCheck = (cardNumber) => {
-    let arr = (cardNumber + '').split('').reverse().map(x => parseInt(x));
-    let lastDigit = arr.splice(0, 1)[0];
-    let sum = arr.reduce(
-      (acc, val, i) => (i % 2 !== 0) ? acc + val : acc + ((val * 2) % 9) || 9,
-        0
-    );
-    sum += lastDigit;
-    return sum % 10 === 0;
-};
 
 const sendEmail = async (email, subject, message) => {
     try {
@@ -89,7 +79,7 @@ const sendEmail = async (email, subject, message) => {
         const info = await transporter.sendMail(mailOptions);
         return info;
     } catch (error) {
-        throw new Error('The email could not be sent' + error)        
+        throw createInternalServerError('The email could not be sent', error);        
     }
 }
 
@@ -105,11 +95,11 @@ async function triggerRevalidationEcomerce(path, tag) {
     const webhookUrl = process.env.ECOMMERCE_WEBHOOK_URL; 
     const secret = process.env.WEBHOOK_SECRET;
     if (!webhookUrl || !secret) {
-        throw new Error('Webhook URL or secret not defined in environment variables');
+        throw createInternalServerError('Webhook URL or secret not defined in environment variables');
     }
 
     if (!path || !tag) {
-        throw new Error('Path and tag are required for revalidation');
+        throw createInternalServerError('Path and tag are required for revalidation');
     }
     // Create the request body
     // The body should include the path and tag for revalidation. Tag is optional, path is required.
@@ -134,7 +124,7 @@ async function triggerRevalidationEcomerce(path, tag) {
 
     const data = await response.json();
     if (!response.ok) {
-        throw new Error(`Failed to revalidate: ${data.message}`);
+        throw createInternalServerError(`Failed to revalidate: ${data.message}`, new Error(data.message));
     }
 }
 
@@ -151,11 +141,11 @@ async function triggerRevalidationDashboard(path, tag) {
     const webhookUrl = process.env.DASHBOARD_WEBHOOK_URL; 
     const secret = process.env.WEBHOOK_SECRET;
     if (!webhookUrl || !secret) {
-        throw new Error('Webhook URL or secret not defined in environment variables');
+        throw createInternalServerError('Webhook URL or secret not defined in environment variables');
     }
 
     if (!path || !tag) {
-        throw new Error('Path and tag are required for revalidation');
+        throw createInternalServerError('Path and tag are required for revalidation');
     }
     // Create the request body
     // The body should include the path and tag for revalidation. Tag is optional, path is required.
@@ -180,7 +170,7 @@ async function triggerRevalidationDashboard(path, tag) {
 
     const data = await response.json();
     if (!response.ok) {
-        throw new Error(`Failed to revalidate: ${data.message}`);
+        throw createInternalServerError(`Failed to revalidate: ${data.message}`, new Error(data.message));
     }
 }
 
@@ -190,8 +180,7 @@ async function triggerRevalidationDashboard(path, tag) {
 export {
     comparePasswords,
     hashPassword,
-    verifyResource, 
-    luhnCheck,
+    verifyResource,
     sendEmail,
     triggerRevalidationEcomerce, 
     triggerRevalidationDashboard

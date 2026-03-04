@@ -1,4 +1,4 @@
-import createError from 'http-errors';
+import { createDatabaseError  } from '../Utilities/errorStandard.js';
 
 class CartItemsQueries {
     /**
@@ -16,19 +16,7 @@ class CartItemsQueries {
     }
 
     static handleDbError(error, context) {
-        const dbError = createError(
-            error.status || (error.code ? 400 : 500),
-            error.code
-                ? `DatabaseError: ${context}`
-                : `ServerError: Unexpected error in ${context}`
-        );
-
-        dbError.name = error.code ? 'DatabaseError' : 'ServerError';
-        dbError.message = error.message || `An unexpected error occurred during ${context}`;
-        dbError.details = error.details || (error.code ? 'Possible constraint violation' : 'No additional details');
-        dbError.stack = process.env.NODE_ENV === 'development' ? error.stack : `CartItemsQueries / ${context}`;
-        dbError.timestamp = new Date().toISOString();
-
+        const dbError = createDatabaseError( `An unexpected error occurred during ${context}`, error);
         return dbError;
     }
 
@@ -48,7 +36,7 @@ class CartItemsQueries {
             const sqlStatement = this.pgp.helpers.update({qty:qty, updated_at:updated_at}, null, 'cart_items') + condition;
 
             const queryResult = await this.db.query(sqlStatement);
-            return queryResult.rows?.[0] || {};            
+            return queryResult[0] || {};            
         } catch (error) {
             throw CartItemsQueries.handleDbError(error, 'update cart items in updateCartItems');            
         }
@@ -72,8 +60,8 @@ class CartItemsQueries {
                     ON cart_items.product_id = products.id
                 WHERE cart_items.cart_id = $1`,[parameter]);
 
-            const queryResult = await this.db.query(sqlStatement);
-            return queryResult.rows || []; 
+            const queryResult = await this.db.any(sqlStatement);
+            return queryResult; 
             
         } catch (error) {
             throw CartItemsQueries.handleDbError(error, 'select all cart items in selectCartItems');                        

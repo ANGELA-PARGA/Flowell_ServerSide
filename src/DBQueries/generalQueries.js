@@ -1,4 +1,4 @@
-import createError from 'http-errors';
+import { createDatabaseError  } from '../Utilities/errorStandard.js';
 
 class GeneralQueries {
     /**
@@ -22,19 +22,7 @@ class GeneralQueries {
     }
 
     static handleDbError(error, context) {
-        const dbError = createError(
-            error.status || (error.code ? 400 : 500),
-            error.code
-                ? `DatabaseError: ${context}`
-                : `ServerError: Unexpected error in ${context}`
-        );
-
-        dbError.name = error.code ? 'DatabaseError' : 'ServerError';
-        dbError.message = error.message || `An unexpected error occurred during ${context}`;
-        dbError.details = error.details || (error.code ? 'Possible constraint violation' : 'No additional details');
-        dbError.stack = process.env.NODE_ENV === 'development' ? error.stack : `GeneralQueries / ${context}`;
-        dbError.timestamp = new Date().toISOString();
-
+        const dbError = createDatabaseError( `An unexpected error occurred during ${context}`, error);
         return dbError;
     }
 
@@ -45,13 +33,15 @@ class GeneralQueries {
      * @param {string} tableName
      * @param {Object} data
      * @returns {Object} query succesfull
-     * @returns {{}} query unsuccesfull
+     * @returns {null} query unsuccesfull
      */
     async insert(data, tableName) {
         try {
             const sql = this.pgp.helpers.insert(data, null, tableName) + ' RETURNING *';
+            console.log('Insert SQL:', sql, 'Data:', data);
             const result = await this.db.query(sql);
-            return result.rows?.[0] || {};
+            console.log('Insert result:', result);
+            return result[0] || null;
         } catch (error) {
             throw GeneralQueries.handleDbError(error, `insert into ${tableName}`);
         }
@@ -66,18 +56,20 @@ class GeneralQueries {
      * @param {string} tableName
      * @param {Object} data
      * @returns {Object} query succesfull
-     * @returns {{}} query unsuccesfull
+     * @returns {null} query unsuccesfull
      */
     async update(data, columnName, tableName) {
         try {
             const { id, ...params } = data;
             params.updated_at = new Date().toISOString();
             const condition = this.pgp.as.format(`WHERE ${columnName} = $1 RETURNING *`, [id]);
+            console.log('Update params:', params, 'Condition:', condition);
             const sql = this.pgp.helpers.update(params, null, tableName) + condition;
             const result = await this.db.query(sql);
-            return result.rows?.[0] || {};
+            console.log('Update result:', result);
+            return result[0] || null;
         } catch (error) {
-            throw GeneralQueries.handleDbError(error, `update in ${tableName}`);
+            throw GeneralQueries.handleDbError(error, `update operation in ${tableName}`);
         }
     }
 
@@ -96,7 +88,7 @@ class GeneralQueries {
         try {
             const sql = this.pgp.as.format(`SELECT * FROM ${tableName} WHERE ${columnName} = $1`, [columnValue]);
             const result = await this.db.query(sql);
-            return result.rows || [];
+            return result;
         } catch (error) {
             throw GeneralQueries.handleDbError(error, `select from ${tableName}`);
         }
@@ -115,7 +107,7 @@ class GeneralQueries {
     async deleteBy(columnValue, columnName, tableName) {
         try {
             const sql = this.pgp.as.format(`DELETE FROM ${tableName} WHERE ${columnName} = $1`, [columnValue]);
-            const result = await this.db.query(sql);
+            const result = await this.db.result(sql);
             return result.rowCount;
         } catch (error) {
             throw GeneralQueries.handleDbError(error, `delete from ${tableName}`);
@@ -140,7 +132,7 @@ class GeneralQueries {
                 `DELETE FROM ${tableName} WHERE ${cond1} = $1 AND ${cond2} = $2`,
                 [param1, param2]
             );
-            const result = await this.db.query(sql);
+            const result = await this.db.result(sql);
             return result.rowCount;
         } catch (error) {
             throw GeneralQueries.handleDbError(error, `delete with double condition from ${tableName}`);
@@ -156,7 +148,7 @@ class GeneralQueries {
      * @param {string} columnName
      * @param {string} tableName
      * @returns {object} successfull query {total:number}
-     * @returns {0} unsuccessfull query
+     * @returns {{total:number}} unsuccessfull query
      */
     async calculateTotal(parameter, columnName, tableName) {
         try {
@@ -167,7 +159,7 @@ class GeneralQueries {
                 WHERE ${tableName}.${columnName} = $1`, [parameter]);
 
             const result = await this.db.query(sql);
-            return result.rows?.[0] || { total: 0 };
+            return result[0] || { total: 0 };
         } catch (error) {
             throw GeneralQueries.handleDbError(error, `calculateTotal in ${tableName}`);
         }
@@ -191,7 +183,7 @@ class GeneralQueries {
                 WHERE ${tableName}.${columnName} = $1`, [parameter]);
 
             const result = await this.db.query(sql);
-            return result.rows?.[0]?.total_items || 0;
+            return result[0]?.total_items || 0;
         } catch (error) {
             throw GeneralQueries.handleDbError(error, `calculateTotalItems in ${tableName}`);
         }

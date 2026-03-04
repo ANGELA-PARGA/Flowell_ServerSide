@@ -1,4 +1,4 @@
-import createError from 'http-errors';
+import { createDatabaseError } from '../Utilities/errorStandard.js';
 
 class ProductQueries {
     /**
@@ -24,19 +24,7 @@ class ProductQueries {
     }
 
     static handleDbError(error, context) {
-        const dbError = createError(
-            error.status || (error.code ? 400 : 500),
-            error.code
-                ? `DatabaseError: ${context}`
-                : `ServerError: Unexpected error in ${context}`
-        );
-
-        dbError.name = error.code ? 'DatabaseError' : 'ServerError';
-        dbError.message = error.message || `An unexpected error occurred during ${context}`;
-        dbError.details = error.details || (error.code ? 'Possible constraint violation' : 'No additional details');
-        dbError.stack = process.env.NODE_ENV === 'development' ? error.stack : `ProductQueries / ${context}`;
-        dbError.timestamp = new Date().toISOString();
-
+        const dbError = createDatabaseError( `An unexpected error occurred during ${context}`, error);
         return dbError;
     }
 
@@ -55,8 +43,8 @@ class ProductQueries {
                 LEFT JOIN products_categories ON products.category_id = products_categories.id
                 WHERE products.id = $1`, [parameter]);
 
-            const queryResult = await this.db.query(sqlStatement);
-            return queryResult.rows?.[0] || [];
+            const queryResult = await this.db.oneOrNone(sqlStatement);
+            return queryResult;
             
         } catch (error) {
             throw ProductQueries.handleDbError(error, `select product in selectAllInfo`);                   
@@ -103,9 +91,8 @@ class ProductQueries {
                                                         LIMIT $1 OFFSET $2`, 
                                                         queryParams
                                                     );
-        
-            const queryResult = await this.db.query(sqlStatement);
-            return queryResult.rows || [];
+            const queryResult = await this.db.any(sqlStatement);
+            return queryResult;
 
         } catch (error) {
             throw ProductQueries.handleDbError(error, `select all products in selectAllProducts`);                          
@@ -137,7 +124,7 @@ class ProductQueries {
             }
         
             if (categoryId) {
-                queryParams.push(Number(categoryId));  // Safe casting to integer
+                queryParams.push(Number(categoryId)); 
                 searchConditions.push(`products.category_id = $${queryParams.length}`); 
             }
         
@@ -150,8 +137,8 @@ class ProductQueries {
                                                         queryParams
                                                     );
                                         
-            const queryResult = await this.db.query(sqlStatement);
-            return parseInt(queryResult.rows?.[0].count || 0, 10);
+            const queryResult = await this.db.one(sqlStatement);
+            return parseInt(queryResult.count || 0, 10);
             
         } catch (error) {
             throw ProductQueries.handleDbError(error, `select total products in selectTotalProducts`);                                     
@@ -168,8 +155,8 @@ class ProductQueries {
         try {
             const sqlStatement = `SELECT products_categories.*
                                 FROM products_categories`;
-            const queryResult = await this.db.query(sqlStatement);
-            return queryResult.rows || [];            
+            const queryResult = await this.db.any(sqlStatement);
+            return queryResult;            
         } catch (error) {
             throw this.handleDbError(error, `select all categories in selectAllCategories`);                          
             
@@ -206,7 +193,6 @@ class ProductQueries {
         
             const whereClause = whereClauses.length > 0 ? `WHERE ${whereClauses.join(' AND ')}` : '';
         
-            // Main query without a subquery, directly applying LIMIT and OFFSET
             const sqlStatement = this.pgp.as.format(
                 `SELECT products_categories.name AS "category_name", products.*
                 FROM products
@@ -217,9 +203,9 @@ class ProductQueries {
                 queryParams
             );
         
-            const queryResult = await this.db.query(sqlStatement);
+            const queryResult = await this.db.any(sqlStatement);
         
-            return queryResult.rows || [];
+            return queryResult;
             
         } catch (error) {
             throw ProductQueries.handleDbError(error, `select all products by category in selectByCategory`);                                    
@@ -279,9 +265,9 @@ class ProductQueries {
                 ORDER BY products.id
             `);
             
-            const queryResult = await this.db.query(sqlStatement, queryParams);
+            const queryResult = await this.db.any(sqlStatement, queryParams);
         
-            return queryResult.rows || [];
+            return queryResult;
             
         } catch (error) {
             throw ProductQueries.handleDbError(error, `select product by search parameters in selectBySearch`);                                              
@@ -339,9 +325,9 @@ class ProductQueries {
                 queryParams
             );
         
-            const queryResult = await this.db.query(sqlStatement);
+            const queryResult = await this.db.any(sqlStatement);
         
-            return queryResult.rows || [];
+            return queryResult;
                 
         } catch (error) {
             throw ProductQueries.handleDbError(error, `select all products in selectAllDashboard`);                                 
@@ -382,8 +368,8 @@ class ProductQueries {
                     queryParams
             );
         
-            const queryResult = await this.db.query(sqlStatement);
-            return parseInt(queryResult.rows?.[0].count || 0, 10);
+            const queryResult = await this.db.one(sqlStatement);
+            return parseInt(queryResult.count || 0, 10);
         } catch (error) {
             throw ProductQueries.handleDbError(error, `select total products in selectTotalDashboard`);                                        
         }
@@ -394,7 +380,7 @@ class ProductQueries {
      * It returns an object with nested objects if the query was succesfull, otherwise it returns an empty object
      * @param {number} parameter
      * @returns {Object} successfull query 
-     * @returns {[]} unsuccessfull query
+     * @returns {null} unsuccessfull query
      */
     async selectInfoWithStock(parameter) {
         try {
@@ -405,8 +391,8 @@ class ProductQueries {
                 LEFT JOIN product_stock ON products.id = product_stock.product_id
                 WHERE products.id = $1`, [parameter]);
 
-            const queryResult = await this.db.query(sqlStatement);
-            return queryResult.rows?.[0] || {};
+            const queryResult = await this.db.oneOrNone(sqlStatement);
+            return queryResult;
             
         } catch (error) {
             throw ProductQueries.handleDbError(error, `select product in selectInfoWithStock`);            
@@ -429,9 +415,9 @@ class ProductQueries {
                 LIMIT 3;
             `);
         
-            const queryResult = await this.db.query(sqlStatement);
+            const queryResult = await this.db.any(sqlStatement);
         
-            return queryResult.rows || [];
+            return queryResult;
             
         } catch (error) {
             throw ProductQueries.handleDbError(error, `select top selling products in selectTopSelling`);                        

@@ -1,4 +1,4 @@
-import createError from 'http-errors';
+import { createDatabaseError } from '../Utilities/errorStandard.js';
 class CartQueries {
     /**
      * CartQueries class is responsible for executing queries related to the cart in the database.
@@ -14,24 +14,12 @@ class CartQueries {
     }
 
     static handleDbError(error, context) {
-        const dbError = createError(
-            error.status || (error.code ? 400 : 500),
-            error.code
-                ? `DatabaseError: ${context}`
-                : `ServerError: Unexpected error in ${context}`
-        );
-
-        dbError.name = error.code ? 'DatabaseError' : 'ServerError';
-        dbError.message = error.message || `An unexpected error occurred during ${context}`;
-        dbError.details = error.details || (error.code ? 'Possible constraint violation' : 'No additional details');
-        dbError.stack = process.env.NODE_ENV === 'development' ? error.stack : `CartQueries / ${context}`;
-        dbError.timestamp = new Date().toISOString();
-
+        const dbError = createDatabaseError( `An unexpected error occurred during ${context}`, error);
         return dbError;
     }
 
     /**
-     * Select all cart information stored on the DB using a parameter (cart id).
+     * Select all cart information stored on the DB using a parameter (user id).
      * It returns an object with the cart information if the query was succesfull, otherwise it returns an empty array
      * @param {number} parameter
      * @returns {Object} successfull query 
@@ -63,8 +51,8 @@ class CartQueries {
                     carts.user_id = $1
                 GROUP BY 
                     carts.id, carts.total`, [parameter]);
-            const queryResult = await this.db.query(sqlStatement);
-            return queryResult.rows?.[0] || {};
+            const queryResult = await this.db.oneOrNone(sqlStatement);
+            return queryResult;
             
         } catch (error) {
             throw CartQueries.handleDbError(error, 'select all cart information in selectCartInfo');            

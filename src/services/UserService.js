@@ -1,4 +1,4 @@
-import createError from 'http-errors';
+import { createNotFoundError } from '../Utilities/errorStandard.js';
 import User from '../models/userModel.js';
 import { hashPassword, 
         verifyResource, 
@@ -51,7 +51,7 @@ export default class UserService{
         try {        
             const userCompleteInfo = await this.userRepository.selectById(user_id);
             if(!Object.keys(userCompleteInfo)?.length) {
-                return 'User information was not found'
+                throw createNotFoundError('User not found', user_id)
             }
             return userCompleteInfo; 
         } catch (error) {
@@ -67,7 +67,7 @@ export default class UserService{
      */
     async findUserByEmail(email){
         try {
-            const foundUser = await this.userRepository.select(email, 'email');  
+            const foundUser = await this.userRepository.select(email, 'email');
             return foundUser
         } catch (error) {
             throw error
@@ -85,7 +85,8 @@ export default class UserService{
     async updateUserInfo(userData){
         try {
             const { id, resource, ...params } = userData
-            const tableName = verifyResource(resource);        
+            const tableName = verifyResource(resource);
+            console.log('Updating user info in service:', {id, resource, ...params});        
             const updatedUser = await this.userRepository.update({id, ...params}, undefined, tableName)
             
             // Trigger revalidation for the changed user
@@ -96,7 +97,10 @@ export default class UserService{
             const tag = `customers`;
             await triggerRevalidationDashboard(path, tag);  
 
-            return updatedUser;
+            return {
+                ...updatedUser,
+                tableName
+            };
         } catch (error) {
             throw error             
         }
@@ -112,9 +116,6 @@ export default class UserService{
     async updateUserPassword(userData){
         try {
             const { id, password } = userData;
-            if(!password || password.length == 0){
-                return createError(400, 'password is required to update the user password');
-            }
             const passwordHashed = await hashPassword(password);
             const updatedUser = await this.userRepository.update({id, password:passwordHashed})
             return updatedUser;
@@ -135,7 +136,8 @@ export default class UserService{
             const { user_id, resource, ...params } = userData
             params.created_at = new Date().toISOString();
             params.updated_at = new Date().toISOString();
-            const tableName = verifyResource(resource);            
+            const tableName = verifyResource(resource); 
+            console.log('Adding user info in service:', {user_id, resource, ...params});           
             const newUserInfo = await this.userRepository.insert({user_id, ...params}, tableName)         
             
             // Trigger revalidation for the changed user
@@ -143,7 +145,10 @@ export default class UserService{
             const tag = `customers`;
             await triggerRevalidationDashboard(path, tag);
 
-            return newUserInfo;             
+            return {
+                ...newUserInfo,
+                tableName
+            };             
         } catch (error) {
             throw error 
         }
@@ -164,14 +169,14 @@ export default class UserService{
 
             const deletedResource = await this.userRepository.deleteInfo({param1, param2}, tableName);
             if(!deletedResource){
-                return createError(400, 'the user information was not found')
+                throw createNotFoundError(`The ${resource} information to delete was not found`);
             }
             // Trigger revalidation for the changed user
             const path = `/admin_panel/customers/${data.param2}`;
             const tag = `customers`;
             await triggerRevalidationDashboard(path, tag); 
 
-            return {message: 'the user information was succesfully deleted', status:204};
+            return { message: 'the user information was succesfully deleted', status:204 };
         } catch (error) {
             throw error 
         }

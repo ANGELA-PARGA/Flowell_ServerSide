@@ -1,4 +1,5 @@
 /*middlewares for routes */
+import { AppError, createAuthError, createForbiddenError } from '../Utilities/errorStandard.js'
 
 const checkAuthenticated = (req, res, next) => {
     if (req.isAuthenticated()) {
@@ -7,12 +8,11 @@ const checkAuthenticated = (req, res, next) => {
     }
     if(!req.isAuthenticated()){
         console.log('🚨 not authenticated')
-        res.status(401).json({ error: 'Unauthorized' });
+        throw createAuthError('User is not authenticated');
     }
 }
 
 const checkUserRole = (req, res, next) => {
-    console.log('🚨 checking user role')
     if (req.user.role === 'client') { 
         console.log('🚨 User is authenticated and authorized')
         return next() 
@@ -20,7 +20,7 @@ const checkUserRole = (req, res, next) => {
     console.log('🚨 User is authenticated but not authorized');
     req.logout(err => {
         if (err) return next(err);
-        res.status(403).json({ error: 'Unauthorized' });
+        throw createForbiddenError('Unauthorized access to client resources');
     });   
 }
 
@@ -31,28 +31,45 @@ const checkAdminRole = (req, res, next) => {
     console.log('🚨 User is authenticated but not authorized');
     req.logout(err => {
         if (err) return next(err);
-        res.status(403).json({ error: 'Unauthorized' });
+        throw createForbiddenError('Unauthorized access to admin resources');
     });   
 }
 
 const errorHandler = (err, req, res, next) => {
     console.log('🚨 Error handler middleware triggered', err);
-    const statusCode = err.status || 500;
-    const message = err.message || 'Internal Server Error';
-    const stack = err.stack || 'Stack was not provided';
-    const error = err || 'Error object was not provided';
-
-    console.error(`🚨 Error: ${statusCode} - ${message}\n\n${error}`);
-
-    res.status(statusCode).json({        
-        status: statusCode,
-        error: message,
-        stack: stack,
-        customError: {
-            status: statusCode,
-            message: message,
-        }
-    });
+    
+    let error = err;
+    
+    if (!(err instanceof AppError)) {
+        const statusCode = err?.status || err.statusCode || 500;
+        const message = err?.message || 'Internal Server Error';
+        
+        error = new AppError(
+            message,
+            statusCode,
+            err?.code || 'INTERNAL_ERROR',
+            err?.details || null
+        );
+    }
+    
+    console.error(`🚨 Error: ${error.statusCode} - ${error.message}`);
+    if (process.env.NODE_ENV === 'development') {
+        console.error('Stack:', error.stack);
+    }
+    
+    const errorResponse = {
+        status: error.statusCode,
+        error: error.message,
+        errorCode: error.errorCode,
+        timestamp: error.timestamp
+    };
+    
+    if (process.env.NODE_ENV === 'development') {
+        errorResponse.stack = error.stack;
+        errorResponse.details = error.details;
+    }
+    
+    res.status(error.statusCode).json(errorResponse);
 };
 
 export {

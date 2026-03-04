@@ -6,10 +6,12 @@ class UserRepository {
     }
 
     async insert(dataToInsert, tableName = this.tableName) {
+        console.log('Inserting into table:', tableName, 'Data:', dataToInsert);
         return this.generalQueries.insert(dataToInsert, tableName);
     }
 
     async update(dataToUpdate, columnName = 'id', tableName = this.tableName) {
+        console.log('Updating table:', tableName, 'Data:', dataToUpdate);
         return this.generalQueries.update(dataToUpdate, columnName, tableName);
     }
 

@@ -1,4 +1,4 @@
-import createError from 'http-errors';
+import { createNotFoundError, createInternalServerError } from '../Utilities/errorStandard.js';
 import {triggerRevalidationEcomerce} from '../Utilities/utilities.js';
 import Product from '../models/productModel.js'; 
 
@@ -39,6 +39,10 @@ export default class ProductService {
             const newProduct = await this.productRepository.insert(product)   
             const product_id = newProduct.id
 
+            if (!newProduct || !newProduct.id) {
+                throw createInternalServerError('Failed to create product');
+            }
+
             /*insert the stock quantity and upload the images and set the urls to the DB*/
             await this.productRepository.insert({product_id, stock_available, qty_purchased:0, created_at:newProduct.created_at}, 'product_stock')
 
@@ -63,7 +67,7 @@ export default class ProductService {
         try {
             const productInfo = await this.productRepository.selectById(id)
             if (!productInfo) {
-                throw createError(404, 'Product not found') 
+                throw createNotFoundError('Product not found', id) 
             }
             return productInfo  
         } catch (error) {
@@ -83,7 +87,7 @@ export default class ProductService {
         try {
             const productsList = await this.productRepository.selectAll(limit, offset, filters)
             if (!productsList) {
-                throw createError(404, 'Products not found') 
+                throw createNotFoundError('Products not found')
             }
             return productsList;
         } catch (error) {
@@ -115,7 +119,7 @@ export default class ProductService {
         try {
             const categoriesList = await this.productRepository.selectCategories();
             if (!categoriesList) {
-                throw createError(404, 'Categories not found') 
+                throw createNotFoundError('Categories not found')
             }
             return categoriesList;
         } catch (error) {
@@ -168,7 +172,10 @@ export default class ProductService {
         try {
             const { product_id, new_qty } = data  
             const stockProductUpdated = await this.productRepository.update({id: product_id, stock_available: new_qty}, 'product_id', 'product_stock')  
-
+            
+            if (!stockProductUpdated || !Object.keys(stockProductUpdated)?.length) {
+                throw createNotFoundError('Product not found to update', product_id);
+            }
             const path = `/products/${stockProductUpdated.id}`; 
             await triggerRevalidationEcomerce(path); 
             
@@ -189,7 +196,7 @@ export default class ProductService {
         try { 
             const updatedProduct = await this.productRepository.update(data)
             if (!updatedProduct) {
-                throw createError(404, 'Product not found') 
+                throw createNotFoundError('Product not found', data.id);
             }
             
             // Trigger revalidation for the updated product

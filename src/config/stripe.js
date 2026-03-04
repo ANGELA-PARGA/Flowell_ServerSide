@@ -3,7 +3,7 @@ import dotenv from 'dotenv';
 dotenv.config({ path: 'variables.env' });
 import Stripe from 'stripe';
 import bodyParser from 'body-parser';
-import { cartService } from './container.js'; // Import the instance from container.js
+import { cartService } from './container.js'; 
 
 // 
 const endpointSecret = process.env.WEBHOOK_ENDPOINT_SECRET; // be careful this change if I delete the webhook in the stripe dashboard

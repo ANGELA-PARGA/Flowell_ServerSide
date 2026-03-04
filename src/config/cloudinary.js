@@ -1,6 +1,7 @@
 import dotenv from 'dotenv';
 import { v2 as cloudinary } from 'cloudinary';
 dotenv.config({ path: 'variables.env' });
+import { createInternalServerError } from '../Utilities/errorStandard.js';
 
 cloudinary.config({
     cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
@@ -27,7 +28,7 @@ const uploadImage = async (file) => {
         return result.secure_url;  // ✅ Return the uploaded image URL
     } catch (error) {
         console.error('🚨 Cloudinary Upload Error:', error);
-        throw new Error('Failed to upload image');
+        throw createInternalServerError('Failed to upload image to Cloudinary', error);
     }
 };
 

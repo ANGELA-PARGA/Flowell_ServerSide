@@ -1,4 +1,4 @@
-import createError from 'http-errors';
+import { createNotFoundError, createInternalServerError } from '../Utilities/errorStandard.js';
 import Order from '../models/orderModel.js';
 import {triggerRevalidationDashboard, triggerRevalidationEcomerce} from '../Utilities/utilities.js';
 
@@ -27,6 +27,10 @@ export default class OrderService {
             const orderObject = new Order(data);
             const orderCreated = await this.orderRepository.insert(orderObject);
             const order_id = orderCreated.id
+
+            if (!orderCreated || !orderCreated.id) {
+                throw createInternalServerError('Failed to create order');
+            }
 
             const orderedItemsPromises = items.map(async (item) => {
                 return await this.orderedItemsService.createOrderedItems({ ...item, order_id });
@@ -110,11 +114,14 @@ export default class OrderService {
         try {
             const cancelledItems = await this.orderedItemsService.cancelOrderedItems({order_id:id})            
             if(!cancelledItems){
-                return false
+                throw createNotFoundError('Items not found to cancel', id);
             }
             const newTotal = await this.orderRepository.getTotalByOrderId(id);
             const cancelledOrder = await this.orderRepository.update({id, total:newTotal.total, status:'CANCELLED', tracking:'NO_TRACKING'})                 
             
+            if(!cancelledOrder){
+                throw createNotFoundError('Order not found to cancel', id);                
+            }
             
             // Trigger revalidation for the new order
             const path = `/admin_panel/orders`;
@@ -203,7 +210,7 @@ export default class OrderService {
             const updatedOrder = await this.orderRepository.update(dataToUpdate);
             
             if(!Object.keys(updatedOrder)?.length){
-                throw createError(400, 'order not found or unable to update');                
+                throw createNotFoundError('Order not found', dataToUpdate.id);                              
             }
             
             // Trigger revalidation for the new product
@@ -240,7 +247,7 @@ export default class OrderService {
             
             
             if(!Object.keys(updatedOrder)?.length){
-                throw createError(400, 'order not found or unable to update');                
+                throw createNotFoundError('Order not found', id);                
             }
             // Trigger revalidation for the new product
             const path = `/account/orders/${updatedOrder.order.id}`; 
@@ -265,7 +272,7 @@ export default class OrderService {
             const shippedOrder = await this.orderRepository.update({...data, status:'SHIPPED'});
             
             if(!Object.keys(shippedOrder)?.length){
-                throw createError(400, 'order not found or unable to ship');                
+                throw createNotFoundError('Order not found', data.id);                
             } 
             // Trigger revalidation for the new product
             const path = `/account/orders/${shippedOrder.id}`; 
@@ -290,7 +297,7 @@ export default class OrderService {
             const orderFound = await this.orderRepository.orderWithUserInfo(id)
             
             if(!orderFound?.length){
-                throw createError(404, 'order not found');             
+                throw createNotFoundError('Order not found', id);             
             }
             return orderFound;
         } catch (error) {
@@ -314,7 +321,7 @@ export default class OrderService {
             const cancelledOrder = await this.orderRepository.update({id, total:newTotal.total, status:'CANCELLED', tracking:'NO_TRACKING'})                 
 
             if(!cancelledOrder) {
-                throw createError(400, 'order not found or unable to cancel');
+                throw createNotFoundError('Order not found', id);
             } 
             // Trigger revalidation for the new product
             const path = `/account/orders`; 

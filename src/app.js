@@ -26,7 +26,7 @@ const allowedOrigins = [
 ]
 
 const corsOptions = {
-    origin: allowedOrigins,
+    origin: allowedOrigins, 
     credentials: true,
 };
 app.use(cors(corsOptions));
@@ -35,7 +35,7 @@ app.use(cors(corsOptions));
 const apiLimiter = rateLimit({
     windowMs: 5 * 60 * 1000, // 5 minutes
     max: 50, // Limit each IP to 50 requests per windowMs
-    message: "Too many requests from this IP, please try again later.",
+    message: "Too many requests",
 });
 app.use('/', apiLimiter);
 
@@ -77,6 +77,8 @@ app.use('/orders', orderRoutes);
 import cartRoutes from './Routes/ClientRoutes/cartRoutes.js';
 app.use('/cart', cartRoutes);
 
+import chatbotRoutes from './Routes/ClientRoutes/chatbotRoutes.js';
+app.use('/chatbot', chatbotRoutes);
 
 /*setting admin role routes */
 import authAdminRoutes from './Routes/AdminRoutes/authAdminRoutes.js';

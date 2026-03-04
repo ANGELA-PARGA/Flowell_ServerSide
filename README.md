@@ -9,7 +9,7 @@ Welcome to the **E-Commerce REST API**! This project is a robust and scalable ba
 ### 🔐 Authentication
 - **Passport.js** for user authentication.
 - **Express-session** to manage user sessions.
-- Sessions are securely stored in **MongoDB**.
+- Sessions are securely stored in **Redis**.
 
 ### 🗄️ Database
 - **PostgreSQL** is used to store permanent data, ensuring reliability and scalability.
@@ -34,23 +34,24 @@ Welcome to the **E-Commerce REST API**! This project is a robust and scalable ba
 ---
 
 ## 📂 Project Structure
+```markdown
 server/ 
 ├── src/ 
-│ ├── ClassModels/ # Database models and logic to work with DB data 
-│ ├── ServicesLogic/ # Business logic 
+│ ├── models/ # Database models and logic to work with DB data 
+│ ├── services/ # Business logic 
+| ├── respositories/ # repositories for data access logic
 │ ├── Routes/ # API routes 
 │ ├── Utilities/  
-│ ├── config/ 
-│ ├── DB/   
-│ ├── DBQueries/  
+│ ├── config/ Config files (container, dbConnection, passport, session, stripe, multer, cloudinary)
+│ ├── DB/ # DB initial configuration  
+│ ├── DBQueries/ # Queries to modify the data on the DB
 │ ├── middleware/  
-├── app.js
+| ├── app.js
 ├── tests/ # Unit and integration tests 
 ├── index.js # Entry point 
 ├── jest.config.js # Testing configuration 
 ├── variables.env # Environment variables
-
-
+```
 ---
 
 ## 🛠️ Installation & Setup
@@ -60,12 +61,10 @@ server/
    git clone https://github.com/your-repo/e-commerce-rest-api.git
    cd e-commerce-rest-api/server
 
-```markdown
 2. Install dependencies:
     ```bash
     pnpm install
     ```
-```
 
 ## 🔑 Environment Variables
 
@@ -73,27 +72,33 @@ Ensure you configure the following environment variables before running the proj
 
 ```env
 # Database Configuration
-DATABASE_URL=postgresql://your_data_fake
-MONGODB=mongodb+srv://your_data_fake
-
-# Stripe Payment Integration
+PORT=your_data_fake
+SECRET=your_data_fake
+NODE_ENV=development
+DB_HOST=your_data_fake
+DB_USER=posyour_data_faketgres
+DB_PASSWORD=your_data_fake
+DB_DATABASE=your_data_fake
+DB_PORT=your_data_fake
 STRIPE_PUBLISHABLE_KEY=your_data_fake
 STRIPE_SECRET_KEY=your_data_fake
 WEBHOOK_ENDPOINT_SECRET=your_data_fake
-
-# Cloudinary Image Uploads
 CLOUDINARY_API_KEY=your_data_fake
 CLOUDINARY_API_SECRET=your_data_fake
 CLOUDINARY_CLOUD_NAME=your_data_fake
-CLOUDINARY_URL=cloudinary://your_data_fake
-
-# Application Configuration
+CLOUDINARY_URL=your_data_fake
 NEXT_PUBLIC_HOST=your_data_fake
+NEXT_PUBLIC_DASHBOARD_HOST=your_data_fake
 JWT_SECRET=your_data_fake
-
-# Email Service
 EMAIL_USER=your_data_fake
 EMAIL_PASS=your_data_fake
+DOMAIN=your_data_fake
+ECOMMERCE_WEBHOOK_URL=your_data_fake
+DASHBOARD_WEBHOOK_URL=your_data_fake
+WEBHOOK_SECRET=your_data_fake
+REDIS_URL=redis:your_data_fake
+REDIS_PUBLIC_URL=your_data_fake
+
 ```
 
 ---
@@ -157,7 +162,7 @@ pnpm test
 
 - **Express.js**: Backend framework.
 - **PostgreSQL**: Relational database.
-- **MongoDB**: Session storage.
+- **Redis**: Session storage.
 - **Passport.js**: Authentication.
 - **Stripe**: Payment processing.
 - **Cloudinary**: Image uploads.
@@ -168,3 +173,5 @@ pnpm test
 ## 🤝 Contributing
 
 Contributions are welcome! Feel free to open issues or submit pull requests.
+
+[![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/ANGELA-PARGA/Flowell_ServerSide)

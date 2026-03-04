@@ -1,4 +1,4 @@
-import createError from 'http-errors';
+import { createDatabaseError } from '../Utilities/errorStandard.js';
 
 class OrderQueries {
     /**
@@ -20,20 +20,8 @@ class OrderQueries {
         this.pgp = pgp;
     }
 
-    handleDbError(error, context) {
-        const dbError = createError(
-            error.status || (error.code ? 400 : 500),
-            error.code
-                ? `DatabaseError: ${context}`
-                : `ServerError: Unexpected error in ${context}`
-        );
-
-        dbError.name = error.code ? 'DatabaseError' : 'ServerError';
-        dbError.message = error.message || `An unexpected error occurred during ${context}`;
-        dbError.details = error.details || (error.code ? 'Possible constraint violation' : 'No additional details');
-        dbError.stack = process.env.NODE_ENV === 'development' ? error.stack : `OrderQueries / ${context}`;
-        dbError.timestamp = new Date().toISOString();
-
+    static handleDbError(error, context) {
+        const dbError = createDatabaseError( `An unexpected error occurred during ${context}`, error);
         return dbError;
     }
 
@@ -74,8 +62,8 @@ class OrderQueries {
                                         LEFT JOIN products ON ordered_items.product_id = products.id
                                         WHERE orders.${columnName} = $1
                                         GROUP BY orders.id`, [parameter]);
-            const result = await this.db.query(sql);
-            return result.rows || [];
+            const result = await this.db.any(sql);
+            return result;
         } catch (error) {
             throw OrderQueries.handleDbError(error, `select order information in selectOrderById from orders table`);
         }
@@ -131,8 +119,8 @@ class OrderQueries {
                                         GROUP BY 
                                             orders.id,
                                             users.id`, [parameter]);
-            const result = await this.db.query(sql);
-            return result.rows || [];
+            const result = await this.db.oneOrNone(sql);
+            return result;
         } catch (error) {
             throw OrderQueries.handleDbError(error, `select order and user information in selectOrderAndUserInfo from orders table`);
         }
@@ -177,8 +165,9 @@ class OrderQueries {
                                             LIMIT $1 OFFSET $2`, 
                                             queryParams
                                         );
-            const result = await this.db.query(sql);
-            return result.rows || [];
+            const result = await this.db.any(sql);
+            console.log(result)
+            return result;
         } catch (error) {
             throw OrderQueries.handleDbError(error, `select all orders in selectAllOrders from orders table`);
         }
@@ -220,7 +209,7 @@ class OrderQueries {
             );
     
             const result = await this.db.query(sql);
-            return parseInt(result.rows?.[0]?.count || 0, 10);       
+            return parseInt(result[0]?.count || 0, 10);       
         } catch (error) {
             throw OrderQueries.handleDbError(error, `select the total number of orders in selectTotalOrders from orders table`);            
         }
@@ -246,8 +235,8 @@ class OrderQueries {
                 FROM status_counts;
             `);
         
-            const queryResult = await this.db.query(sqlStatement);
-            return queryResult.rows?.[0];            
+            const queryResult = await this.db.any(sqlStatement);
+            return queryResult;            
         } catch (error) {
             throw OrderQueries.handleDbError(error, `select all orders with status and the revenue in selectAllOrdersDashboard from orders table`);    
         }
@@ -275,9 +264,9 @@ class OrderQueries {
                 ORDER BY month_number;
             `);
         
-            const queryResult = await this.db.query(sqlStatement);
+            const queryResult = await this.db.any(sqlStatement);
         
-            return queryResult.rows || [];            
+            return queryResult;            
         } catch (error) {
             throw OrderQueries.handleDbError(error, `select orders by month in selectOrdersByMonth from orders table`);            
         }
@@ -306,9 +295,9 @@ class OrderQueries {
                 LIMIT 1;  -- ✅ Only return the top month
             `);
         
-            const queryResult = await this.db.query(sqlStatement);
+            const queryResult = await this.db.any(sqlStatement);
         
-            return queryResult.rows?.[0] || {};  // ✅ Return only the highest month or an empty object          
+            return queryResult[0] || {};  // ✅ Return only the highest month or an empty object          
         } catch (error) {
             throw OrderQueries.handleDbError(error, `select month with most orders excluding cancelled orders in selectMonthWithMostOrders from orders table`);                   
         }

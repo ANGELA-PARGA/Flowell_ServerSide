@@ -202,7 +202,7 @@ paths:
                           "email": 'angela@gmail.com',
                           "addresses": [
                               {
-                                "addressID": 5,
+                                "id": 5,
                                 "address": "4301 N MICHIGAN. AVENUE",
                                 "city": "MIAMI",
                                 "state": "FLORIDA",
@@ -211,7 +211,7 @@ paths:
                           ],
                           "phones": [
                               {
-                                "phoneID":1,
+                                "id":1,
                                 "phone":"323-123-12345"
                               }
                           ],
@@ -1561,7 +1561,7 @@ paths:
                       "status": "success",
                       "message": "cart's items updated successfully",
                       "code": 200,
-                      "cart_updated": 
+                      "cart": 
                         {
                           "items": [
                               {
@@ -1635,7 +1635,7 @@ paths:
                       "status": "success",
                       "message": "Cart emptied successfully",
                       "code": 204,
-                      "cart_updated": 
+                      "cart": 
                         {
                           status: 204,
                           message: 'Cart emptied successfully'
@@ -1701,7 +1701,7 @@ paths:
                       "status": "success",
                       "message": "Cart's item deleted successfully",
                       "code": 204,
-                      "cart_updated": 
+                      "cart": 
                         {
                           "item": 
                             {

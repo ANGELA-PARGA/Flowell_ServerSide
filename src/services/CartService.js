@@ -59,14 +59,15 @@ export default class CartService{
      */
     async addProductToCart(data){
         try {
-            const { cart_id } = data
-            const itemToAdd = await  this.cartItemsService.createCartItem(data)
-
+            const { cart_id, user_id } = data
+            await this.cartItemsService.createCartItem(data)
             const newTotal = await this.cartRepository.getTotalByCartId(cart_id);
-            const newItemNumber = await this.cartRepository.getTotalItems(cart_id);         
-            const updatedCart = await this.cartRepository.update({id:cart_id, total:newTotal.total, total_items:newItemNumber})
+            const newItemNumber = await this.cartRepository.getTotalItems(cart_id);
+            await this.cartRepository.update({id:cart_id, total:newTotal.total, total_items:newItemNumber})
 
-            return {item:itemToAdd, cart:updatedCart};
+            const cart_updated = await this.cartRepository.selectBy(user_id)
+            console.log(cart_updated)
+            return cart_updated  
 
         } catch (error) {
             throw error
@@ -85,14 +86,15 @@ export default class CartService{
      */
     async updateCartItems(data){
         try {
-            const { cart_id } = data;
-            const updatedCartItem = await  this.cartItemsService.updateCartItem(data)
+            const { cart_id, user_id } = data;
 
+            await this.cartItemsService.updateCartItem(data)
             const newTotal = await this.cartRepository.getTotalByCartId(cart_id);
             const newItemNumber = await this.cartRepository.getTotalItems(cart_id);             
-            const updatedCart = await this.cartRepository.update({id:cart_id, total:newTotal.total, total_items:newItemNumber})
+            await this.cartRepository.update({id:cart_id, total:newTotal.total, total_items:newItemNumber})
             
-            return {item: updatedCartItem, cart: updatedCart};                       
+            const cart_updated = await this.cartRepository.selectBy(user_id)
+            return cart_updated                 
                     
         } catch (error) {
             throw error
@@ -108,20 +110,20 @@ export default class CartService{
      */
     async deleteItemFromCart(data){
         try {
-            const cart_id = data.param1;
-            const deletedCartItem = await  this.cartItemsService.deleteCartItem(data)
+            const { param1: cart_id, param2: product_id, user_id } = data;
+            await this.cartItemsService.deleteCartItem(data)
             const newTotal = await this.cartRepository.getTotalByCartId(cart_id);
             const newItemNumber = await this.cartRepository.getTotalItems(cart_id); 
             
-            let updatedCart;
             if(!newTotal.total){
-                updatedCart = await this.cartRepository.update({id:cart_id, total:0, total_items:0 })
+                await this.cartRepository.update({id:cart_id, total:0, total_items:0 })
                 
             } else {
-                updatedCart = await this.cartRepository.update({id:cart_id, total:newTotal.total, total_items:newItemNumber})
+                await this.cartRepository.update({id:cart_id, total:newTotal.total, total_items:newItemNumber})
             }
 
-            return {item:deletedCartItem, cart:updatedCart};
+            const cart_updated = await this.cartRepository.selectBy(user_id)
+            return cart_updated
         } catch (error) {
             throw error
         }
@@ -141,7 +143,7 @@ export default class CartService{
                 return false
             }
 
-            return { message:'Cart succesfully emptied' , status:204}
+            return { message:'Cart successfully emptied' , status:204 }
         } catch (error) {
             throw error
         }
@@ -196,7 +198,7 @@ export default class CartService{
                 //empty the cart after the order is created
                 const cartUpdated= await this.emptyCart(cart_id)
     
-                return { order:order, message:`Order succesfully created`, cart:cartUpdated }; 
+                return { order:order, message:`Order successfully created`, cart:cartUpdated }; 
 
             }  
             if (session.payment_status === 'unpaid' || session.payment_status === 'expired'){

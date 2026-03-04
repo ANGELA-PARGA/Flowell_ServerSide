@@ -70,6 +70,7 @@ export default class OrderedItemsService {
     async updateOrderedItems(data){
         try {             
             const updatedOrderedItem = await this.orderedItemsRepository.update(data)
+            
             return updatedOrderedItem;
         } catch(error) {
             throw error
